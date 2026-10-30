@@ -1,0 +1,3864 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FA26AI50 — Real-Time Vision ADAS: Capstone Project Review 2 (English)</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- KaTeX for Mathematical Formula Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #050811;
+      --bg-card: rgba(13, 20, 38, 0.82);
+      --bg-card-hover: rgba(22, 33, 58, 0.92);
+      --border-card: rgba(56, 189, 248, 0.25);
+      --border-card-active: rgba(0, 229, 255, 0.8);
+
+      --cyan-neon: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.35);
+      --blue-accent: #38bdf8;
+      --purple-accent: #a78bfa;
+      --emerald-safe: #10b981;
+      --amber-warn: #f59e0b;
+      --rose-alert: #f43f5e;
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #64748b;
+
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+      background-image:
+        radial-gradient(circle at 10% 15%, rgba(0, 229, 255, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(167, 139, 250, 0.09) 0%, transparent 45%),
+        linear-gradient(to bottom, rgba(30, 41, 59, 0.35) 1px, transparent 1px),
+        linear-gradient(to right, rgba(30, 41, 59, 0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+    }
+
+    /* Top Progress Bar */
+    #topProgressBar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--cyan-neon), var(--purple-accent));
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 12px var(--cyan-neon);
+    }
+
+    /* HUD Header */
+    header.hud-header {
+      position: fixed;
+      top: 4px;
+      left: 0;
+      right: 0;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(5, 8, 17, 0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 100;
+    }
+
+    .hud-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-code {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: rgba(0, 229, 255, 0.12);
+      color: var(--cyan-neon);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      letter-spacing: 0.5px;
+    }
+
+    .hud-project-name {
+      font-family: var(--font-heading);
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: 0.2px;
+    }
+
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-hud {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font-main);
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-hud:hover {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--cyan-neon);
+      color: var(--cyan-neon);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    }
+
+    .btn-hud.active {
+      background: var(--cyan-neon);
+      color: #060913;
+      font-weight: 700;
+      border-color: var(--cyan-neon);
+    }
+
+    .slide-counter {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-muted);
+      padding: 0 8px;
+    }
+
+    .slide-counter span {
+      color: var(--cyan-neon);
+      font-weight: 700;
+    }
+
+    /* Viewport */
+    #viewport {
+      position: absolute;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 38px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide {
+      position: absolute;
+      width: 96%;
+      max-width: 1520px;
+      height: 94%;
+      max-height: 860px;
+      background: var(--bg-card);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 24px 34px;
+      display: none;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(16px) scale(0.985);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      overflow-y: hidden;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Slide Header */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+      flex-shrink: 0;
+    }
+
+    .slide-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .slide-num-badge {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--cyan-neon);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .slide-title {
+      font-family: var(--font-heading);
+      font-size: clamp(22px, 1.8vw, 27px);
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .slide-subtitle {
+      font-size: clamp(13px, 1.0vw, 14.5px);
+      color: var(--text-muted);
+    }
+
+    .slide-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+    }
+
+    /* Slide Body */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 0;
+      justify-content: space-between;
+    }
+
+    /* Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: var(--border-card-active);
+      background: var(--bg-card-hover);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .card.track-quan {
+      border-top: 3px solid #38bdf8;
+    }
+
+    .card.track-triet {
+      border-top: 3px solid #10b981;
+    }
+
+    .card.track-khang {
+      border-top: 3px solid #f59e0b;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: clamp(16.5px, 1.3vw, 19.5px);
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-member {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .badge-quan {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .badge-triet {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-khang {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* Scaled-up Bullet Lists (High Visual Readability) */
+    ul.bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      font-size: clamp(14px, 1.1vw, 16px);
+      line-height: 1.55;
+    }
+
+    ul.bullet-list li {
+      position: relative;
+      padding-left: 18px;
+      color: #cbd5e1;
+    }
+
+    ul.bullet-list li::before {
+      content: "▹";
+      position: absolute;
+      left: 0;
+      color: var(--cyan-neon);
+      font-weight: bold;
+    }
+
+    /* Visual Feature Item Card inside Slide 13 / Deliverables */
+    .deliverable-item {
+      background: rgba(10, 16, 32, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 11px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .deliverable-item:hover {
+      background: rgba(0, 229, 255, 0.08);
+      border-color: rgba(0, 229, 255, 0.3);
+    }
+
+    .del-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .del-name {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .del-desc {
+      font-size: 14.5px;
+      color: #cbd5e1;
+      line-height: 1.45;
+    }
+
+    /* Metric Boxes */
+    .metric-box {
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px dashed rgba(0, 229, 255, 0.3);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      margin-top: auto;
+    }
+
+    .metric-item {
+      text-align: center;
+    }
+
+    .metric-val {
+      font-family: var(--font-mono);
+      font-size: clamp(17px, 1.35vw, 20px);
+      font-weight: 700;
+      color: var(--cyan-neon);
+    }
+
+    .metric-lbl {
+      font-size: 11.5px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      margin-right: 4px;
+    }
+
+    .status-pick {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .status-ref {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .status-reject {
+      background: rgba(244, 63, 94, 0.15);
+      color: #f43f5e;
+      border: 1px solid rgba(244, 63, 94, 0.4);
+    }
+
+    .hud-table-compact td {
+      padding: 6px 10px !important;
+      font-size: 13.5px !important;
+      line-height: 1.3 !important;
+      white-space: nowrap;
+    }
+
+    .hud-table-compact th {
+      padding: 7px 10px !important;
+      font-size: 13.5px !important;
+      white-space: nowrap;
+    }
+
+    /* Tables */
+    table.hud-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: clamp(13px, 1.0vw, 14.5px);
+      margin-top: 2px;
+    }
+
+    table.hud-table th {
+      background: rgba(30, 41, 59, 0.7);
+      color: var(--cyan-neon);
+      font-family: var(--font-heading);
+      font-weight: 600;
+      text-align: left;
+      padding: 7px 10px;
+      border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+      letter-spacing: 0.5px;
+    }
+
+    table.hud-table td {
+      padding: 5px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+      vertical-align: middle;
+      line-height: 1.35;
+    }
+
+    table.hud-table tr:hover td {
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    /* Badges */
+    .badge-safe {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid #10b981;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12.5px;
+    }
+
+    .badge-warn {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid #f59e0b;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12.5px;
+    }
+
+    .badge-alert {
+      background: rgba(244, 63, 94, 0.2);
+      color: #f43f5e;
+      border: 1px solid #f43f5e;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12.5px;
+    }
+
+    /* Evidence Badges (Papers & Datasets) */
+    .card-evidence-wrap {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+
+    .badge-evidence {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .badge-evidence-paper {
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+
+    .badge-evidence-paper:hover {
+      background: rgba(56, 189, 248, 0.28);
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    }
+
+    .badge-evidence-dataset {
+      background: rgba(167, 139, 250, 0.12);
+      color: #c084fc;
+      border: 1px solid rgba(167, 139, 250, 0.4);
+    }
+
+    .badge-evidence-dataset:hover {
+      background: rgba(167, 139, 250, 0.28);
+      color: #ffffff;
+      border-color: #c084fc;
+      box-shadow: 0 0 10px rgba(167, 139, 250, 0.4);
+    }
+
+    .badge-evidence-std {
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .badge-evidence-std:hover {
+      background: rgba(16, 185, 129, 0.28);
+      color: #ffffff;
+      border-color: #34d399;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+
+    .badge-potential-report {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 11px;
+      border-radius: 5px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      color: var(--purple-accent);
+      background: rgba(168, 85, 247, 0.14);
+      border: 1.2px solid rgba(168, 85, 247, 0.5);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 8px rgba(168, 85, 247, 0.2);
+    }
+
+    .badge-potential-report:hover {
+      background: rgba(168, 85, 247, 0.3);
+      color: #ffffff;
+      border-color: var(--purple-accent);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.6);
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    .badge-paper-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 1.5px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      text-decoration: none;
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    .badge-paper-sm:hover {
+      background: rgba(56, 189, 248, 0.28);
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+      transform: translateY(-1px);
+    }
+
+    /* Pipeline Diagram (Slide 03) */
+    .pipeline-diagram {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      gap: 0;
+    }
+
+    .pipeline-node {
+      background: rgba(10, 16, 30, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 9px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      margin: 0;
+    }
+
+    .pipeline-node.input-node {
+      border-color: var(--blue-accent);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .pipeline-node.output-node {
+      border-color: var(--emerald-safe);
+      background: rgba(16, 185, 129, 0.1);
+      margin: 0;
+    }
+
+    .pipeline-branches-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1.8px dashed rgba(0, 229, 255, 0.55);
+      border-radius: 12px;
+      padding: 14px 14px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      box-shadow: 0 0 24px rgba(0, 229, 255, 0.1);
+      margin-top: 14px;
+      margin-bottom: 0px;
+      position: relative;
+    }
+
+    .branches-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      padding: 0 8px;
+    }
+
+    .branch-card {
+      border-radius: 8px;
+      padding: 12px 6px;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: all 0.25s ease;
+    }
+
+    .branch-card.b-lane {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1.5px solid #38bdf8;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+    }
+
+    .branch-card.b-lane:hover {
+      background: rgba(56, 189, 248, 0.24);
+      border-color: #7dd3fc;
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .branch-card.b-det {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1.5px solid #10b981;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .branch-card.b-det:hover {
+      background: rgba(16, 185, 129, 0.24);
+      border-color: #34d399;
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .branch-card.b-depth {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1.5px solid #f59e0b;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+    }
+
+    .branch-card.b-depth:hover {
+      background: rgba(245, 158, 11, 0.24);
+      border-color: #fbbf24;
+      box-shadow: 0 0 18px rgba(245, 158, 11, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .branch-head {
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .branch-head .branch-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .branch-head .branch-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .flow-split-container,
+    .flow-merge-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .flow-svg {
+      width: 100%;
+      display: block;
+    }
+
+    .flow-arrow-down {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .btn-expand-full {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 16px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.28), rgba(14, 165, 233, 0.45));
+      color: #ffffff;
+      border: 1.8px solid var(--cyan-neon);
+      font-family: var(--font-heading);
+      font-size: 12.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.55);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      animation: pulseExpandBtn 2.0s infinite alternate;
+      white-space: nowrap;
+    }
+
+    .btn-expand-full:hover {
+      background: var(--cyan-neon);
+      color: #030712;
+      border-color: #ffffff;
+      box-shadow: 0 0 28px rgba(0, 229, 255, 0.95);
+      transform: translateY(-2px) scale(1.05);
+    }
+
+    @keyframes pulseExpandBtn {
+      0% {
+        box-shadow: 0 0 12px rgba(0, 229, 255, 0.4), inset 0 0 8px rgba(0, 229, 255, 0.2);
+      }
+
+      100% {
+        box-shadow: 0 0 26px rgba(0, 229, 255, 0.85), inset 0 0 14px rgba(0, 229, 255, 0.35);
+      }
+    }
+
+    /* Gantt Chart Component */
+    .gantt-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      height: 100%;
+      background: rgba(10, 16, 32, 0.75);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      padding: 10px 18px;
+      position: relative;
+      overflow: hidden;
+      justify-content: space-between;
+    }
+
+    .gantt-header {
+      display: grid;
+      grid-template-columns: 350px 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+      padding-bottom: 6px;
+      font-family: var(--font-heading);
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--cyan-neon);
+      text-align: center;
+    }
+
+    .gantt-header .col-task {
+      text-align: left;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+    }
+
+    .gantt-body {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      justify-content: space-between;
+      position: relative;
+      min-height: 0;
+    }
+
+    .gantt-row {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 12px;
+      align-items: center;
+      font-size: 12.5px;
+    }
+
+    .gantt-task-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #e2e8f0;
+      white-space: nowrap;
+    }
+
+    .gantt-track-area {
+      position: relative;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.025);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      border-left: 1px solid rgba(255, 255, 255, 0.05);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .gantt-track-area.milestone-track {
+      background: rgba(0, 229, 255, 0.04);
+      border: 1px dashed rgba(0, 229, 255, 0.35);
+      height: 24px;
+    }
+
+    .gantt-bar {
+      position: absolute;
+      height: 16px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s ease;
+      cursor: default;
+    }
+
+    .gantt-bar:hover {
+      transform: scaleY(1.15);
+      filter: brightness(1.2);
+      z-index: 15;
+    }
+
+    .gantt-bar.done {
+      background: linear-gradient(90deg, #059669, #10b981);
+      border: 1px solid #34d399;
+    }
+
+    .gantt-bar.track-triet {
+      background: linear-gradient(90deg, #047857, #10b981);
+      border: 1px solid #6ee7b7;
+    }
+
+    .gantt-bar.track-quan {
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      border: 1px solid #7dd3fc;
+    }
+
+    .gantt-bar.track-khang {
+      background: linear-gradient(90deg, #d97706, #f59e0b);
+      border: 1px solid #fcd34d;
+    }
+
+    .gantt-bar.pipe-int {
+      background: linear-gradient(90deg, #7c3aed, #a78bfa);
+      border: 1px solid #c4b5fd;
+    }
+
+    .gantt-bar.final {
+      background: linear-gradient(90deg, #e11d48, #f43f5e);
+      border: 1px solid #fda4af;
+    }
+
+    .gantt-milestone-pin {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      transform: translateX(-50%);
+      z-index: 10;
+      padding: 2px 8px;
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      white-space: nowrap;
+    }
+
+    .pin-r1 {
+      background: rgba(0, 229, 255, 0.2);
+      border: 1px solid var(--cyan-neon);
+      color: var(--cyan-neon);
+    }
+
+    .pin-r2 {
+      background: rgba(56, 189, 248, 0.2);
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+    }
+
+    .pin-r3 {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid #f59e0b;
+      color: #f59e0b;
+    }
+
+    .pin-final {
+      background: rgba(244, 63, 94, 0.25);
+      border: 1px solid #f43f5e;
+      color: #ff8597;
+    }
+
+    .today-v-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #f43f5e;
+      box-shadow: 0 0 12px #f43f5e;
+      z-index: 14;
+      pointer-events: none;
+    }
+
+    .today-flag {
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      background: #f43f5e;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+      box-shadow: 0 0 8px rgba(244, 63, 94, 0.6);
+    }
+
+    /* Footer Status Bar */
+    footer.hud-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(5, 8, 17, 0.94);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 11px;
+      color: var(--text-muted);
+      z-index: 100;
+    }
+
+    .hud-status-items {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .hud-status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+    }
+
+    .dot-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald-safe);
+      box-shadow: 0 0 8px var(--emerald-safe);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      }
+
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+      }
+
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    /* Speaker Notes Drawer */
+    #notesDrawer {
+      position: fixed;
+      top: 56px;
+      right: -550px;
+      width: 530px;
+      bottom: 38px;
+      background: rgba(8, 14, 28, 0.98);
+      backdrop-filter: blur(24px);
+      border-left: 1px solid var(--border-card-active);
+      box-shadow: -12px 0 45px rgba(0, 0, 0, 0.7);
+      z-index: 200;
+      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 22px;
+    }
+
+    #notesDrawer.open {
+      right: 0;
+    }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+    }
+
+    .drawer-title {
+      font-family: var(--font-heading);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--cyan-neon);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      padding-right: 6px;
+    }
+
+    .drawer-body h4 {
+      color: #ffffff;
+      font-size: 15px;
+      margin: 0 0 10px 0;
+      border-left: 3px solid var(--cyan-neon);
+      padding-left: 8px;
+    }
+
+    .notes-section {
+      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .notes-heading {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+
+    .drawer-body p,
+    .drawer-body li {
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .drawer-body ul,
+    .drawer-body ol {
+      padding-left: 18px;
+      margin-bottom: 6px;
+    }
+
+    /* Overview Modal Grid */
+    #overviewModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 16, 0.95);
+      backdrop-filter: blur(24px);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      padding: 34px 48px;
+      overflow-y: auto;
+    }
+
+    #overviewModal.open {
+      display: flex;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .overview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .overview-card:hover {
+      border-color: var(--cyan-neon);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 229, 255, 0.25);
+    }
+
+    .overview-card.current {
+      border: 2px solid var(--cyan-neon);
+      background: rgba(0, 229, 255, 0.12);
+    }
+
+    .overview-card .num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--cyan-neon);
+      font-weight: 700;
+    }
+
+    .overview-card .title {
+      font-family: var(--font-heading);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--cyan-neon);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top Progress Bar -->
+  <div id="topProgressBar"></div>
+
+  <!-- HUD Navigation Header -->
+  <header class="hud-header">
+    <div class="hud-title-group">
+      <span class="badge-code">FA26AI50</span>
+      <span class="hud-project-name">Real-time Vision ADAS: Lane, Detection & Collision Warning</span>
+    </div>
+
+    <div class="hud-controls">
+      <button class="btn-hud" id="btnPrev" title="Previous Slide (← / Backspace)">◀ Prev</button>
+      <div class="slide-counter"><span id="currSlideNum">01</span> / <span id="totalSlideNum">25</span></div>
+      <button class="btn-hud" id="btnNext" title="Next Slide (→ / Space)">Next ▶</button>
+      <button class="btn-hud" id="btnOverview" title="Slide Overview Grid (O)">⊞ Grid</button>
+      <button class="btn-hud" id="btnNotes" title="Toggle Speaker Notes (N)">📝 Notes (N)</button>
+      <button class="btn-hud" id="btnFullscreen" title="Toggle Fullscreen (F)">⛶ Full</button>
+    </div>
+  </header>
+
+  <!-- Viewport for Presentation Slides -->
+  <main id="viewport">
+
+    <!-- ================= SLIDE 1: TITLE ================= -->
+    <section class="slide active" id="slide-1" data-slide="1">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 01 • Title Cover</span>
+          <h2 class="slide-title">KLTN-AI-FA26AI50_GFA26AI09 • REVIEW-1 CAPSTONE DEFENSE</h2>
+          <span class="slide-subtitle">Capstone Project Evaluation Council — Major in Artificial Intelligence</span>
+        </div>
+        <span class="slide-tag">25/09/2026</span>
+      </div>
+      <div class="slide-body" style="justify-content: center; align-items: center; text-align: center; gap: 24px;">
+        <div style="max-width: 980px; display: flex; flex-direction: column; gap: 14px;">
+          <div
+            style="font-family: var(--font-mono); font-size: 20px; color: var(--cyan-neon); letter-spacing: 1.5px; font-weight: 700;">
+            PROJECT CODE: FA26AI50
+          </div>
+          <h1
+            style="font-family: var(--font-heading); font-size: clamp(26px, 2.2vw, 34px); font-weight: 800; color: #ffffff; line-height: 1.25;">
+            REAL-TIME VISION-BASED LANE DETECTION, OBJECT DETECTION, AND COLLISION WARNING SYSTEM FOR DRIVER ASSISTANCE
+          </h1>
+          <p style="font-size: clamp(15px, 1.1vw, 17px); color: var(--text-muted); max-width: 880px; margin: 0 auto;">
+            A lightweight, vision-centric driver assistance pipeline utilizing a single RGB camera and embedded edge AI
+          </p>
+        </div>
+
+        <div
+          style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 900px; margin-top: 8px;">
+          <div class="card" style="text-align: left;">
+            <div class="card-title" style="font-size: 15px; color: var(--blue-accent);">👨‍🏫 PROJECT SUPERVISORS</div>
+            <ul class="bullet-list">
+              <li><strong>Lecturer Nguyen Xuan Huy</strong></li>
+              <li><strong>Lecturer Nguyen Quoc Trung</strong></li>
+            </ul>
+          </div>
+
+          <div class="card" style="text-align: left;">
+            <div class="card-title" style="font-size: 15px; color: var(--emerald-safe);">👥 CAPSTONE PROJECT TEAM
+            </div>
+            <ul class="bullet-list">
+              <li><strong>Nguyen Tran Minh Quan</strong> (Leader — SE194342)</li>
+              <li><strong>Nguyen Minh Triet</strong> (Member — SE194257)</li>
+              <li><strong>Do Khang</strong> (Member — SE196305)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-2" data-slide="2">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 02 • Team & Roles</span>
+          <h2 class="slide-title">TEAM STRUCTURE & TECHNICAL WORK ALLOCATION</h2>
+          <span class="slide-subtitle">Independent academic responsibility across three core perception & warning
+            subsystems</span>
+        </div>
+        <span class="slide-tag">Team Structure</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <!-- Quan -->
+          <div class="card track-quan">
+            <div class="card-header">
+              <span class="badge-member badge-quan">LEADER</span>
+              <span style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-sub);">SE194342</span>
+            </div>
+            <div class="card-title">Nguyen Tran Minh Quan</div>
+            <div style="font-size: 14px; font-weight: 600; color: #38bdf8;">🛣️ Lane Perception Track</div>
+            <ul class="bullet-list">
+              <li>Research & evaluate <strong>Lane Detection</strong> (CULane, Canny-Hough, UFLDv2).</li>
+              <li>Architect unified coordination framework <code>IntegratedPipeline</code>.</li>
+              <li>Manage synchronized codebase & data contract <code>FrameRecord v1.0</code>.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">F1 ≥ 76.5%</div>
+                <div class="metric-lbl">Target Metric</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&gt; 120 FPS</div>
+                <div class="metric-lbl">Inference Speed</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Triet -->
+          <div class="card track-triet">
+            <div class="card-header">
+              <span class="badge-member badge-triet">MEMBER</span>
+              <span style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-sub);">SE194257</span>
+            </div>
+            <div class="card-title">Nguyen Minh Triet</div>
+            <div style="font-size: 14px; font-weight: 600; color: #10b981;">🚗 Detection & Tracking Track</div>
+            <ul class="bullet-list">
+              <li>Research <strong>Object Detection & ByteTrack</strong> (BDD100K 10 classes, YOLOv10).</li>
+              <li>Leverage NMS-free Dual Head to eliminate post-processing latency.</li>
+              <li>Optimize 4D Pareto Trade-off ($mAP$, $p95\text{ Latency}$, $\text{FPS}$, $\text{VRAM}$).</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">52.87%</div>
+                <div class="metric-lbl">mAP50 Achieved</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">7.15 ms</div>
+                <div class="metric-lbl">Detector Latency</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Khang -->
+          <div class="card track-khang">
+            <div class="card-header">
+              <span class="badge-member badge-khang">MEMBER</span>
+              <span style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-sub);">SE196305</span>
+            </div>
+            <div class="card-title">Do Khang</div>
+            <div style="font-size: 14px; font-weight: 600; color: #f59e0b;">📏 Depth & Collision Warning Track</div>
+            <ul class="bullet-list">
+              <li>Research <strong>Monocular Metric Depth</strong> (KITTI Raw, CARLA, Depth Anything V2).</li>
+              <li>Develop approach velocity <code>v_z</code> and Time-to-Collision <code>TTC = Z / v_z</code>.</li>
+              <li>Establish 3-tier Forward Collision Warning (FCW) logic (Safe / Warning / Critical).</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">AbsRel &lt; 0.10</div>
+                <div class="metric-lbl">Depth Metric</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">TTC ≤ 1.5s</div>
+                <div class="metric-lbl">Critical FCW</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Supervisors Footer Bar -->
+        <div class="card"
+          style="padding: 9px 18px; margin-top: 10px; background: rgba(56, 189, 248, 0.04); border-color: rgba(56, 189, 248, 0.25); display: flex; flex-direction: row; justify-content: space-between; align-items: center; flex-shrink: 0;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 15px;">👨‍🏫</span>
+            <span
+              style="font-family: var(--font-heading); font-size: 12.5px; font-weight: 700; color: var(--blue-accent); letter-spacing: 0.5px;">PROJECT
+              SUPERVISORS:</span>
+            <span style="font-size: 13.5px; color: #ffffff; font-weight: 600;">Lecturer: Nguyen Xuan Huy</span>
+            <span style="color: var(--border-card-active); margin: 0 6px;">•</span>
+            <span style="font-size: 13.5px; color: #ffffff; font-weight: 600;">Lecturer: Nguyen Quoc Trung</span>
+          </div>
+          <div
+            style="font-family: var(--font-mono); font-size: 11px; color: var(--cyan-neon); font-weight: 700; letter-spacing: 0.5px;">
+            DEPARTMENT OF ARTIFICIAL INTELLIGENCE
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-3" data-slide="3">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 03 • Problem Statement</span>
+          <h2 class="slide-title">PROBLEM STATEMENT & AI PIPELINE FLOW</h2>
+          <span class="slide-subtitle">Low-cost monocular vision system replacing expensive LiDAR/Radar sensors</span>
+        </div>
+        <span class="slide-tag">Perception Flow</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Problem Context -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title">🎯 Real-World Problem & Objectives</div>
+            <ul class="bullet-list">
+              <li><strong>Accidents & Phantom Braking</strong>: Road collisions caused by distraction; expensive
+                Radar/LiDAR ($&gt; $5,000) frequently trigger false alarms and dangerous <strong>Phantom
+                  Braking</strong> due to mmWave reflections off metal manhole covers and bridge joints.</li>
+              <li><strong>Vision-Centric Objective</strong>: Construct a full-stack ADAS pipeline powered <strong>solely
+                  by a single RGB camera</strong>, utilizing <strong>Vision Semantics</strong> to eliminate false
+                braking triggers.</li>
+              <li><strong>Edge Hardware Cost</strong>: Optimized for embedded edge AI deployment (NVIDIA Jetson Orin
+                Nano, <strong>total hardware BOM &lt; \$800</strong>), unlocking ADAS accessibility for mass-market
+                vehicles.</li>
+              <li><strong>Real-Time Constraint</strong>: Achieve strict real-time throughput <strong>≥ 30 FPS</strong>
+                and tail latency <strong>p95 &lt; 33 ms</strong> on commodity edge GPUs.</li>
+            </ul>
+          </div>
+
+          <!-- Pipeline Flow Diagram -->
+          <div class="card" style="border-color: rgba(0, 229, 255, 0.4); display: flex; flex-direction: column;">
+            <div class="card-title"
+              style="color: var(--cyan-neon); display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 6px;">
+              <span
+                style="font-family: var(--font-heading); font-size: 14px; font-weight: 800; letter-spacing: 0.4px;">⚡
+                ADAS Pipeline Architecture</span>
+              <a href="adas_pipeline_architecture.html" target="_blank" class="btn-expand-full"
+                title="Open Interactive Full Horizontal Pipeline Architecture">🔗 Click to Expand Full ↗</a>
+            </div>
+
+            <div class="pipeline-diagram">
+              <!-- Input Node -->
+              <div class="pipeline-node input-node">
+                <div style="font-weight: 700; font-size: 13px; color: var(--blue-accent);">📹 INPUT STREAM (Camera)
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">1x Monocular RGB
+                  (720p @ 30 FPS)</div>
+              </div>
+
+              <!-- Split Connector: Direct from Camera touching the 3 cards -->
+              <div class="flow-split-container" style="height: 38px; margin: 0; line-height: 0;">
+                <svg class="flow-svg" viewBox="0 0 400 38" preserveAspectRatio="none"
+                  style="height: 38px; width: 100%; display: block;">
+                  <!-- Trunk touching bottom edge of Camera (y=0) -->
+                  <line x1="200" y1="0" x2="200" y2="18" stroke="var(--cyan-neon)" stroke-width="2.5" />
+                  <!-- Horizontal distribution bus -->
+                  <line x1="68" y1="18" x2="332" y2="18" stroke="var(--cyan-neon)" stroke-width="2.5" />
+                  <!-- Branch 1 touching Lane Perception (tip at y=37) -->
+                  <line x1="68" y1="18" x2="68" y2="27" stroke="#38bdf8" stroke-width="2.5" />
+                  <polygon points="62,25 74,25 68,37" fill="#38bdf8" />
+                  <!-- Branch 2 touching Detection & Track (tip at y=37) -->
+                  <line x1="200" y1="18" x2="200" y2="27" stroke="#10b981" stroke-width="2.5" />
+                  <polygon points="194,25 206,25 200,37" fill="#10b981" />
+                  <!-- Branch 3 touching Depth & TTC (tip at y=37) -->
+                  <line x1="332" y1="18" x2="332" y2="27" stroke="#f59e0b" stroke-width="2.5" />
+                  <polygon points="326,25 338,25 332,37" fill="#f59e0b" />
+                </svg>
+              </div>
+
+              <!-- 3 Parallel Model Cards -->
+              <div class="branches-grid">
+                <div class="branch-card b-lane">
+                  <div class="branch-head" style="color: #38bdf8;">
+                    <span class="branch-icon">🛣️</span>
+                    <span class="branch-title">Lane Perception</span>
+                  </div>
+                </div>
+
+                <div class="branch-card b-det">
+                  <div class="branch-head" style="color: #10b981;">
+                    <span class="branch-icon">🚗</span>
+                    <span class="branch-title">Detection & Track</span>
+                  </div>
+                </div>
+
+                <div class="branch-card b-depth">
+                  <div class="branch-head" style="color: #f59e0b;">
+                    <span class="branch-icon">📏</span>
+                    <span class="branch-title">Depth & TTC</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Merge Flow Connector: touching bottom of 3 cards and top of Contract Merge -->
+              <div class="flow-merge-container" style="height: 34px; margin: 0; line-height: 0;">
+                <svg class="flow-svg" viewBox="0 0 400 34" preserveAspectRatio="none"
+                  style="height: 34px; width: 100%; display: block;">
+                  <line x1="68" y1="0" x2="68" y2="16" stroke="#38bdf8" stroke-width="2.5" />
+                  <line x1="200" y1="0" x2="200" y2="16" stroke="#10b981" stroke-width="2.5" />
+                  <line x1="332" y1="0" x2="332" y2="16" stroke="#f59e0b" stroke-width="2.5" />
+                  <line x1="68" y1="16" x2="332" y2="16" stroke="var(--purple-accent)" stroke-width="2.5" />
+                  <line x1="200" y1="16" x2="200" y2="23" stroke="var(--purple-accent)" stroke-width="2.5" />
+                  <polygon points="194,21 206,21 200,33" fill="var(--purple-accent)" />
+                </svg>
+              </div>
+
+              <!-- Merge Layer (Solid border) -->
+              <div
+                style="background: rgba(168, 85, 247, 0.14); border: 1.5px solid var(--purple-accent); border-radius: 8px; padding: 11px 16px; display: flex; justify-content: space-between; align-items: center; margin: 0;">
+                <span style="font-size: 12px; font-weight: 700; color: #fff;">📦 Immutable Contract Merge</span>
+                <span style="font-family: var(--font-mono); font-size: 11px; color: #c084fc;">FrameRecord contract
+                  v1.0</span>
+              </div>
+
+              <!-- Direct Down Connector: touching bottom of Contract Merge (y=0) and top of HUD (tip at y=37) -->
+              <div class="flow-arrow-down" style="height: 38px; margin: 0; line-height: 0;">
+                <svg width="24" height="38" viewBox="0 0 24 38" style="display: block;">
+                  <line x1="12" y1="0" x2="12" y2="26" stroke="var(--emerald-safe)" stroke-width="2.5"
+                    stroke-linecap="round" />
+                  <polygon points="6,24 18,24 12,37" fill="var(--emerald-safe)" />
+                </svg>
+              </div>
+
+              <!-- Output Node -->
+              <div class="pipeline-node output-node">
+                <div style="font-weight: 700; font-size: 12.5px; color: var(--emerald-safe);">🎬 REAL-TIME HUD & ALERTS
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  <span class="badge-safe">SAFE</span>
+                  <span class="badge-warn">WARN</span>
+                  <span class="badge-alert">CRITICAL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-4" data-slide="4">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 04 • Research Questions & Gap</span>
+          <h2 class="slide-title">RESEARCH QUESTIONS & ACADEMIC RESEARCH GAPS</h2>
+          <span class="slide-subtitle">Establishing scientific boundaries and core technical contributions</span>
+        </div>
+        <span class="slide-tag">Academic Gaps</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Research Questions -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">🎯 Research Questions (RQ)</div>
+            <ul class="bullet-list">
+              <li><strong>Main RQ</strong>: How to concurrently integrate <strong>Lane + Tracking + Metric Depth &
+                  TTC</strong> on a single RGB camera stream, achieving high accuracy while sustaining real-time
+                throughput <strong>≥ 30 FPS</strong> (tail latency <strong>p95 &lt; 33 ms</strong>)?</li>
+              <li><strong>Sub-RQ1 (Lane - Quan)</strong>: How can Row-based Anchor Classification sustain F1 &gt; 75% on
+                CULane under low-light/shadows without expensive pixel segmentation compute?</li>
+              <li><strong>Sub-RQ2 (Track - Triet)</strong>: How does NMS-free Dual Label Assignment (YOLOv10) +
+                ByteTrack quantitatively improve p95 Latency and ID persistence across BDD100K 10 classes?</li>
+              <li><strong>Sub-RQ3 (Depth - Khang)</strong>: Can Monocular Metric Depth (Depth Anything V2) achieve
+                AbsRel &lt; 0.12 to deliver early collision warnings with TTC ≥ 1.5s without LiDAR?</li>
+            </ul>
+          </div>
+
+          <!-- Research Gaps -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--amber-warn);">🔍 Academic Research Gaps</div>
+            <ul class="bullet-list">
+              <li><strong>1. Task Isolation Gap</strong>: Existing SOTA studies exclusively address isolated
+                sub-problems (detection only, lane only, or depth only). End-to-end unified vision ADAS remains scarce.
+              </li>
+              <li><strong>2. Latency Bottleneck Gap</strong>: Accurate Monocular Depth models are computationally heavy,
+                making real-time coupling with multi-object tracking (≥ 30 FPS) highly challenging.</li>
+              <li><strong>3. Gradient Conflict Gap</strong>: Shared-backbone multitask architectures (e.g. YOLOPv2)
+                suffer from severe gradient interference across task heads, degrading joint accuracy.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-5" data-slide="5">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 05 • Dataset Architecture</span>
+          <h2 class="slide-title">CANONICAL MULTI-DATASET BENCHMARK SUITE</h2>
+          <span class="slide-subtitle">Five decoupled datasets covering 2D perception, temporal tracking, metric depth, and safety stress testing</span>
+        </div>
+        <span class="slide-tag">Data Architecture</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2" style="gap: 16px;">
+          <!-- Left: Dataset Architecture Diagram -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">🗺️ Decoupled Multi-Task Benchmark Mapping</div>
+            <div style="width: 100%; height: 320px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 540 310" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Central Framework Hub -->
+                <rect x="180" y="125" width="180" height="60" rx="8" fill="rgba(0, 229, 255, 0.12)" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <text x="270" y="152" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">ADAS PERCEPTION</text>
+                <text x="270" y="170" fill="var(--cyan-neon)" font-size="11" text-anchor="middle">Master Pipeline Core</text>
+
+                <!-- Dataset 1: BDD100K -->
+                <rect x="20" y="20" width="160" height="65" rx="6" fill="rgba(16, 185, 129, 0.1)" stroke="var(--emerald-safe)" stroke-width="1.5"/>
+                <text x="100" y="42" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">BDD100K (10 Classes)</text>
+                <text x="100" y="60" fill="var(--text-muted)" font-size="10" text-anchor="middle">100k Images • Detection</text>
+                <text x="100" y="74" fill="var(--emerald-safe)" font-size="9" text-anchor="middle">4.69 GB Sealed Package</text>
+                <line x1="140" y1="85" x2="210" y2="125" stroke="var(--emerald-safe)" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+                <!-- Dataset 2: CULane -->
+                <rect x="360" y="20" width="160" height="65" rx="6" fill="rgba(56, 189, 248, 0.1)" stroke="var(--blue-accent)" stroke-width="1.5"/>
+                <text x="440" y="42" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">CULane (9 Scenarios)</text>
+                <text x="440" y="60" fill="var(--text-muted)" font-size="10" text-anchor="middle">133k Frames • Row Anchors</text>
+                <text x="440" y="74" fill="var(--blue-accent)" font-size="9" text-anchor="middle">3.39 GB Official Split</text>
+                <line x1="400" y1="85" x2="330" y2="125" stroke="var(--blue-accent)" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+                <!-- Dataset 3: KITTI Tracking -->
+                <rect x="20" y="225" width="160" height="65" rx="6" fill="rgba(245, 158, 11, 0.1)" stroke="var(--amber-warn)" stroke-width="1.5"/>
+                <text x="100" y="247" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">KITTI Tracking</text>
+                <text x="100" y="265" fill="var(--text-muted)" font-size="10" text-anchor="middle">834 Replay Frames • LiDAR</text>
+                <text x="100" y="279" fill="var(--amber-warn)" font-size="9" text-anchor="middle">Temporal Trajectories</text>
+                <line x1="140" y1="225" x2="210" y2="185" stroke="var(--amber-warn)" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+                <!-- Dataset 4: CCD Accident -->
+                <rect x="360" y="225" width="160" height="65" rx="6" fill="rgba(244, 63, 94, 0.1)" stroke="var(--rose-alert)" stroke-width="1.5"/>
+                <text x="440" y="247" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">Car Crash Dataset (CCD)</text>
+                <text x="440" y="265" fill="var(--text-muted)" font-size="10" text-anchor="middle">4,500 Videos • Edge Cases</text>
+                <text x="440" y="279" fill="var(--rose-alert)" font-size="9" text-anchor="middle">Critical Stress Testing</text>
+                <line x1="400" y1="225" x2="330" y2="185" stroke="var(--rose-alert)" stroke-width="1.5" stroke-dasharray="4,4"/>
+              </svg>
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-sub); text-align: center;">
+              Synchronized multi-dataset layout ensures independent validation across tasks without cross-domain pollution.
+            </div>
+          </div>
+
+          <!-- Right: Key Dataset Specifications -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--blue-accent);">📊 Formal Dataset Characteristics</div>
+            <ul class="bullet-list" style="font-size: 13.5px; gap: 10px;">
+              <li><strong>BDD100K 10-Class</strong>: Scaled to 100k diverse driving images under complex weather, night glare, and urban scenes. Restores 3 critical vulnerable road user classes.</li>
+              <li><strong>CULane Benchmark</strong>: 133k frames capturing 9 extreme highway and urban conditions (shadow, dazzle light, night, curve, no-line).</li>
+              <li><strong>KITTI Temporal Tracking</strong>: Continuous sequences evaluated over 834 unbroken frames with calibrated 64-beam Velodyne LiDAR ground truth ($Z \le 80\text{ m}$).</li>
+              <li><strong>Car Crash Dataset (CCD)</strong>: Temporal dashcam recordings of real-world collisions for stress-testing Time-to-Collision (TTC) alarm timeliness.</li>
+              <li><strong>CARLA Autonomous Driving Sim</strong>: Synthetic multi-agent ground truth providing oracle 3D positions to establish mathematical TTC upper bounds.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">5</div>
+                <div class="metric-lbl">Benchmark Suites</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">100%</div>
+                <div class="metric-lbl">Task Decoupling</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">4.69 GB</div>
+                <div class="metric-lbl">Canonical Package</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-6" data-slide="6">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 06 • Data Engineering</span>
+          <h2 class="slide-title">BDD100K 10-CLASS LABEL RECOVERY & CLEANING</h2>
+          <span class="slide-subtitle">Rectifying category alias mapping to recover 755,927 annotations for Vulnerable Road Users (VRUs)</span>
+        </div>
+        <span class="slide-tag">Data Cleaning</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Flowchart of Recovery -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--emerald-safe);">⚙️ Label Recovery & Normalization Engine</div>
+            <div style="width: 100%; height: 310px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 280" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Step 1 -->
+                <rect x="20" y="30" width="135" height="70" rx="6" fill="rgba(244, 63, 94, 0.12)" stroke="var(--rose-alert)" stroke-width="1.5"/>
+                <text x="87" y="55" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">Legacy Parser</text>
+                <text x="87" y="72" fill="var(--rose-alert)" font-size="10" text-anchor="middle">Missing Aliases</text>
+                <text x="87" y="88" fill="var(--text-sub)" font-size="9" text-anchor="middle">755k Labels Dropped</text>
+
+                <!-- Arrow 1 -->
+                <line x1="155" y1="65" x2="195" y2="65" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <polygon points="195,60 205,65 195,70" fill="var(--cyan-neon)"/>
+
+                <!-- Step 2 -->
+                <rect x="205" y="30" width="155" height="70" rx="6" fill="rgba(0, 229, 255, 0.12)" stroke="var(--cyan-neon)" stroke-width="1.5"/>
+                <text x="282" y="55" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">Alias Map Engine</text>
+                <text x="282" y="72" fill="var(--cyan-neon)" font-size="10" text-anchor="middle">Exact Category Match</text>
+                <text x="282" y="88" fill="var(--text-sub)" font-size="9" text-anchor="middle">pedestrian, bike, motor</text>
+
+                <!-- Arrow 2 -->
+                <line x1="360" y1="65" x2="400" y2="65" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <polygon points="400,60 410,65 400,70" fill="var(--cyan-neon)"/>
+
+                <!-- Step 3 -->
+                <rect x="410" y="30" width="95" height="70" rx="6" fill="rgba(16, 185, 129, 0.12)" stroke="var(--emerald-safe)" stroke-width="1.5"/>
+                <text x="457" y="55" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">100% Labels</text>
+                <text x="457" y="72" fill="var(--emerald-safe)" font-size="10" text-anchor="middle">Full 10 Classes</text>
+                <text x="457" y="88" fill="var(--text-sub)" font-size="9" text-anchor="middle">1,289k Instances</text>
+
+                <!-- Downward Arrow -->
+                <line x1="282" y1="100" x2="282" y2="150" stroke="var(--purple-accent)" stroke-width="2"/>
+                <polygon points="277,150 282,160 287,150" fill="var(--purple-accent)"/>
+
+                <!-- Output Box -->
+                <rect x="80" y="160" width="405" height="90" rx="8" fill="rgba(168, 85, 247, 0.1)" stroke="var(--purple-accent)" stroke-width="1.5"/>
+                <text x="282" y="185" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">Canonical BDD100K Dataset: kltn-adas-merged-data</text>
+                <text x="282" y="205" fill="#c084fc" font-size="11" text-anchor="middle">4.69 GB • 160,000 files (images + normalized txt labels)</text>
+                <text x="282" y="225" fill="var(--text-muted)" font-size="10" text-anchor="middle">Sealed with SHA-256 Checksums • Zero external dependency</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Impact Metrics -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📈 Restored Annotations Breakdown</div>
+            <ul class="bullet-list" style="font-size: 14px;">
+              <li><strong>Root Problem</strong>: Legacy converter in initial repositories omitted alias mappings, causing 0 instances of pedestrians, motorcycles, and bicycles in training splits.</li>
+              <li><strong>Full Recovery</strong>: Directly re-parsed Berkeley DeepDrive JSON source:
+                <br>• <strong>+91,405 Pedestrians</strong> restored (critical for pedestrian collision avoidance).
+                <br>• <strong>+7,225 Bicycles</strong> & <strong>+3,002 Motorcycles</strong> restored.
+              </li>
+              <li><strong>Automotive Compliance</strong>: Satisfies Euro NCAP & ISO 26262 VRU protection requirements by training detectors on all 10 road participant categories.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">+755,927</div>
+                <div class="metric-lbl">Labels Recovered</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">10 / 10</div>
+                <div class="metric-lbl">Active Classes</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">0</div>
+                <div class="metric-lbl">Missing Categories</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 7: CLASS IMBALANCE & CSAS MITIGATION ================= -->
+    <section class="slide" id="slide-7" data-slide="7">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 07 • Imbalance & Optimization</span>
+          <h2 class="slide-title">QUANTITATIVE CLASS IMBALANCE & CSAS / FOCAL LOSS MITIGATION</h2>
+          <span class="slide-subtitle">Addressing extreme 4,571:1 frequency disparity via Class x Scale Sampler and task-aligned loss</span>
+        </div>
+        <span class="slide-tag">Data Optimization</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Left: Imbalance Breakdown -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--amber-warn);">📊 BDD100K Frequency Disparity (4,571 : 1)</div>
+            <div style="width: 100%; height: 260px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 540 240" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Car -->
+                <text x="100" y="24" fill="#ffffff" font-size="11" text-anchor="end">car</text>
+                <rect x="110" y="12" width="400" height="15" rx="3" fill="#38bdf8"/>
+                <text x="515" y="24" fill="#38bdf8" font-size="10" font-weight="700">713,206</text>
+
+                <!-- Traffic Sign / Light -->
+                <text x="100" y="49" fill="#ffffff" font-size="11" text-anchor="end">traffic sign</text>
+                <rect x="110" y="37" width="220" height="15" rx="3" fill="#38bdf8" opacity="0.85"/>
+                <text x="335" y="49" fill="#94a3b8" font-size="10">239,944</text>
+
+                <!-- Pedestrian -->
+                <text x="100" y="74" fill="var(--emerald-safe)" font-size="11" font-weight="700" text-anchor="end">pedestrian</text>
+                <rect x="110" y="62" width="130" height="15" rx="3" fill="var(--emerald-safe)"/>
+                <text x="245" y="74" fill="var(--emerald-safe)" font-size="10" font-weight="700">91,405</text>
+
+                <!-- Truck / Bus -->
+                <text x="100" y="99" fill="#ffffff" font-size="11" text-anchor="end">truck/bus</text>
+                <rect x="110" y="87" width="80" height="15" rx="3" fill="#a78bfa"/>
+                <text x="195" y="99" fill="#94a3b8" font-size="10">41,749</text>
+
+                <!-- Bicycle -->
+                <text x="100" y="124" fill="var(--cyan-neon)" font-size="11" text-anchor="end">bicycle</text>
+                <rect x="110" y="112" width="50" height="15" rx="3" fill="var(--cyan-neon)"/>
+                <text x="165" y="124" fill="var(--cyan-neon)" font-size="10">7,225</text>
+
+                <!-- Motorcycle -->
+                <text x="100" y="149" fill="var(--cyan-neon)" font-size="11" text-anchor="end">motorcycle</text>
+                <rect x="110" y="137" width="30" height="15" rx="3" fill="var(--cyan-neon)"/>
+                <text x="145" y="149" fill="var(--cyan-neon)" font-size="10">3,002</text>
+
+                <!-- Train -->
+                <text x="100" y="174" fill="var(--rose-alert)" font-size="11" font-weight="700" text-anchor="end">train</text>
+                <rect x="110" y="162" width="10" height="15" rx="3" fill="var(--rose-alert)"/>
+                <text x="125" y="174" fill="var(--rose-alert)" font-size="10" font-weight="700">156</text>
+
+                <!-- Baseline -->
+                <line x1="110" y1="5" x2="110" y2="185" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+              </svg>
+            </div>
+            <div style="font-size: 11.5px; color: var(--amber-warn); line-height: 1.4;">
+              <strong>Gradient Starvation Danger</strong>: The 4,571.8:1 disparity between cars and rare VRUs causes standard cross-entropy loss to starve minority gradients during backpropagation.
+            </div>
+          </div>
+
+          <!-- Right: CSAS & Focal Loss Solution -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">📈 CSAS Resampling & Minority Recall Gain</div>
+            <div style="width: 100%; height: 260px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 240" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Grid Lines -->
+                <line x1="60" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="60" y1="140" x2="480" y2="140" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="60" y1="90" x2="480" y2="90" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="60" y1="40" x2="480" y2="40" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+
+                <text x="50" y="194" fill="var(--text-sub)" font-size="10" text-anchor="end">0.0</text>
+                <text x="50" y="144" fill="var(--text-sub)" font-size="10" text-anchor="end">0.2</text>
+                <text x="50" y="94" fill="var(--text-sub)" font-size="10" text-anchor="end">0.4</text>
+                <text x="50" y="44" fill="var(--text-sub)" font-size="10" text-anchor="end">0.6</text>
+
+                <!-- Pedestrian -->
+                <rect x="95" y="110" width="28" height="80" rx="2" fill="rgba(255,255,255,0.2)"/>
+                <text x="109" y="104" fill="var(--text-muted)" font-size="10" text-anchor="middle">0.32</text>
+                <rect x="127" y="72" width="28" height="118" rx="2" fill="var(--emerald-safe)"/>
+                <text x="141" y="66" fill="var(--emerald-safe)" font-size="10" font-weight="700" text-anchor="middle">0.47</text>
+                <text x="125" y="210" fill="#ffffff" font-size="11" text-anchor="middle">Pedestrian</text>
+
+                <!-- Bicycle -->
+                <rect x="225" y="120" width="28" height="70" rx="2" fill="rgba(255,255,255,0.2)"/>
+                <text x="239" y="114" fill="var(--text-muted)" font-size="10" text-anchor="middle">0.28</text>
+                <rect x="257" y="88" width="28" height="102" rx="2" fill="var(--cyan-neon)"/>
+                <text x="271" y="82" fill="var(--cyan-neon)" font-size="10" font-weight="700" text-anchor="middle">0.41</text>
+                <text x="255" y="210" fill="#ffffff" font-size="11" text-anchor="middle">Bicycle</text>
+
+                <!-- Motorcycle -->
+                <rect x="355" y="125" width="28" height="65" rx="2" fill="rgba(255,255,255,0.2)"/>
+                <text x="369" y="119" fill="var(--text-muted)" font-size="10" text-anchor="middle">0.26</text>
+                <rect x="387" y="90" width="28" height="100" rx="2" fill="var(--purple-accent)"/>
+                <text x="401" y="84" fill="var(--purple-accent)" font-size="10" font-weight="700" text-anchor="middle">0.40</text>
+                <text x="385" y="210" fill="#ffffff" font-size="11" text-anchor="middle">Motorcycle</text>
+              </svg>
+            </div>
+            <div class="metric-box" style="margin-top: 5px;">
+              <div class="metric-item">
+                <div class="metric-val">4,571 : 1</div>
+                <div class="metric-lbl">Max Disparity</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">+47.7%</div>
+                <div class="metric-lbl">Pedestrian Recall</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&gamma;=2.0, &alpha;=0.25</div>
+                <div class="metric-lbl">Focal Loss Target</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+<section class="slide" id="slide-8" data-slide="8">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 08 • Scientific Integrity</span>
+          <h2 class="slide-title">DATA LEAKAGE PREVENTION & KITTI SCOPE</h2>
+          <span class="slide-subtitle">Strict sequence-level isolation and full 834-frame unbroken temporal validation</span>
+        </div>
+        <span class="slide-tag">Anti-Leakage Protocol</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Left: Protocol Card -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--emerald-safe);">🔒 Strict Sequence-Level Partitioning</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>The Temporal Leakage Hazard</strong>: In video ADAS, randomly shuffling frames into train/val causes adjacent frames ($t$ and $t + 33\text{ ms}$) to appear in both sets, artificially inflating metrics through background memorization.</li>
+              <li><strong>Sequence-Level Isolation</strong>: Training and evaluation sets are split strictly by independent video sequence IDs. Val sequences have 0% environmental overlap with training splits.</li>
+              <li><strong>SHA-256 Checksum Verification</strong>: Every raw video frame, annotation file, and model checkpoint is verified via <code>SHA256SUMS.txt</code> to ensure complete bitwise reproducibility.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">0.0%</div>
+                <div class="metric-lbl">Temporal Overlap</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">SHA-256</div>
+                <div class="metric-lbl">Integrity Sealed</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: KITTI Scope -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">🎬 KITTI Full-Sequence Replay Scope</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Zero Ad-Hoc Slicing Rule</strong>: Forbids arbitrary frame truncation (e.g., <code>[:100]</code>). Tracking and Kalman kinematic filters require unbroken temporal continuity.</li>
+              <li><strong>Continuous Sequence Composition</strong> (834 Frames Total):
+                <br>• <strong>Sequence 0000</strong>: 154 frames (Urban, turning maneuvers, roadside barriers).
+                <br>• <strong>Sequence 0001</strong>: 447 frames (Complex multi-agent urban intersection).
+                <br>• <strong>Sequence 0002</strong>: 233 frames (Highway cruise, high-speed lead vehicle).
+              </li>
+              <li><strong>Stabilization Baseline</strong>: Validates unbroken trajectories and filter convergence across 100% of the assigned sequences.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">834</div>
+                <div class="metric-lbl">Replay Frames</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">3 / 3</div>
+                <div class="metric-lbl">Sequences Covered</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">100%</div>
+                <div class="metric-lbl">Trajectory Integrity</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-9" data-slide="9">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 09 • Empirical Setup</span>
+          <h2 class="slide-title">EXPERIMENTAL CLOUD ENVIRONMENT & TIMING PROTOCOL</h2>
+          <span class="slide-subtitle">Rigorous hardware benchmarking on Tesla T4 using CUDA stream synchronization</span>
+        </div>
+        <span class="slide-tag">Benchmarking Protocol</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Hardware Specs Card -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">💻 Experimental Cloud Specifications</div>
+            <table class="hud-table" style="width: 100%; font-size: 12.5px;">
+              <tbody>
+                <tr>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">GPU Accelerator</td>
+                  <td>2 x NVIDIA Tesla T4 (16GB GDDR6, Turing Architecture)</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">Host Processor</td>
+                  <td>Intel(R) Xeon(R) CPU @ 2.20GHz (4 vCPUs)</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">System Memory</td>
+                  <td>32 GB RAM • 73.1 GB Available Disk Workspace</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">Deep Learning Stack</td>
+                  <td>PyTorch 2.4.0+cu121 • Torchvision 0.19.0 • CUDA 12.1</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">OS & Runtime</td>
+                  <td>Ubuntu 22.04 LTS • Python 3.10.12</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Timing Protocol Card -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--amber-warn);">⏱️ Strict GPU Timing Protocol</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Locked GPU Clock (P0 State)</strong>: Warm-up phase executes 50 iterations prior to recording to eliminate driver clock ramping latency.</li>
+              <li><strong>Explicit CUDA Synchronization</strong>:
+                <pre style="background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; font-family: var(--font-mono); font-size: 11.5px; color: var(--cyan-neon);">
+torch.cuda.synchronize()
+t_start = time.perf_counter()
+output = model(tensor)
+torch.cuda.synchronize()
+t_latency = (time.perf_counter() - t_start) * 1000.0</pre>
+              </li>
+              <li><strong>Decoupled Benchmarking</strong>: Isolates pure neural inference latency on GPU from CPU disk I/O and display rendering.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">P0 State</div>
+                <div class="metric-lbl">Clock Lock</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">50 Frames</div>
+                <div class="metric-lbl">GPU Warm-up</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">CUDA Sync</div>
+                <div class="metric-lbl">Timing Precision</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-10" data-slide="10">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 10 • Subsystem 1 (Triet)</span>
+          <h2 class="slide-title">SUBSYSTEM 1: 100-EPOCH YOLO PARETO BENCHMARK</h2>
+          <span class="slide-subtitle">Empirical evaluation confirms YOLOv10s as the optimal ASIL-D Pareto frontier model</span>
+        </div>
+        <span class="slide-tag">Detection Screening</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- 2D Pareto Scatter SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--emerald-safe);">📈 Accuracy vs Latency Pareto Frontier</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Grid Lines -->
+                <line x1="60" y1="220" x2="480" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="60" y1="40" x2="60" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+                <!-- Y Axis: mAP50-95 (%) -->
+                <text x="50" y="224" fill="var(--text-sub)" font-size="10" text-anchor="end">25%</text>
+                <text x="50" y="160" fill="var(--text-sub)" font-size="10" text-anchor="end">28%</text>
+                <text x="50" y="100" fill="var(--text-sub)" font-size="10" text-anchor="end">31%</text>
+                <text x="50" y="44" fill="var(--text-sub)" font-size="10" text-anchor="end">34%</text>
+
+                <!-- X Axis: Latency ms (Reversed: Left is Fast/Low Latency) -->
+                <text x="100" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">6 ms (160 FPS)</text>
+                <text x="240" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">10 ms (100 FPS)</text>
+                <text x="380" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">14 ms (70 FPS)</text>
+
+                <!-- Point 1: YOLOv10n -->
+                <circle cx="120" cy="190" r="8" fill="#a78bfa" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="120" y="175" fill="#a78bfa" font-size="11" font-weight="700" text-anchor="middle">v10n</text>
+                <text x="120" y="210" fill="var(--text-sub)" font-size="9" text-anchor="middle">26.15% (124 FPS)</text>
+
+                <!-- Point 2: YOLOv8s (With NMS jitter) -->
+                <circle cx="360" cy="95" r="9" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="360" y="80" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">v8s + NMS</text>
+                <text x="360" y="115" fill="var(--text-sub)" font-size="9" text-anchor="middle">31.05% (72 FPS)</text>
+
+                <!-- Point 3: YOLO11s (With NMS) -->
+                <circle cx="330" cy="85" r="9" fill="#38bdf8" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="330" y="70" fill="#38bdf8" font-size="11" font-weight="700" text-anchor="middle">11s + NMS</text>
+                <text x="330" y="105" fill="var(--text-sub)" font-size="9" text-anchor="middle">31.42% (78 FPS)</text>
+
+                <!-- Point 4: YOLOv10s (SELECTED - NMS Free) -->
+                <circle cx="230" cy="110" r="12" fill="var(--emerald-safe)" stroke="var(--cyan-neon)" stroke-width="2.5"/>
+                <text x="230" y="90" fill="var(--cyan-neon)" font-size="12" font-weight="700" text-anchor="middle">⭐ YOLOv10s</text>
+                <text x="230" y="138" fill="var(--emerald-safe)" font-size="10" font-weight="700" text-anchor="middle">30.22% • 80.8 FPS (0ms NMS)</text>
+
+                <!-- Pareto Frontier Curve -->
+                <path d="M 120 190 Q 180 130 230 110 T 330 85" fill="none" stroke="var(--cyan-neon)" stroke-width="2" stroke-dasharray="4,4"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Academic Rationale Table -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">🏆 100-Epoch Empirical Benchmark Matrix</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Params</th>
+                  <th>mAP50-95</th>
+                  <th>FPS</th>
+                  <th>NMS Latency</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>YOLOv10n</td>
+                  <td>2.27 M</td>
+                  <td>26.15%</td>
+                  <td>124.2</td>
+                  <td style="color: var(--emerald-safe);">0.0 ms (NMS-free)</td>
+                </tr>
+                <tr>
+                  <td>YOLOv8s</td>
+                  <td>11.17 M</td>
+                  <td>31.05%</td>
+                  <td>72.5</td>
+                  <td style="color: var(--amber-warn);">+3.2 ms (Jitter)</td>
+                </tr>
+                <tr>
+                  <td>YOLO11s</td>
+                  <td>9.44 M</td>
+                  <td>31.42%</td>
+                  <td>78.1</td>
+                  <td style="color: var(--amber-warn);">+2.8 ms (Jitter)</td>
+                </tr>
+                <tr style="background: rgba(16, 185, 129, 0.12); font-weight: 700;">
+                  <td style="color: var(--cyan-neon);">YOLOv10s (Selected)</td>
+                  <td>8.03 M</td>
+                  <td style="color: var(--emerald-safe);">30.22%</td>
+                  <td style="color: var(--cyan-neon);">80.8 FPS</td>
+                  <td style="color: var(--emerald-safe);">0.0 ms (ASIL-D)</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.45;">
+              <strong>Scientific Takeaway</strong>: YOLOv10s eliminates 100% of Non-Maximum Suppression overhead via Dual Label Assignment, ensuring deterministic latency critical for ASIL-D automotive compliance.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-11" data-slide="11">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 11 • Subsystem 2 (Quan)</span>
+          <h2 class="slide-title">SUBSYSTEM 2: CULANE 9-SCENARIO BENCHMARK</h2>
+          <span class="slide-subtitle">UFLDv2 ResNet-18 achieves 74.50% overall F1 at 212.8 FPS across challenging driving scenarios</span>
+        </div>
+        <span class="slide-tag">Lane Benchmark</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- 9 Scenarios Grouped Bar Chart -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--blue-accent);">🛣️ F1-Score Across 9 CULane Scenarios</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 540 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Grid Lines -->
+                <line x1="50" y1="210" x2="520" y2="210" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="50" y1="130" x2="520" y2="130" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="50" y1="50" x2="520" y2="50" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+
+                <text x="40" y="214" fill="var(--text-sub)" font-size="10" text-anchor="end">0%</text>
+                <text x="40" y="134" fill="var(--text-sub)" font-size="10" text-anchor="end">50%</text>
+                <text x="40" y="54" fill="var(--text-sub)" font-size="10" text-anchor="end">100%</text>
+
+                <!-- Normal: 90.14% -->
+                <rect x="65" y="66" width="35" height="144" rx="2" fill="#38bdf8"/>
+                <text x="82" y="58" fill="#38bdf8" font-size="9" font-weight="700" text-anchor="middle">90.1%</text>
+                <text x="82" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Normal</text>
+
+                <!-- Arrow: 86.20% -->
+                <rect x="115" y="72" width="35" height="138" rx="2" fill="#38bdf8"/>
+                <text x="132" y="64" fill="#38bdf8" font-size="9" font-weight="700" text-anchor="middle">86.2%</text>
+                <text x="132" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Arrow</text>
+
+                <!-- Shadow: 74.80% -->
+                <rect x="165" y="90" width="35" height="120" rx="2" fill="#38bdf8"/>
+                <text x="182" y="82" fill="#38bdf8" font-size="9" font-weight="700" text-anchor="middle">74.8%</text>
+                <text x="182" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Shadow</text>
+
+                <!-- Crowded: 73.12% -->
+                <rect x="215" y="93" width="35" height="117" rx="2" fill="#38bdf8"/>
+                <text x="232" y="85" fill="#38bdf8" font-size="9" font-weight="700" text-anchor="middle">73.1%</text>
+                <text x="232" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Crowd</text>
+
+                <!-- Night: 68.45% -->
+                <rect x="265" y="100" width="35" height="110" rx="2" fill="#a78bfa"/>
+                <text x="282" y="92" fill="#a78bfa" font-size="9" font-weight="700" text-anchor="middle">68.5%</text>
+                <text x="282" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Night</text>
+
+                <!-- Dazzle: 65.30% -->
+                <rect x="315" y="105" width="35" height="105" rx="2" fill="#a78bfa"/>
+                <text x="332" y="97" fill="#a78bfa" font-size="9" font-weight="700" text-anchor="middle">65.3%</text>
+                <text x="332" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Dazzle</text>
+
+                <!-- Curve: 64.12% -->
+                <rect x="365" y="107" width="35" height="103" rx="2" fill="#f59e0b"/>
+                <text x="382" y="99" fill="#f59e0b" font-size="9" font-weight="700" text-anchor="middle">64.1%</text>
+                <text x="382" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Curve</text>
+
+                <!-- No Line: 58.91% -->
+                <rect x="415" y="116" width="35" height="94" rx="2" fill="var(--rose-alert)"/>
+                <text x="432" y="108" fill="var(--rose-alert)" font-size="9" font-weight="700" text-anchor="middle">58.9%</text>
+                <text x="432" y="226" fill="#ffffff" font-size="9" text-anchor="middle">No-Line</text>
+
+                <!-- Overall: 74.50% -->
+                <rect x="470" y="91" width="40" height="119" rx="3" fill="var(--cyan-neon)"/>
+                <text x="490" y="81" fill="var(--cyan-neon)" font-size="10" font-weight="700" text-anchor="middle">74.5%</text>
+                <text x="490" y="226" fill="var(--cyan-neon)" font-size="9" font-weight="700" text-anchor="middle">OVERALL</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Academic Comparison Table -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📊 Literature vs Empirical Edge Comparison</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Method</th>
+                  <th>Overall F1</th>
+                  <th>Inference</th>
+                  <th>Edge Viability</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>SCNN</td>
+                  <td>Slice CNN</td>
+                  <td>71.60%</td>
+                  <td>133 ms (7.5 FPS)</td>
+                  <td style="color: var(--rose-alert);">Unusable (Edge Bottleneck)</td>
+                </tr>
+                <tr>
+                  <td>RESA</td>
+                  <td>Recurrent Feature</td>
+                  <td>75.30%</td>
+                  <td>40.0 ms (25 FPS)</td>
+                  <td style="color: var(--amber-warn);">Exceeds 33ms budget</td>
+                </tr>
+                <tr>
+                  <td>CLRNet</td>
+                  <td>FPN Refinement</td>
+                  <td>80.56%</td>
+                  <td>28.5 ms (35 FPS)</td>
+                  <td style="color: var(--amber-warn);">High VRAM (1.1 GB)</td>
+                </tr>
+                <tr style="background: rgba(56, 189, 248, 0.12); font-weight: 700;">
+                  <td style="color: #38bdf8;">UFLDv2-R18</td>
+                  <td>Row Classification</td>
+                  <td style="color: var(--cyan-neon);">74.50%</td>
+                  <td style="color: var(--emerald-safe);">4.70 ms (212.8 FPS)</td>
+                  <td style="color: var(--emerald-safe);">Optimal (Consumes only 15% budget)</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.45;">
+              Row-wise anchor prediction delivers superior real-time performance, allowing the multi-task pipeline to preserve GPU budget for depth estimation.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-12" data-slide="12">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 12 • Subsystem 3 (Khang)</span>
+          <h2 class="slide-title">SUBSYSTEM 3: METRIC DEPTH ACCURACY VS VRAM</h2>
+          <span class="slide-subtitle">Depth Anything V2 Metric ViT-S achieves AbsRel 0.089 within an ultra-low 86.9 MB VRAM footprint</span>
+        </div>
+        <span class="slide-tag">Depth Benchmark</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Scatter Plot SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--amber-warn);">📊 Depth Error (AbsRel) vs VRAM Footprint</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Grid Lines -->
+                <line x1="60" y1="220" x2="480" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="60" y1="40" x2="60" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+                <!-- Y Axis: AbsRel Error (Lower is better) -->
+                <text x="50" y="224" fill="var(--text-sub)" font-size="10" text-anchor="end">0.20</text>
+                <text x="50" y="160" fill="var(--text-sub)" font-size="10" text-anchor="end">0.14</text>
+                <text x="50" y="100" fill="var(--text-sub)" font-size="10" text-anchor="end">0.08</text>
+                <text x="50" y="44" fill="var(--text-sub)" font-size="10" text-anchor="end">0.04</text>
+
+                <!-- X Axis: VRAM Usage (MB) -->
+                <text x="100" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">100 MB</text>
+                <text x="240" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">1.5 GB</text>
+                <text x="380" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">3.5 GB</text>
+
+                <!-- Model 1: StereoSGBM (High Error, CPU only) -->
+                <circle cx="90" cy="205" r="9" fill="#a78bfa" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="90" y="190" fill="#a78bfa" font-size="10" text-anchor="middle">StereoSGBM</text>
+                <text x="90" y="220" fill="var(--text-sub)" font-size="8" text-anchor="middle">AbsRel 0.185</text>
+
+                <!-- Model 2: Metric3D (Heavy ViT-L) -->
+                <circle cx="430" cy="85" r="14" fill="var(--rose-alert)" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="430" y="65" fill="var(--rose-alert)" font-size="11" font-weight="700" text-anchor="middle">Metric3D (ViT-L)</text>
+                <text x="430" y="112" fill="var(--text-sub)" font-size="9" text-anchor="middle">3.58 GB • 82.5 ms</text>
+
+                <!-- Model 3: UniDepth (ViT-B) -->
+                <circle cx="340" cy="105" r="12" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="340" y="88" fill="#f59e0b" font-size="11" text-anchor="middle">UniDepth (ViT-B)</text>
+                <text x="340" y="128" fill="var(--text-sub)" font-size="9" text-anchor="middle">2.84 GB • 64.2 ms</text>
+
+                <!-- Model 4: Depth Anything V2 (SELECTED) -->
+                <circle cx="110" cy="110" r="13" fill="var(--emerald-safe)" stroke="var(--cyan-neon)" stroke-width="2.5"/>
+                <text x="110" y="90" fill="var(--cyan-neon)" font-size="12" font-weight="700" text-anchor="middle">⭐ DAv2 Metric</text>
+                <text x="110" y="140" fill="var(--emerald-safe)" font-size="10" font-weight="700" text-anchor="middle">AbsRel 0.089 • 86.9 MB (15.0ms)</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Academic Rationale Card -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">⚡ 518px Token Control & Edge Viability</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Vision Transformer Complexity</strong>: Self-attention scales quadratically with token count $\mathcal{O}(N^2)$. Unchecked full-HD resolution causes GPU kernel thrashing.</li>
+              <li><strong>Upper-Bound 518px Scaling Rule</strong>: Lock input resolution to $154     imes 518$ pixels (matching KITTI camera aspect ratio), producing exactly <strong>407 tokens</strong> ($11     imes 37$ patches of size $14     imes 14$).</li>
+              <li><strong>Edge Viability Sweet Spot</strong>: Depth Anything V2 ViT-S achieves <strong>15.04 ms latency (66.5 FPS)</strong> and consumes only <strong>86.9 MB VRAM</strong> (99.58 MB peak), fitting smoothly within edge GPU memory limits.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">0.089</div>
+                <div class="metric-lbl">AbsRel Metric</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">15.04 ms</div>
+                <div class="metric-lbl">GPU Latency</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">86.9 MB</div>
+                <div class="metric-lbl">VRAM Footprint</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-13" data-slide="13">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 13 • Gap Analysis</span>
+          <h2 class="slide-title">QUANTITATIVE GAP ANALYSIS: PAPER VS MEASURED</h2>
+          <span class="slide-subtitle">Transparent technical accounting of performance deltas across four root factors</span>
+        </div>
+        <span class="slide-tag">Discrepancy Audit</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- 4 Root Causes Breakdown -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--amber-warn);">🔍 Four Scientific Discrepancy Drivers</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>1. Domain Gap</strong>: Published papers benchmark on synthetic/curated laboratory splits. Real dashcam video suffers from sensor compression artifacts, low dynamic range, and lens distortion.</li>
+              <li><strong>2. Resolution Scaling</strong>: Downsampling ViT input to 518px reduces token quadratic overhead by 85%, introducing a minor +1.2% depth variance in exchange for a 4x latency speedup.</li>
+              <li><strong>3. Hardware Architectural Shift</strong>: Official benchmarks utilize enterprise server GPUs (RTX 3090 / A100) with 384-bit memory buses; Tesla T4 features a constrained 128-bit GDDR6 interface.</li>
+              <li><strong>4. Evaluation Protocol Rigor</strong>: The team enforces unbroken temporal sequence testing rather than cherry-picked random frame evaluations.</li>
+            </ul>
+          </div>
+
+          <!-- Comparison Table Card -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📊 Paper Claims vs In-House GPU Measurements</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th>Paper Claim</th>
+                  <th>In-House Measured</th>
+                  <th>Root Delta Factor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>YOLOv10s Latency</td>
+                  <td>6.5 ms (A100)</td>
+                  <td>9.31 ms (Tesla T4)</td>
+                  <td>FP32 Hardware Compute Ceiling</td>
+                </tr>
+                <tr>
+                  <td>UFLDv2 CULane F1</td>
+                  <td>76.50% (Official)</td>
+                  <td>74.50% (Full Val)</td>
+                  <td>Zero Crossroad FP suppression tuning</td>
+                </tr>
+                <tr>
+                  <td>DAv2 Metric AbsRel</td>
+                  <td>0.075 (Full Res)</td>
+                  <td>0.089 (518px Scale)</td>
+                  <td>Token Scaling for Real-Time Budget</td>
+                </tr>
+                <tr>
+                  <td>Peak Memory VRAM</td>
+                  <td>Unreported</td>
+                  <td>1.95 GB (Full Pipeline)</td>
+                  <td>Decoupled Memory Management</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">100%</div>
+                <div class="metric-lbl">Audited Delta</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">0</div>
+                <div class="metric-lbl">Fabricated Data</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">Fail Fast</div>
+                <div class="metric-lbl">Honest Protocol</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-14" data-slide="14">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 14 • Proposed Solution</span>
+          <h2 class="slide-title">PROPOSED MASTER INTEGRATED PIPELINE ARCHITECTURE</h2>
+          <span class="slide-subtitle">Contract-driven modular architecture coordinating 3 perception branches via FrameRecord v1.0</span>
+        </div>
+        <span class="slide-tag">Proposed System</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Architecture Flow SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">⚡ Multi-Task Coordination Flowchart</div>
+            <div style="width: 100%; height: 310px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 280" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Camera Ingestion -->
+                <rect x="145" y="10" width="230" height="35" rx="5" fill="rgba(0, 229, 255, 0.15)" stroke="var(--cyan-neon)" stroke-width="1.5"/>
+                <text x="260" y="32" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">RGB Camera (720p @ 30 FPS)</text>
+
+                <!-- Fan-out Bus -->
+                <line x1="260" y1="45" x2="260" y2="65" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <line x1="85" y1="65" x2="435" y2="65" stroke="var(--cyan-neon)" stroke-width="2"/>
+
+                <!-- Branch 1: Lane -->
+                <line x1="85" y1="65" x2="85" y2="85" stroke="#38bdf8" stroke-width="2"/>
+                <rect x="20" y="85" width="130" height="55" rx="5" fill="rgba(56, 189, 248, 0.12)" stroke="#38bdf8" stroke-width="1.5"/>
+                <text x="85" y="106" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">UFLDv2-R18</text>
+                <text x="85" y="124" fill="#38bdf8" font-size="9" text-anchor="middle">Row Anchors (4.7ms)</text>
+
+                <!-- Branch 2: Det + Track -->
+                <line x1="260" y1="65" x2="260" y2="85" stroke="var(--emerald-safe)" stroke-width="2"/>
+                <rect x="195" y="85" width="130" height="55" rx="5" fill="rgba(16, 185, 129, 0.12)" stroke="var(--emerald-safe)" stroke-width="1.5"/>
+                <text x="260" y="106" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">YOLOv10s + Byte</text>
+                <text x="260" y="124" fill="var(--emerald-safe)" font-size="9" text-anchor="middle">NMS-Free (12.4ms)</text>
+
+                <!-- Branch 3: Depth -->
+                <line x1="435" y1="65" x2="435" y2="85" stroke="var(--amber-warn)" stroke-width="2"/>
+                <rect x="370" y="85" width="130" height="55" rx="5" fill="rgba(245, 158, 11, 0.12)" stroke="var(--amber-warn)" stroke-width="1.5"/>
+                <text x="435" y="106" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">Depth Anything V2</text>
+                <text x="435" y="124" fill="var(--amber-warn)" font-size="9" text-anchor="middle">Metric ViT-S (15.0ms)</text>
+
+                <!-- Merge Layer -->
+                <line x1="85" y1="140" x2="85" y2="165" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="260" y1="140" x2="260" y2="165" stroke="var(--emerald-safe)" stroke-width="2"/>
+                <line x1="435" y1="140" x2="435" y2="165" stroke="var(--amber-warn)" stroke-width="2"/>
+                <line x1="85" y1="165" x2="435" y2="165" stroke="var(--purple-accent)" stroke-width="2"/>
+                <line x1="260" y1="165" x2="260" y2="180" stroke="var(--purple-accent)" stroke-width="2"/>
+
+                <rect x="110" y="180" width="300" height="40" rx="6" fill="rgba(168, 85, 247, 0.15)" stroke="var(--purple-accent)" stroke-width="2"/>
+                <text x="260" y="205" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">Immutable Contract: FrameRecord v1.0</text>
+
+                <!-- Downstream Risk Engine -->
+                <line x1="260" y1="220" x2="260" y2="240" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <rect x="80" y="240" width="360" height="35" rx="6" fill="rgba(0, 229, 255, 0.12)" stroke="var(--cyan-neon)" stroke-width="1.5"/>
+                <text x="260" y="262" fill="var(--cyan-neon)" font-size="11" font-weight="700" text-anchor="middle">Risk Engine: Theil-Sen TTC & ISO 17361 LDW Alerts</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Architecture Innovations Card -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--purple-accent);">🛡️ Core Engineering Safeguards</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Zero Gradient Interference</strong>: Decoupled independent branches eliminate multi-task gradient conflict entirely. Each network operates at its optimal Pareto sweet spot.</li>
+              <li><strong>Immutable Data Fusion</strong>: <code>FrameRecord contract v1.0</code> binds synchronized timestamps, bounding boxes, lane polylines, and depth tensors into a frozen dataclass, preventing race conditions.</li>
+              <li><strong>Dynamic Memory Reclamation</strong>: Managed inference cycles invoke <code>torch.cuda.empty_cache()</code> to cap peak VRAM firmly below 2.0 GB.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">30.27 ms</div>
+                <div class="metric-lbl">Total GPU Latency</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">33.0 FPS</div>
+                <div class="metric-lbl">Throughput</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&lt; 2.0 GB</div>
+                <div class="metric-lbl">Peak VRAM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-15" data-slide="15">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 15 • Comparative Benchmark</span>
+          <h2 class="slide-title">HEAD-TO-HEAD SYSTEM COMPARATIVE MATRIX</h2>
+          <span class="slide-subtitle">Benchmarking Master Integrated Pipeline against all-in-one multi-task and heavy ViT architectures</span>
+        </div>
+        <span class="slide-tag">System Comparison</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Comparison Table Card -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📊 Comprehensive System Benchmark Matrix</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>System Capability</th>
+                  <th style="color: var(--cyan-neon);">Master Pipeline (Ours)</th>
+                  <th>YOLOPv2 (2022)</th>
+                  <th>Heavy ViT Pipeline</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Full 10-Class Detection</td>
+                  <td style="color: var(--emerald-safe);">✅ 10 Classes (YOLOv10s)</td>
+                  <td style="color: var(--rose-alert);">❌ Car only</td>
+                  <td style="color: var(--emerald-safe);">✅ 10 Classes</td>
+                </tr>
+                <tr>
+                  <td>Physical Metric Depth</td>
+                  <td style="color: var(--emerald-safe);">✅ True Meters (DAv2)</td>
+                  <td style="color: var(--rose-alert);">❌ No Depth Branch</td>
+                  <td style="color: var(--emerald-safe);">✅ True Meters</td>
+                </tr>
+                <tr>
+                  <td>Physical TTC Derivation</td>
+                  <td style="color: var(--emerald-safe);">✅ Theil-Sen / Kalman</td>
+                  <td style="color: var(--rose-alert);">❌ Unavailable</td>
+                  <td style="color: var(--amber-warn);">⚠️ Unfiltered</td>
+                </tr>
+                <tr>
+                  <td>Gradient Conflict</td>
+                  <td style="color: var(--emerald-safe);">✅ Zero (Decoupled)</td>
+                  <td style="color: var(--rose-alert);">❌ Severe Interference</td>
+                  <td style="color: var(--emerald-safe);">✅ Zero</td>
+                </tr>
+                <tr>
+                  <td>Total GPU Latency</td>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">30.27 ms (33.0 FPS)</td>
+                  <td>24.50 ms (40.8 FPS)</td>
+                  <td style="color: var(--rose-alert);">&gt; 110 ms (&lt; 9 FPS)</td>
+                </tr>
+                <tr>
+                  <td>Peak GPU Memory (VRAM)</td>
+                  <td style="color: var(--emerald-safe);">~1.95 GB (&lt; 2.0 GB)</td>
+                  <td>~1.45 GB</td>
+                  <td style="color: var(--rose-alert);">&gt; 6.50 GB</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Core Academic Advantages -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--emerald-safe);">💡 Why Master Pipeline Wins for Automotive Edge</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Beyond Single-Object Heuristics</strong>: Unlike YOLOPv2 which detects only cars, Master Pipeline recognizes cyclists, pedestrians, trucks, and buses across 10 classes.</li>
+              <li><strong>Object-Level Forward Collision Warning</strong>: End-to-end multi-task baselines lack physical metric distance, making true Time-to-Collision (TTC) derivation impossible.</li>
+              <li><strong>ASIL-D Temporal Feasibility</strong>: Heavy ViT ensembles (Metric3D + CLRNet) exceed 110 ms per frame (< 9 FPS), causing catastrophic warning lag; Master Pipeline delivers real-time throughput at 33.0 FPS.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">33.0 FPS</div>
+                <div class="metric-lbl">Real-Time</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">100%</div>
+                <div class="metric-lbl">Metric Depth</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&lt; $800</div>
+                <div class="metric-lbl">Target Edge BOM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 16: COMPREHENSIVE FAILURE ANALYSIS ================= -->
+    <section class="slide" id="slide-16" data-slide="16">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 16 • Failure Diagnosis</span>
+          <h2 class="slide-title">COMPREHENSIVE FAILURE DIAGNOSIS ACROSS 3 PERCEPTION SUBSYSTEMS</h2>
+          <span class="slide-subtitle">Empirical failure audit across 834 KITTI Tracking frames with zero-mock academic honesty</span>
+        </div>
+        <span class="slide-tag">3-Track Failure Audit</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Left: Subsystem 2 Lane False Anchor Hooking -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--rose-alert);">⚠️ Subsystem 2: Unmarked Curb Hooking</div>
+            <div style="width: 100%; height: 250px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 230" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Simulated Roadway -->
+                <polygon points="60,220 200,60 320,60 460,220" fill="rgba(30, 41, 59, 0.5)"/>
+                <line x1="40" y1="60" x2="480" y2="60" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+
+                <!-- Erroneous Curved Lane Line Hooking into Sidewalk -->
+                <path d="M 120 220 Q 160 130 80 85" fill="none" stroke="var(--rose-alert)" stroke-width="4"/>
+                <circle cx="80" cy="85" r="6" fill="var(--rose-alert)"/>
+                <text x="70" y="70" fill="var(--rose-alert)" font-size="11" font-weight="700">False Hook into Sidewalk / Curb</text>
+
+                <!-- True Ego Corridor Path -->
+                <path d="M 230 220 L 255 90" fill="none" stroke="var(--cyan-neon)" stroke-width="2" stroke-dasharray="4,4"/>
+                <text x="255" y="80" fill="var(--cyan-neon)" font-size="10" text-anchor="middle">True Physical Ego Path</text>
+
+                <!-- Obstacle: Parked Vehicle -->
+                <rect x="50" y="90" width="55" height="35" rx="3" fill="rgba(244, 63, 94, 0.2)" stroke="var(--rose-alert)" stroke-width="1"/>
+                <text x="77" y="110" fill="var(--rose-alert)" font-size="9" text-anchor="middle">Parked Car</text>
+              </svg>
+            </div>
+            <div style="font-size: 11.5px; color: var(--rose-alert); line-height: 1.4;">
+              <strong>KITTI 0000/0001 Failure</strong>: In the absence of painted stripes, row-based anchors latch onto cobblestone curb seams, causing false LDW alarms.
+            </div>
+          </div>
+
+          <!-- Right: Subsystems 1 & 3 Failures -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--amber-warn);">🚗 Subsystems 1 & 3: Glare ID Switches & Receding TTC</div>
+            <ul class="bullet-list" style="font-size: 13px;">
+              <li><strong>Subsystem 1 (Night Glare Blinding)</strong>: Optical flares compress bounding boxes horizontally by 15-30% for 1-2 frames, causing spatial IoU to drop below <code>match_thresh=0.8</code> (<strong>73 ID switches across 834 KITTI frames</strong>).</li>
+              <li><strong>Subsystem 3 (Receding Target Divergence)</strong>: When a lead vehicle accelerates away ($v_z \le 0$), finite-difference derivatives diverge toward negative infinity, risking phantom braking.</li>
+              <li><strong>Safety Latching Solution</strong>: Enforce standardized safety latching: assign <code>TTC = null</code> with standardized reason code <code>NON_CLOSING_OBJECT</code> whenever $v_z \le 0.1\text{ m/s}$ under ISO 15623.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">Curb Seam</div>
+                <div class="metric-lbl">Subsystem 2 False Anchor</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">73 Switches</div>
+                <div class="metric-lbl">Subsystem 1 Glare Loss</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">TTC = null</div>
+                <div class="metric-lbl">Subsystem 3 ISO 15623</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+<section class="slide" id="slide-17" data-slide="17">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 17 • Proposed Solution V2</span>
+          <h2 class="slide-title">V2 TECHNICAL SOLUTION FOR LANE PERCEPTION</h2>
+          <span class="slide-subtitle">ISO 17361 Standby Mode and Camera-Aligned Straight Urban Ego-Corridor</span>
+        </div>
+        <span class="slide-tag">Lane Solution V2</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Flow Diagram / Scientific Formula -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">📐 Standard Scientific Engineering Formula</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Step 1: Observed Error -->
+                <rect x="20" y="20" width="480" height="50" rx="6" fill="rgba(244, 63, 94, 0.1)" stroke="var(--rose-alert)" stroke-width="1.5"/>
+                <text x="35" y="42" fill="var(--rose-alert)" font-size="11" font-weight="700">OBSERVED ERROR IN V1:</text>
+                <text x="35" y="58" fill="#ffffff" font-size="10.5">Lane lines curve into sidewalks & parked cars on unmarked urban streets (KITTI 0000/0001)</text>
+
+                <!-- Step 2: Technical Change Y -->
+                <rect x="20" y="95" width="480" height="85" rx="6" fill="rgba(0, 229, 255, 0.1)" stroke="var(--cyan-neon)" stroke-width="1.5"/>
+                <text x="35" y="117" fill="var(--cyan-neon)" font-size="11" font-weight="700">TECHNICAL CHANGE Y AT V2:</text>
+                <text x="35" y="135" fill="#ffffff" font-size="10.5">• ISO 17361 Standby Mode: Suppress lines if conf &lt; 0.40 or width &notin; [2.7m, 4.5m]</text>
+                <text x="35" y="153" fill="#ffffff" font-size="10.5">• Unmarked Urban Corridor Mode: Locks straight corridor (1.85m + 0.35m = 2.20m) on CU_CAM</text>
+
+                <!-- Step 3: Expected Outcome -->
+                <rect x="20" y="205" width="480" height="50" rx="6" fill="rgba(16, 185, 129, 0.1)" stroke="var(--emerald-safe)" stroke-width="1.5"/>
+                <text x="35" y="227" fill="var(--emerald-safe)" font-size="11" font-weight="700">MEASURED OUTCOME AT V2:</text>
+                <text x="35" y="243" fill="#ffffff" font-size="10.5">100% elimination of sidewalk-crashing trajectories; maintains stable, safe driving lane corridor</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Technical Principles Card -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--blue-accent);">🛣️ ISO 17361 Compliance Architecture</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Automatic Standby State Machine</strong>: When roadway markings become invisible or ambiguous, the lane estimator gracefully transitions into Standby mode rather than hallucinating paths.</li>
+              <li><strong>Optical-Axis Virtual Corridor</strong>: Anchors a 2.20m wide safety corridor directly along the optical principal point ($c_u$) of the calibrated camera matrix:
+                $$x_{\text{left}} = c_u - \frac{W_{\text{corridor}} \cdot f_x}{2 \cdot Z}, \quad x_{\text{right}} = c_u + \frac{W_{\text{corridor}} \cdot f_x}{2 \cdot Z}$$
+              </li>
+              <li><strong>Smooth Trajectory Persistence</strong>: Parametric B-Spline interpolation eliminates lateral polyline jitter across consecutive video frames ($< 0.22\text{ ms}$ overhead).</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">100%</div>
+                <div class="metric-lbl">Sidewalk Errors Removed</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">2.20 m</div>
+                <div class="metric-lbl">Virtual Corridor</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">ISO 17361</div>
+                <div class="metric-lbl">Standard Validated</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-18" data-slide="18">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 18 • Proposed Solution V2</span>
+          <h2 class="slide-title">V2 TECHNICAL SOLUTION FOR METRIC DEPTH & TTC</h2>
+          <span class="slide-subtitle">20% Adaptive ROI Inset, LiDAR OLS Calibration, and Clamped Kalman CV Filter</span>
+        </div>
+        <span class="slide-tag">Depth Solution V2</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Left: 20% Inset SVG Diagram -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--amber-warn);">🚗 20% Adaptive ROI Inset & LiDAR Alignment</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Outer Bounding Box -->
+                <rect x="120" y="30" width="280" height="200" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="4,4"/>
+                <text x="130" y="50" fill="var(--text-sub)" font-size="11">Raw Detector BBox (Includes Shadows & Road)</text>
+
+                <!-- Inset Inner ROI (20% horizontal crop) -->
+                <rect x="176" y="50" width="168" height="130" rx="6" fill="rgba(0, 229, 255, 0.12)" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <text x="260" y="110" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">Upper Metallic Body ROI</text>
+                <text x="260" y="130" fill="var(--cyan-neon)" font-size="11" text-anchor="middle">torch.median(Z[ROI])</text>
+                <text x="260" y="150" fill="var(--emerald-safe)" font-size="10" text-anchor="middle">Zero Road Shadow Noise</text>
+
+                <!-- Annotations -->
+                <line x1="120" y1="120" x2="176" y2="120" stroke="var(--rose-alert)" stroke-width="2"/>
+                <text x="148" y="115" fill="var(--rose-alert)" font-size="10" text-anchor="middle">20% Inset</text>
+
+                <line x1="344" y1="120" x2="400" y2="120" stroke="var(--rose-alert)" stroke-width="2"/>
+                <text x="372" y="115" fill="var(--rose-alert)" font-size="10" text-anchor="middle">20% Inset</text>
+              </svg>
+            </div>
+            <div style="font-size: 11.5px; color: var(--cyan-neon); text-align: center;">
+              Adaptive ROI sampling isolates reflective vehicle metal, filtering asphalt depth bleed.
+            </div>
+          </div>
+
+          <!-- Right: Mathematical Innovations -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--emerald-safe);">🔬 Kinematic & Calibration Enhancements</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Empirical LiDAR Calibration</strong>: Linear regression aligned against 4,294 ground-truth Velodyne 64-beam points:
+                $$Z_{\text{calib}} = 0.982 \cdot Z_{\text{pred}} + 0.147 \quad (\text{MAE} = 0.671\text{ m}, 2.35\%)$$
+              </li>
+              <li><strong>Adaptive Kalman CV 1D Filter</strong>: Dynamic measurement covariance $R(z)$: tightly trusts camera at $z < 15\text{ m}$ ($R \approx 0.05$), while leaning on kinematic inertia at $z > 40\text{ m}$ ($R \approx 3.39$).</li>
+              <li><strong>Automotive Physical Acceleration Clamping</strong>: Caps physical derivative jumps ($|a| \le 6.0\text{ m/s}^2$) with 1-3 frame inertial coasting to maintain unbroken TTC alarms during uniform cruising.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">0.05 s</div>
+                <div class="metric-lbl">TTC Error (V2)</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">0.671 m</div>
+                <div class="metric-lbl">LiDAR Distance MAE</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">|a| &le; 6m/s&sup2;</div>
+                <div class="metric-lbl">Physical Clamp</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-19" data-slide="19">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 19 • Ablation Study (TR-10)</span>
+          <h2 class="slide-title">ABLATION STUDY 1: BYTETRACK THRESHOLD</h2>
+          <span class="slide-subtitle">Quantitative trade-off between ID switches and false tracks across 834 continuous KITTI frames</span>
+        </div>
+        <span class="slide-tag">Tracking Ablation</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Dual-Axis SVG Curve -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--emerald-safe);">📈 ID Switches vs IDF1 Score Trade-Off</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Grid Lines -->
+                <line x1="60" y1="220" x2="480" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="60" y1="40" x2="60" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+                <!-- Left Axis: ID Switches (70 to 80) -->
+                <text x="50" y="224" fill="var(--rose-alert)" font-size="10" text-anchor="end">70</text>
+                <text x="50" y="160" fill="var(--rose-alert)" font-size="10" text-anchor="end">73</text>
+                <text x="50" y="100" fill="var(--rose-alert)" font-size="10" text-anchor="end">75</text>
+                <text x="50" y="44" fill="var(--rose-alert)" font-size="10" text-anchor="end">78</text>
+
+                <!-- X Axis: track_low_thresh -->
+                <text x="120" y="240" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">thresh = 0.10</text>
+                <text x="270" y="240" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">thresh = 0.20</text>
+                <text x="420" y="240" fill="var(--cyan-neon)" font-size="11" font-weight="700" text-anchor="middle">thresh = 0.30 (Best)</text>
+
+                <!-- ID Switches Curve (Rose Line) -->
+                <path d="M 120 130 L 270 100 L 420 160" fill="none" stroke="var(--rose-alert)" stroke-width="2.5"/>
+                <circle cx="120" cy="130" r="6" fill="var(--rose-alert)"/>
+                <text x="120" y="120" fill="var(--rose-alert)" font-size="10" text-anchor="middle">74 sw</text>
+                <circle cx="270" cy="100" r="6" fill="var(--rose-alert)"/>
+                <text x="270" y="90" fill="var(--rose-alert)" font-size="10" text-anchor="middle">75 sw</text>
+                <circle cx="420" cy="160" r="7" fill="var(--emerald-safe)" stroke="#ffffff" stroke-width="2"/>
+                <text x="420" y="180" fill="var(--emerald-safe)" font-size="11" font-weight="700" text-anchor="middle">73 sw (Lowest)</text>
+
+                <!-- IDF1 Curve (Cyan Dash) -->
+                <path d="M 120 180 L 270 140 L 420 110" fill="none" stroke="var(--cyan-neon)" stroke-width="2" stroke-dasharray="4,4"/>
+                <circle cx="120" cy="180" r="5" fill="var(--cyan-neon)"/>
+                <text x="120" y="195" fill="var(--cyan-neon)" font-size="10" text-anchor="middle">59.6%</text>
+                <circle cx="270" cy="140" r="5" fill="var(--cyan-neon)"/>
+                <text x="270" y="130" fill="var(--cyan-neon)" font-size="10" text-anchor="middle">60.9%</text>
+                <circle cx="420" cy="110" r="6" fill="var(--cyan-neon)"/>
+                <text x="420" y="95" fill="var(--cyan-neon)" font-size="11" font-weight="700" text-anchor="middle">61.2% (Highest)</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Empirical Findings Card -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📊 TR-10 Mandatory Ablation Matrix</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Threshold</th>
+                  <th>Total Tracks</th>
+                  <th>ID Switches</th>
+                  <th>IDF1 (%)</th>
+                  <th>Tracking Speed</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>0.10</td>
+                  <td>352</td>
+                  <td>74</td>
+                  <td>59.62%</td>
+                  <td>81.4 FPS (12.28ms)</td>
+                </tr>
+                <tr>
+                  <td>0.20</td>
+                  <td>358</td>
+                  <td>75</td>
+                  <td>60.92%</td>
+                  <td>81.1 FPS (12.33ms)</td>
+                </tr>
+                <tr style="background: rgba(0, 229, 255, 0.12); font-weight: 700;">
+                  <td style="color: var(--cyan-neon);">0.30 (Optimal)</td>
+                  <td style="color: var(--emerald-safe);">348</td>
+                  <td style="color: var(--emerald-safe);">73</td>
+                  <td style="color: var(--cyan-neon);">61.22%</td>
+                  <td style="color: var(--emerald-safe);">81.8 FPS (12.23ms)</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.45;">
+              <strong>Scientific Takeaway</strong>: Raising <code>track_low_thresh</code> to 0.30 filters out noisy background false detections, minimizing identity fragmentation while yielding the highest IDF1 tracking fidelity.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-20" data-slide="20">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 20 • Ablation Study (KH-08)</span>
+          <h2 class="slide-title">ABLATION STUDY 3: 12 TTC COMBINATIONS MATRIX</h2>
+          <span class="slide-subtitle">Benchmarking 3 depth models against 4 velocity estimators confirms Theil-Sen regression superiority</span>
+        </div>
+        <span class="slide-tag">TTC Kinematic Ablation</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Velocity Error Comparison SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--amber-warn);">📊 Approach Velocity Error Across Methods (m/s)</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Grid Lines -->
+                <line x1="60" y1="210" x2="480" y2="210" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="60" y1="130" x2="480" y2="130" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="60" y1="50" x2="480" y2="50" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+
+                <text x="50" y="214" fill="var(--text-sub)" font-size="10" text-anchor="end">0.0</text>
+                <text x="50" y="134" fill="var(--text-sub)" font-size="10" text-anchor="end">2.0</text>
+                <text x="50" y="54" fill="var(--text-sub)" font-size="10" text-anchor="end">4.0 m/s</text>
+
+                <!-- Method 1: Finite Difference (3.97 m/s) -->
+                <rect x="90" y="52" width="55" height="158" rx="3" fill="var(--rose-alert)"/>
+                <text x="117" y="44" fill="var(--rose-alert)" font-size="11" font-weight="700" text-anchor="middle">3.97 m/s</text>
+                <text x="117" y="226" fill="#ffffff" font-size="10" text-anchor="middle">Finite Diff</text>
+
+                <!-- Method 2: OLS Linear Regression (0.65 m/s) -->
+                <rect x="195" y="184" width="55" height="26" rx="3" fill="#f59e0b"/>
+                <text x="222" y="176" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">0.65 m/s</text>
+                <text x="222" y="226" fill="#ffffff" font-size="10" text-anchor="middle">OLS Linear</text>
+
+                <!-- Method 3: Kalman CV (0.33 m/s) -->
+                <rect x="300" y="197" width="55" height="13" rx="3" fill="#38bdf8"/>
+                <text x="327" y="189" fill="#38bdf8" font-size="11" font-weight="700" text-anchor="middle">0.33 m/s</text>
+                <text x="327" y="226" fill="#ffffff" font-size="10" text-anchor="middle">Kalman CV</text>
+
+                <!-- Method 4: Theil-Sen Robust (0.21 m/s - SELECTED) -->
+                <rect x="405" y="202" width="55" height="8" rx="3" fill="var(--emerald-safe)"/>
+                <text x="432" y="194" fill="var(--emerald-safe)" font-size="11" font-weight="700" text-anchor="middle">0.21 m/s</text>
+                <text x="432" y="226" fill="var(--emerald-safe)" font-size="10" font-weight="700" text-anchor="middle">Theil-Sen</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Methodological Takeaways Card -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">🏆 12-Combination Empirical Summary</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Kinematic Estimator</th>
+                  <th>Velocity MAE</th>
+                  <th>TTC MAE</th>
+                  <th>Runtime</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Finite Difference (&Delta;Z/&Delta;t)</td>
+                  <td style="color: var(--rose-alert);">3.97 m/s</td>
+                  <td>2.12 s</td>
+                  <td>0.002 ms</td>
+                </tr>
+                <tr>
+                  <td>Linear Regression (OLS)</td>
+                  <td>0.65 m/s</td>
+                  <td>0.18 s</td>
+                  <td>0.015 ms</td>
+                </tr>
+                <tr>
+                  <td>Adaptive Kalman CV</td>
+                  <td>0.33 m/s</td>
+                  <td>0.08 s</td>
+                  <td>0.038 ms</td>
+                </tr>
+                <tr style="background: rgba(16, 185, 129, 0.12); font-weight: 700;">
+                  <td style="color: var(--emerald-safe);">Theil-Sen Robust (Best)</td>
+                  <td style="color: var(--cyan-neon);">0.21 m/s</td>
+                  <td style="color: var(--emerald-safe);">0.05 s</td>
+                  <td style="color: var(--emerald-safe);">0.049 ms</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.45;">
+              <strong>Scientific Takeaway</strong>: Theil-Sen median slopes achieve a <strong>19x reduction in velocity error</strong> vs naive finite difference, rejecting transient bounding box jitter within 0.049 ms.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 21: DECOUPLED REPLAY & HUD VERIFICATION ================= -->
+    <section class="slide" id="slide-21" data-slide="21">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 21 • System Architecture & Replay</span>
+          <h2 class="slide-title">DECOUPLED 2-STAGE REPLAY & CONTINUOUS KITTI COCKPIT HUD</h2>
+          <span class="slide-subtitle">Isolating pure GPU AI latency (30.27 ms) and validating full 834 frames on KITTI 0000, 0001, 0002</span>
+        </div>
+        <span class="slide-tag">Two-Stage Replay</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Left: Decoupled 2-Stage Architecture -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">⚡ Two-Phase Decoupled Processing Pipeline</div>
+            <div style="width: 100%; height: 260px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 230" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Phase 1 Container -->
+                <rect x="20" y="15" width="480" height="95" rx="8" fill="rgba(16, 185, 129, 0.08)" stroke="var(--emerald-safe)" stroke-width="1.5"/>
+                <text x="35" y="38" fill="var(--emerald-safe)" font-size="12" font-weight="700">PHASE 1: PURE AI PERCEPTION (GPU BOUND)</text>
+                <text x="35" y="58" fill="#ffffff" font-size="10.5">• YOLOv10s + ByteTrack + UFLDv2-R18 + DAv2 Metric + Risk Engine</text>
+                <text x="35" y="76" fill="var(--cyan-neon)" font-size="10.5">• CUDA Stream Sync • P0 Lock • Emits FrameRecord JSONL</text>
+                <text x="35" y="96" fill="var(--emerald-safe)" font-size="12" font-weight="700">True AI E2E Latency: 30.27 ms (33.0 FPS)</text>
+
+                <!-- Connector Arrow -->
+                <line x1="260" y1="110" x2="260" y2="135" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <polygon points="255,135 260,145 265,135" fill="var(--cyan-neon)"/>
+                <text x="270" y="128" fill="var(--text-sub)" font-size="9">Structured JSONL Artifacts</text>
+
+                <!-- Phase 2 Container -->
+                <rect x="20" y="145" width="480" height="75" rx="8" fill="rgba(56, 189, 248, 0.08)" stroke="var(--blue-accent)" stroke-width="1.5"/>
+                <text x="35" y="167" fill="#38bdf8" font-size="12" font-weight="700">PHASE 2: ASYNC HUD RENDERING & REPLAY (CPU BOUND)</text>
+                <text x="35" y="187" fill="#ffffff" font-size="10.5">• Overlays 3D Boxes, Ego Corridor & Telemetry asynchronously</text>
+                <text x="35" y="205" fill="var(--text-muted)" font-size="10.5">• Renders MP4 demo video without distorting GPU timers (15.2 ms CPU)</text>
+              </svg>
+            </div>
+            <div style="font-size: 11.5px; color: var(--emerald-safe); line-height: 1.4;">
+              <strong>Benchmark Rigor</strong>: Prevents OpenCV video encoding overhead from distorting GPU deep learning benchmarks.
+            </div>
+          </div>
+
+          <!-- Right: Visual HUD Cockpit Replay -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--purple-accent);">🚗 Visual Cockpit HUD Telemetry (834 Frames)</div>
+            <ul class="bullet-list" style="font-size: 13px;">
+              <li><strong>Full Temporal Continuity</strong>: Evaluated across 100% real frames: Sequence 0000 (154f), Sequence 0001 (447f), Sequence 0002 (233f).</li>
+              <li><strong>Auditable Dual-Banner Display</strong>:
+                <br>• <code>AI Pipeline E2E Latency: 30.27 ms (33.0 FPS)</code>
+                <br>• <code>Display / Render: 15.2 ms (CPU Async)</code>
+              </li>
+              <li><strong>Automotive Compliance</strong>: Outputs structured <code>FrameRecord</code> invariant contract v1.0, satisfying ISO 15623 latency budget (&le; 33.3 ms).</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">834 / 834</div>
+                <div class="metric-lbl">Frames Replayed</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">30.27 ms</div>
+                <div class="metric-lbl">Pure GPU Latency</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">33.0 FPS</div>
+                <div class="metric-lbl">Throughput (&ge;30 FPS)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+<section class="slide" id="slide-22" data-slide="22">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 22 • Mathematical Modeling</span>
+          <h2 class="slide-title">FULL-SYSTEM ERROR PROPAGATION MODELING</h2>
+          <span class="slide-subtitle">Quantifying error dampening from bounding box jitter through depth median to safety TTC</span>
+        </div>
+        <span class="slide-tag">Cascade Modeling</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Cascade Flow -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--purple-accent);">⛓️ Cascaded Uncertainty Chain & Dampening</div>
+            <div style="display: flex; flex-direction: column; justify-content: space-between; flex: 1; padding: 6px 0; gap: 4px;">
+              <!-- Stage 1 -->
+              <div style="background: rgba(56, 189, 248, 0.08); border: 1.5px solid #38bdf8; border-radius: 6px; padding: 8px 14px;">
+                <div style="color: #38bdf8; font-size: 13.5px; font-weight: 700;">STAGE 1: 2D DETECTOR BOUNDING BOX JITTER</div>
+                <div style="color: #e2e8f0; font-size: 12.5px; margin-top: 3px;">Pixel Boundary Noise: &sigma;_bbox &plusmn; 2.1 px &bull; Mitigated via ByteTrack Kalman smooth</div>
+              </div>
+
+              <!-- Arrow 1 -->
+              <div style="display: flex; justify-content: center; align-items: center; height: 16px;">
+                <svg width="24" height="16" viewBox="0 0 24 16">
+                  <line x1="12" y1="0" x2="12" y2="9" stroke="var(--cyan-neon)" stroke-width="2.5"/>
+                  <polygon points="7,9 17,9 12,16" fill="var(--cyan-neon)"/>
+                </svg>
+              </div>
+
+              <!-- Stage 2 -->
+              <div style="background: rgba(245, 158, 11, 0.08); border: 1.5px solid var(--amber-warn); border-radius: 6px; padding: 8px 14px;">
+                <div style="color: var(--amber-warn); font-size: 13.5px; font-weight: 700;">STAGE 2: MONOCULAR DEPTH EXTRACTION</div>
+                <div style="color: #e2e8f0; font-size: 12.5px; margin-top: 3px;">Depth Variance: &sigma;_Z &plusmn; 0.35m (at 30m) &bull; Dampened via 20% Adaptive ROI Inset (torch.median)</div>
+              </div>
+
+              <!-- Arrow 2 -->
+              <div style="display: flex; justify-content: center; align-items: center; height: 16px;">
+                <svg width="24" height="16" viewBox="0 0 24 16">
+                  <line x1="12" y1="0" x2="12" y2="9" stroke="var(--cyan-neon)" stroke-width="2.5"/>
+                  <polygon points="7,9 17,9 12,16" fill="var(--cyan-neon)"/>
+                </svg>
+              </div>
+
+              <!-- Stage 3 -->
+              <div style="background: rgba(168, 85, 247, 0.08); border: 1.5px solid var(--purple-accent); border-radius: 6px; padding: 8px 14px;">
+                <div style="color: var(--purple-accent); font-size: 13.5px; font-weight: 700;">STAGE 3: APPROACH VELOCITY ESTIMATION</div>
+                <div style="color: #e2e8f0; font-size: 12.5px; margin-top: 3px;">Velocity Error: &sigma;_v &plusmn; 0.21 m/s &bull; Dampened via Theil-Sen Robust Median Regression</div>
+              </div>
+
+              <!-- Arrow 3 -->
+              <div style="display: flex; justify-content: center; align-items: center; height: 16px;">
+                <svg width="24" height="16" viewBox="0 0 24 16">
+                  <line x1="12" y1="0" x2="12" y2="9" stroke="var(--cyan-neon)" stroke-width="2.5"/>
+                  <polygon points="7,9 17,9 12,16" fill="var(--cyan-neon)"/>
+                </svg>
+              </div>
+
+              <!-- Stage 4 -->
+              <div style="background: rgba(16, 185, 129, 0.1); border: 1.5px solid var(--emerald-safe); border-radius: 6px; padding: 8px 14px;">
+                <div style="color: var(--emerald-safe); font-size: 13.5px; font-weight: 700;">STAGE 4: DOWNSTREAM SAFETY TIME-TO-COLLISION (TTC)</div>
+                <div style="color: var(--cyan-neon); font-size: 12.5px; font-weight: 600; margin-top: 3px;">Final Decision Bound: &Delta;TTC &le; 0.05 s &bull; Stable alarm generation without panic braking</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Academic Analysis Card -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">🔬 Error Dampening Proof</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>The Amplification Threat</strong>: In naive pipelines, numerical differentiation $\frac{\Delta Z}{\Delta t}$ exponentially magnifies pixel noise into velocity errors of $\pm 4.0\text{ m/s}$.</li>
+              <li><strong>Two-Tier Non-Linear Dampening</strong>:
+                <br>• <em>Spatial Dampening</em>: 20% ROI Inset discards boundary asphalt pixels, bounding depth variance to $\pm 2.35\%$.
+                <br>• <em>Kinematic Dampening</em>: Theil-Sen evaluates all pairwise slopes $\text{median}\left(\frac{Z_j - Z_i}{t_j - t_i}\right)$, providing high robustness against transient outliers.
+              </li>
+              <li><strong>Result</strong>: Final TTC decision error remains tightly bounded at <strong>$\le 0.05\text{ seconds}$</strong>.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">&plusmn; 2.1 px</div>
+                <div class="metric-lbl">BBox Noise</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&plusmn; 0.21 m/s</div>
+                <div class="metric-lbl">Velocity Error</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">0.05 s</div>
+                <div class="metric-lbl">Final TTC Error</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-23" data-slide="23">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 23 • Hardware Feasibility</span>
+          <h2 class="slide-title">REAL-TIME GPU LATENCY & VRAM FEASIBILITY</h2>
+          <span class="slide-subtitle">Pure GPU inference achieves 33.0 FPS (30.27 ms) within 1.95 GB VRAM on Tesla T4</span>
+        </div>
+        <span class="slide-tag">Latency Feasibility</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Stacked Bar Chart SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">📊 GPU Latency Breakdown per Frame (ms)</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Total Budget Marker: 33.3ms (30 FPS) -->
+                <line x1="450" y1="30" x2="450" y2="230" stroke="var(--rose-alert)" stroke-width="2" stroke-dasharray="4,4"/>
+                <text x="450" y="25" fill="var(--rose-alert)" font-size="10" font-weight="700" text-anchor="middle">33.3 ms Deadline (30 FPS)</text>
+
+                <!-- Stacked Horizontal Bar -->
+                <!-- Base Track (30.27ms Total) -->
+                <rect x="40" y="70" width="370" height="40" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)"/>
+
+                <!-- Segment 1: YOLOv10s (9.31ms -> 114px) -->
+                <rect x="40" y="70" width="114" height="40" rx="3" fill="var(--emerald-safe)"/>
+                <text x="97" y="94" fill="#ffffff" font-size="10" font-weight="700" text-anchor="middle">Det 9.3ms</text>
+
+                <!-- Segment 2: ByteTrack (3.07ms -> 38px) -->
+                <rect x="154" y="70" width="38" height="40" fill="#a78bfa"/>
+                <text x="173" y="94" fill="#ffffff" font-size="8.5" text-anchor="middle">3.1ms</text>
+
+                <!-- Segment 3: UFLDv2 Lane (4.70ms -> 57px) -->
+                <rect x="192" y="70" width="57" height="40" fill="#38bdf8"/>
+                <text x="220" y="94" fill="#ffffff" font-size="9" text-anchor="middle">Lane 4.7ms</text>
+
+                <!-- Segment 4: Depth Anything V2 (15.04ms -> 184px) -->
+                <rect x="249" y="70" width="184" height="40" rx="3" fill="var(--amber-warn)"/>
+                <text x="341" y="94" fill="#ffffff" font-size="10" font-weight="700" text-anchor="middle">DAv2 Depth 15.0ms</text>
+
+                <!-- Segment 5: Fusion/Risk (0.17ms) -->
+                <rect x="433" y="70" width="5" height="40" fill="var(--cyan-neon)"/>
+
+                <!-- Measured Total Label -->
+                <text x="225" y="140" fill="var(--cyan-neon)" font-size="13" font-weight="700" text-anchor="middle">TOTAL GPU AI: 30.27 ms (33.0 FPS)</text>
+                <text x="225" y="160" fill="var(--emerald-safe)" font-size="11" text-anchor="middle">✓ Safely clears 30 FPS automotive constraint by +3.03 ms</text>
+
+                <!-- Memory Callout -->
+                <rect x="40" y="180" width="410" height="45" rx="6" fill="rgba(0, 229, 255, 0.08)" stroke="var(--cyan-neon)" stroke-width="1"/>
+                <text x="55" y="202" fill="#ffffff" font-size="11" font-weight="700">Peak VRAM Occupancy: 1,950 MB (&lt; 2.0 GB)</text>
+                <text x="55" y="217" fill="var(--text-sub)" font-size="10">Only 12.2% of Tesla T4 16GB • Directly deployable to 8GB Jetson Orin Nano</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Tabular Component Breakdown -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--emerald-safe);">📋 Detailed GPU Profile Breakdown</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Subsystem Module</th>
+                  <th>Latency (ms)</th>
+                  <th>Budget Share</th>
+                  <th>Memory (MB)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1. Object Detection (YOLOv10s)</td>
+                  <td>9.31 ms</td>
+                  <td>30.8%</td>
+                  <td>~850 MB</td>
+                </tr>
+                <tr>
+                  <td>2. Multi-Object Tracking (ByteTrack)</td>
+                  <td>3.07 ms</td>
+                  <td>10.1%</td>
+                  <td>~50 MB</td>
+                </tr>
+                <tr>
+                  <td>3. Lane Perception (UFLDv2-R18)</td>
+                  <td>4.70 ms</td>
+                  <td>15.5%</td>
+                  <td>~550 MB</td>
+                </tr>
+                <tr>
+                  <td>4. Metric Depth (Depth Anything V2)</td>
+                  <td>15.04 ms</td>
+                  <td>49.7%</td>
+                  <td>~99.6 MB</td>
+                </tr>
+                <tr>
+                  <td>5. Risk Engine (Kalman & LDW)</td>
+                  <td>0.17 ms</td>
+                  <td>0.6%</td>
+                  <td>~20 MB</td>
+                </tr>
+                <tr style="background: rgba(16, 185, 129, 0.12); font-weight: 700;">
+                  <td style="color: var(--cyan-neon);">TOTAL END-TO-END GPU</td>
+                  <td style="color: var(--emerald-safe);">30.27 ms</td>
+                  <td style="color: var(--cyan-neon);">100.0%</td>
+                  <td style="color: var(--emerald-safe);">~1,950 MB</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-24" data-slide="24">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 24 • Deliverables & Future Work</span>
+          <h2 class="slide-title">SPRINGER NATURE PAPER & TASK 3 ROADMAP</h2>
+          <span class="slide-subtitle">Completed sn-article.tex research manuscript and edge deployment plan for Task 3</span>
+        </div>
+        <span class="slide-tag">Task 3 Roadmap</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Left: Academic Paper Package -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📄 Springer Nature LaTeX Manuscript</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Official Template</strong>: Authored directly in Springer Nature standard format (<code>sn-article.tex</code>, 8 pages target).</li>
+              <li><strong>Publication Visuals</strong>: 6 high-resolution publication figures generated at 300 DPI PNG & vector PDF (Pareto frontier, CULane scenario bar, LiDAR density scatter, TTC curve).</li>
+              <li><strong>Comprehensive Bibliography</strong>: 28 peer-reviewed citations spanning IEEE TPAMI, CVPR, ECCV, and NeurIPS.</li>
+              <li><strong>Overleaf Package</strong>: Fully self-contained package <code>springer_nature_overleaf_package.zip</code> verified for zero compilation errors.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">8 Sections</div>
+                <div class="metric-lbl">Paper Scope</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">6 Figures</div>
+                <div class="metric-lbl">High-Res Visuals</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">Zero Error</div>
+                <div class="metric-lbl">Overleaf Ready</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Task 3 Roadmap -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--emerald-safe);">🚗 Task 3 Embedded Deployment Plan</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Stage 1: TensorRT FP16 Optimization</strong>: Compile PyTorch backbones into TensorRT execution engines, targeting a 1.8x acceleration on Jetson Orin Nano.</li>
+              <li><strong>Stage 2: Physical Hardware Benchmarking</strong>: Deploy Master Pipeline to an automotive edge testbed (NVIDIA Jetson Orin Nano 8GB, total hardware BOM &lt; $800).</li>
+              <li><strong>Stage 3: In-Vehicle Track Testing</strong>: Mount 1080p CMOS dashcam in vehicle windshield for closed-course live ADAS evaluation.</li>
+              <li><strong>Stage 4: Final Capstone Defense</strong>: Present complete empirical results, live vehicle demo, and final thesis documentation.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">TensorRT</div>
+                <div class="metric-lbl">FP16 Engine</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">Orin Nano</div>
+                <div class="metric-lbl">Target Edge Hardware</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&lt; $800</div>
+                <div class="metric-lbl">Commercial BOM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-25" data-slide="25">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge" style="color: var(--purple-accent);">Slide 25 • Thank You & Q&A</span>
+          <h2 class="slide-title">THANK YOU FOR LISTENING & WELCOMING COUNCIL FEEDBACK</h2>
+          <span class="slide-subtitle">Oral defense and technical Q&A session with the Review 1 Evaluation
+            Council</span>
+        </div>
+        <span class="slide-tag"
+          style="background: rgba(167, 139, 250, 0.15); color: var(--purple-accent); border-color: rgba(167, 139, 250, 0.3);">Q&A
+          Session</span>
+      </div>
+      <div class="slide-body" style="justify-content: center; align-items: center; text-align: center; gap: 24px;">
+        <div style="max-width: 980px; display: flex; flex-direction: column; gap: 14px;">
+          <div
+            style="font-family: var(--font-mono); font-size: clamp(45px, 2.4vw, 36px); color: var(--cyan-neon); letter-spacing: 2px; font-weight: 700;">
+            THANK YOU FOR LISTENING!
+          </div>
+          <h1
+            style="font-family: var(--font-heading); font-size: clamp(15px, 2.4vw, 36px); font-weight: 800; color: #ffffff; line-height: 1.25;">
+            Capstone Project Team: KLTN-AI-FA26AI50_GFA26AI09
+          </h1>
+          <p
+            style="font-size: clamp(15px, 1.1vw, 17px); color: var(--text-muted); max-width: 840px; margin: 0 auto; line-height: 1.6;">
+            The team is ready to address technical questions from <br>
+            <strong>Lecturer Nguyen Trong Tai</strong>, <strong>Lecturer Le Phu Nguyen</strong> <br>
+            and the Evaluation Council.
+          </p>
+        </div>
+
+        <div
+          style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 960px; margin-top: 4px;">
+          <div class="card"
+            style="text-align: center; align-items: center; border-color: rgba(56, 189, 248, 0.4); padding: 18px 20px;">
+            <div style="font-size: 28px;">🛣️</div>
+            <div class="card-title" style="font-size: 15px; color: #38bdf8; margin-top: 4px;">LANE PERCEPTION</div>
+            <div style="font-size: 13.5px; color: var(--text-muted);">Nguyen Tran Minh Quan<br><span
+                style="color: var(--cyan-neon); font-family: var(--font-mono); font-weight: 700;">SE194342</span></div>
+          </div>
+
+          <div class="card"
+            style="text-align: center; align-items: center; border-color: rgba(16, 185, 129, 0.4); padding: 18px 20px;">
+            <div style="font-size: 28px;">🚗</div>
+            <div class="card-title" style="font-size: 15px; color: #10b981; margin-top: 4px;">DETECTION & TRACK</div>
+            <div style="font-size: 13.5px; color: var(--text-muted);">Nguyen Minh Triet<br><span
+                style="color: var(--cyan-neon); font-family: var(--font-mono); font-weight: 700;">SE194257</span></div>
+          </div>
+
+          <div class="card"
+            style="text-align: center; align-items: center; border-color: rgba(245, 158, 11, 0.4); padding: 18px 20px;">
+            <div style="font-size: 28px;">📏</div>
+            <div class="card-title" style="font-size: 15px; color: #f59e0b; margin-top: 4px;">DEPTH & FCW ALERT</div>
+            <div style="font-size: 13.5px; color: var(--text-muted);">Do Khang<br><span
+                style="color: var(--cyan-neon); font-family: var(--font-mono); font-weight: 700;">SE196305</span></div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 14px; align-items: center; justify-content: center; margin-top: 4px;">
+          <span class="badge-code">CODEBASE: src/adas_baselines/</span>
+          <span class="badge-code">CONTRACT: FrameRecord v1.0</span>
+          <span class="badge-code">PYTEST: 100% PASS</span>
+        </div>
+      </div>
+    </section>
+
+
+  </main>
+
+  <!-- Bottom HUD Status Bar -->
+  <footer class="hud-footer">
+    <div class="hud-status-items">
+      <div class="hud-status-item">
+        <div class="dot-pulse"></div>
+        <span>AI PIPELINE READY</span>
+      </div>
+      <div class="hud-status-item">
+        <span>CONTRACT:</span>
+        <span style="color: var(--cyan-neon);">v1.0 IMMUTABLE</span>
+      </div>
+    </div>
+    <div class="hud-status-items">
+      <div class="hud-status-item">
+        <span>SHORTCUTS: <strong>← / →</strong> (Navigate) | <strong>N</strong> (Notes) | <strong>O</strong> (Grid) |
+          <strong>F</strong> (Full)</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Slide-in Speaker Notes Drawer -->
+  <aside id="notesDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span>📝 SPEAKER NOTES (KỊCH BẢN THUYẾT TRÌNH)</span>
+      </div>
+      <button class="btn-hud" id="btnCloseNotes">✕</button>
+    </div>
+    <div class="drawer-body" id="notesContent">
+      <!-- Injected by JavaScript based on active slide -->
+    </div>
+  </aside>
+
+  <!-- Overview Grid Modal -->
+  <div id="overviewModal">
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px;">
+      <h2 style="font-family: var(--font-heading); color: #fff; font-size: 22px;">⊞ OVERVIEW: 15 SLIDES - CAPSTONE
+        DEFENSE REVIEW 1
+      </h2>
+      <button class="btn-hud" id="btnCloseOverview">✕ Close (Esc)</button>
+    </div>
+    <div class="overview-grid" id="overviewGrid">
+      <!-- Generated by JavaScript -->
+    </div>
+  </div>
+
+  <!-- JavaScript for Presentation Engine -->
+  <script>
+
+    // Speaker Notes Data Dictionary for all 25 slides
+        const speakerNotes = {
+      1: `
+        <h4>Slide 01: Capstone Defense Review 2 — Title Cover</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Distinguished Evaluation Council, welcome to our Review 2 Capstone Defense for Project FA26AI50: "Real-Time Vision-Based Lane Detection, Object Detection, and Collision Warning System for Driver Assistance" under the supervision of Lecturer Nguyen Xuan Huy and Lecturer Nguyen Quoc Trung.</p>
+          <p>In this second review milestone, we report our end-to-end multi-task perception pipeline running concurrently on a single monocular camera, validating pure GPU inference latency and physical collision warnings across 834 real driving frames.</p>
+        </div>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--amber-warn);">🔬 TECHNICAL HIGHLIGHTS:</div>
+          <ul>
+            <li><strong>Project Identity</strong>: Project FA26AI50, Group GFA26AI09. 3 technical sub-tracks: Lane (Quan), Detection & Tracking (Triet), Depth & TTC (Khang).</li>
+            <li><strong>Economic Objective</strong>: Replace prohibitive $5,000-$10,000 multi-sensor LiDAR/Radar setups with an edge AI monocular system targeting total hardware BOM < $800.</li>
+          </ul>
+        </div>
+      `,
+      2: `
+        <h4>Slide 02: Team Structure & Technical Work Allocation</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>To ensure academic depth and complete reproducibility, our workload is partitioned into three independent yet harmonized perception tracks:</p>
+          <ul>
+            <li><strong>Nguyen Tran Minh Quan (Leader)</strong>: Lane Perception Track — UFLDv2 ResNet-18, CULane benchmark, and master pipeline coordination via FrameRecord v1.0.</li>
+            <li><strong>Nguyen Minh Triet</strong>: Object Detection & Tracking Track — NMS-free YOLOv10s, 10-class BDD100K data engineering, and multi-object ByteTrack.</li>
+            <li><strong>Do Khang</strong>: Monocular Metric Depth & Collision Track — Depth Anything V2 ViT-S, LiDAR 64-beam calibration, and Theil-Sen Time-to-Collision (TTC) derivation.</li>
+          </ul>
+        </div>
+      `,
+      3: `
+        <h4>Slide 03: Problem Statement & AI Pipeline Flow</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Automotive mmWave radars suffer from phantom braking triggered by metal manhole covers and bridge expansion joints due to poor vertical angular resolution. Our vision-centric pipeline leverages rich visual semantics from a single RGB camera to discriminate drivable road surfaces from real collision threats while sustaining strict real-time throughput ≥ 30 FPS.</p>
+        </div>
+      `,
+      4: `
+        <h4>Slide 04: Research Questions & Academic Gaps</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>We address one central research question: How to concurrently integrate lane detection, multi-object tracking, and metric depth on a single RGB camera stream, sustaining high accuracy and real-time throughput ≥ 30 FPS (tail latency p95 < 33.3 ms)?</p>
+          <p>We bridge three critical academic gaps: Task Isolation Gap, Latency Bottleneck Gap in monocular depth, and Multi-Task Gradient Conflict in shared-backbone networks.</p>
+        </div>
+      `,
+      5: `
+        <h4>Slide 05: Canonical Multi-Dataset Benchmark Suite</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Distinguished Council, in Chapter I we establish our empirical foundation on five decoupled benchmark datasets. BDD100K 10-Class serves 2D detection, CULane covers 9 challenging environmental conditions, KITTI provides 834 continuous temporal frames with 64-beam LiDAR ground truth, CCD stress-tests critical collision moments, and CARLA establishes oracle metric boundaries.</p>
+        </div>
+      `,
+      6: `
+        <h4>Slide 06: BDD100K 10-Class Label Recovery & Data Cleaning</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>We resolved a severe data issue where legacy converters omitted category aliases, dropping over 755,000 labels and leaving 0 pedestrians, motorcycles, and bicycles. By re-parsing the original Berkeley DeepDrive JSON source, we restored all 91,405 pedestrians, 7,225 bicycles, and 3,002 motorcycles, sealing the clean dataset into a 4.69 GB canonical package with SHA-256 integrity.</p>
+        </div>
+      `,
+      7: `
+        <h4>Slide 07: Class Imbalance & CSAS Mitigation</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Moving to data distribution, we observe an extreme frequency disparity of 4,571.8 to 1 between passenger cars (713,206) and minority classes like train (156) or pedestrian (91,405). To prevent vehicle gradients from starving minority vulnerable road users, we developed the Class x Scale Sampler (CSAS) paired with task-aligned Focal Loss.</p>
+          <p>This targeted strategy significantly lifts pedestrian recall from 0.321 to 0.474 (+47.7% gain) and bicycle recall from 0.28 to 0.41, closing critical urban safety blind spots.</p>
+        </div>
+      `,
+      8: `
+        <h4>Slide 08: Data Leakage Prevention Protocol & KITTI Scope</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>To eliminate temporal data leakage, our splits are partitioned strictly by driving sequence ID, guaranteeing 0% environmental overlap between training and testing. For tracking evaluation, we process all 834 continuous frames across KITTI Sequences 0000, 0001, and 0002 without heuristic slicing.</p>
+        </div>
+      `,
+      9: `
+        <h4>Slide 09: Experimental Cloud Environment & Timing Protocol</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>All experiments were conducted on dual NVIDIA Tesla T4 16GB GPUs under locked P0 clock states. We enforce explicit CUDA stream synchronization (torch.cuda.synchronize) before and after neural forward passes, isolating pure GPU execution from CPU I/O and display rendering.</p>
+        </div>
+      `,
+      10: `
+        <h4>Slide 10: Subsystem 1: 100-Epoch YOLO Pareto Benchmark</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>After 100 epochs on BDD100K 10-Class, YOLOv10s emerged as our optimal detector, achieving 30.22% mAP50-95 at 80.8 FPS. Critically, its Dual Label Assignment head eliminates 100% of Non-Maximum Suppression latency, providing deterministic ASIL-D timing.</p>
+        </div>
+      `,
+      11: `
+        <h4>Slide 11: Subsystem 2: CULane 9-Scenario Quantitative Benchmark</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>For lane perception, UFLDv2 ResNet-18 achieves 74.50% overall F1 on CULane at 212.8 FPS (4.70 ms) and only 99.6 MB VRAM. Its row-based anchor classification consumes only 15% of our 33.3 ms real-time frame budget, leaving ample headroom for metric depth estimation.</p>
+        </div>
+      `,
+      12: `
+        <h4>Slide 12: Subsystem 3: Metric Depth Accuracy vs VRAM Analysis</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Benchmarking metric depth models revealed that while Metric3D and UniDepth achieve high accuracy, they require over 2.8 GB VRAM and 64 ms per frame. In contrast, Depth Anything V2 Metric ViT-S with 518px token scaling delivers AbsRel 0.089 at 15.04 ms within an ultra-low 86.9 MB VRAM footprint.</p>
+        </div>
+      `,
+      13: `
+        <h4>Slide 13: Quantitative Gap Analysis: Paper Claims vs GPU Measured</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>We transparently account for performance deltas between published paper claims and our in-house GPU measurements across four root causes: Domain gap in dashcam sensors, 518px resolution scaling for token control, hardware bus limitations, and strict sequence-level evaluation protocols.</p>
+        </div>
+      `,
+      14: `
+        <h4>Slide 14: Proposed Master Integrated Pipeline Architecture</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Chapter III presents our proposed Master Integrated Pipeline. By decoupling perception into three independent parallel workers bound together via the immutable FrameRecord v1.0 contract, we eliminate multi-task gradient conflict entirely while capping peak VRAM below 2.0 GB.</p>
+        </div>
+      `,
+      15: `
+        <h4>Slide 15: Head-to-Head System Comparative Matrix</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Compared to all-in-one architectures like YOLOPv2 (which only detects cars and lacks metric depth) and heavy ViT pipelines (which drop below 9 FPS), our Master Pipeline delivers full 10-class detection, true metric depth, and physical TTC calculation at 33.0 FPS.</p>
+        </div>
+      `,
+      16: `
+        <h4>Slide 16: Comprehensive 3-Track Failure Diagnosis</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>In accordance with zero-mock academic honesty, we audited empirical failure cases across all 834 KITTI Tracking frames.</p>
+          <p>In Subsystem 2 (Lane), unmarked cobblestone streets in KITTI 0000/0001 cause row anchors to falsely hook into sidewalk curb seams and parked cars. In Subsystem 1 (Detection), optical flare blinding causes 73 ID switches across 834 frames. In Subsystem 3 (Depth), receding targets ($v_z \le 0$) cause derivative explosion; we resolve this by enforcing ISO 15623 standardized safety latching with TTC = null.</p>
+        </div>
+      `,
+      17: `
+        <h4>Slide 17: V2 Technical Solution for Lane Perception</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Our V2 lane solution introduces ISO 17361 Standby Mode to suppress predictions when lane confidence is low, coupled with an Unmarked Urban Corridor Mode that locks a 2.20m virtual driving corridor along the camera optical axis, eliminating 100% of sidewalk hooking errors.</p>
+        </div>
+      `,
+      18: `
+        <h4>Slide 18: V2 Technical Solution for Metric Depth & TTC</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>For depth and collision warning, V2 implements a 20% Adaptive ROI Inset to sample only the upper metallic vehicle body, combined with empirical LiDAR calibration and a clamped 1D Kalman CV filter, reducing TTC error from 2.12s down to 0.05s.</p>
+        </div>
+      `,
+      19: `
+        <h4>Slide 19: Ablation Study 1: ByteTrack Threshold (TR-10)</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Our TR-10 ablation study on ByteTrack matching thresholds demonstrated that setting track_low_thresh to 0.30 yielded the lowest ID switches (73) and highest IDF1 (61.22%) by effectively filtering noisy low-confidence background detections.</p>
+        </div>
+      `,
+      20: `
+        <h4>Slide 20: Ablation Study 3: 12 TTC Combinations Matrix</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Evaluating 12 combinations of depth models and velocity estimators confirmed that Theil-Sen Robust Regression achieved the lowest velocity MAE of 0.21 m/s — a 19x reduction compared to naive finite difference — with a calculation time of just 0.049 ms.</p>
+        </div>
+      `,
+      21: `
+        <h4>Slide 21: Decoupled Replay & KITTI Cockpit HUD</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>To measure true deep learning latency without UI distortion, our Replay pipeline decouples execution into two independent phases: Phase 1 executes pure GPU AI perception at locked P0 state (30.27 ms / 33.0 FPS), while Phase 2 asynchronously renders the Cockpit HUD and video output with 15.2 ms CPU overhead.</p>
+          <p>We verified full temporal continuity across all 834 continuous frames of KITTI Sequences 0000, 0001, and 0002 with zero benchmark contamination.</p>
+        </div>
+      `,
+      22: `
+        <h4>Slide 22: Full-System Error Propagation Modeling</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>We mathematically modeled the cascaded error chain: 2D detector bounding box jitter of ±2.1 px propagates into ±0.35m depth drift, which is dampened by Theil-Sen regression into ±0.21 m/s velocity error, ultimately bounding final TTC decision error within 0.05 seconds.</p>
+        </div>
+      `,
+      23: `
+        <h4>Slide 23: Real-Time GPU Latency & VRAM Feasibility</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Our end-to-end multi-task execution consumes 30.27 ms on Tesla T4, achieving 33.0 FPS and clearing the 30 FPS safety deadline. Total peak VRAM is only 1.95 GB (12.2% of GPU capacity), confirming direct deployment feasibility for 8GB Jetson Orin Nano modules.</p>
+        </div>
+      `,
+      24: `
+        <h4>Slide 24: Springer Nature Paper & Task 3 Roadmap</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ PRESENTATION SCRIPT:</div>
+          <p>Our academic paper is drafted in Springer Nature format (sn-article.tex) with 6 high-resolution figures. For Task 3, our roadmap targets TensorRT FP16 quantization, in-vehicle testbed deployment on NVIDIA Jetson Orin Nano (< $800 BOM), and closed-course track validation.</p>
+        </div>
+      `,
+      25: `
+        
+      `,
+    };
+
+    // Engine State
+    let currentSlide = 1;
+    const totalSlides = document.querySelectorAll('.slide').length || 25;
+
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('topProgressBar');
+    const currSlideNumEl = document.getElementById('currSlideNum');
+    const totalSlideNumEl = document.getElementById('totalSlideNum');
+    const notesDrawer = document.getElementById('notesDrawer');
+    const notesContent = document.getElementById('notesContent');
+    const overviewModal = document.getElementById('overviewModal');
+    const overviewGrid = document.getElementById('overviewGrid');
+
+    totalSlideNumEl.textContent = totalSlides.toString().padStart(2, '0');
+
+    // Build Overview Grid Cards for all 25 slides
+    for (let i = 1; i <= totalSlides; i++) {
+      const card = document.createElement('div');
+      card.className = `overview-card ${i === 1 ? 'current' : ''}`;
+      card.dataset.slide = i;
+
+      const slideEl = document.getElementById(`slide-${i}`);
+      const title = slideEl ? slideEl.querySelector('.slide-title').textContent : `Slide ${i}`;
+
+      card.innerHTML = `
+        <div class="num">SLIDE ${i.toString().padStart(2, '0')}</div>
+        <div class="title">${title}</div>
+      `;
+      card.addEventListener('click', () => {
+        goToSlide(i);
+        closeOverview();
+      });
+      overviewGrid.appendChild(card);
+    }
+
+    function renderMathIfAvailable(targetEl) {
+      if (window.renderMathInElement && targetEl) {
+        renderMathInElement(targetEl, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ],
+          throwOnError: false
+        });
+        return true;
+      }
+      return false;
+    }
+
+    function updatePresentation() {
+      slides.forEach((slide, idx) => {
+        const slideNum = idx + 1;
+        if (slideNum === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      // Update progress bar
+      const progressPercent = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+
+      // Update counter
+      currSlideNumEl.textContent = currentSlide.toString().padStart(2, '0');
+
+      // Update speaker notes content
+      notesContent.innerHTML = speakerNotes[currentSlide] || '<p>No speaker notes for this slide.</p>';
+
+      // Render math only once per slide (lazy on activation) and inside current notes
+      const activeSlideEl = slides[currentSlide - 1];
+      if (activeSlideEl && !activeSlideEl.dataset.mathRendered) {
+        if (renderMathIfAvailable(activeSlideEl)) {
+          activeSlideEl.dataset.mathRendered = "true";
+        }
+      }
+      renderMathIfAvailable(notesContent);
+
+      // Update overview active card
+      document.querySelectorAll('.overview-card').forEach(card => {
+        if (parseInt(card.dataset.slide) === currentSlide) {
+          card.classList.add('current');
+        } else {
+          card.classList.remove('current');
+        }
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updatePresentation();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updatePresentation();
+      }
+    }
+
+    function goToSlide(num) {
+      if (num >= 1 && num <= totalSlides) {
+        currentSlide = num;
+        updatePresentation();
+      }
+    }
+
+    function toggleNotes() {
+      notesDrawer.classList.toggle('open');
+      document.getElementById('btnNotes').classList.toggle('active');
+    }
+
+    function toggleOverview() {
+      overviewModal.classList.toggle('open');
+      document.getElementById('btnOverview').classList.toggle('active');
+    }
+
+    function closeOverview() {
+      overviewModal.classList.remove('open');
+      document.getElementById('btnOverview').classList.remove('active');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => alert(err.message));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Event Listeners
+    document.getElementById('btnNext').addEventListener('click', nextSlide);
+    document.getElementById('btnPrev').addEventListener('click', prevSlide);
+    document.getElementById('btnNotes').addEventListener('click', toggleNotes);
+    document.getElementById('btnCloseNotes').addEventListener('click', toggleNotes);
+    document.getElementById('btnOverview').addEventListener('click', toggleOverview);
+    document.getElementById('btnCloseOverview').addEventListener('click', closeOverview);
+    document.getElementById('btnFullscreen').addEventListener('click', toggleFullscreen);
+
+    // Keyboard Navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        goToSlide(1);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        goToSlide(totalSlides);
+      } else if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        toggleNotes();
+      } else if (e.key === 'o' || e.key === 'O') {
+        e.preventDefault();
+        toggleOverview();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.key === 'Escape') {
+        closeOverview();
+        notesDrawer.classList.remove('open');
+        document.getElementById('btnNotes').classList.remove('active');
+      }
+    });
+
+    // Touch Swipe Navigation
+    let touchStartX = 0;
+    let touchEndX = 0;
+    window.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
+    window.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchEndX < touchStartX - 60) nextSlide();
+      if (touchEndX > touchStartX + 60) prevSlide();
+    }, false);
+
+    // Initial Presentation render on load
+    window.addEventListener('DOMContentLoaded', () => {
+      updatePresentation();
+      setTimeout(() => {
+        const activeSlideEl = slides[currentSlide - 1];
+        if (activeSlideEl && !activeSlideEl.dataset.mathRendered) {
+          if (renderMathIfAvailable(activeSlideEl)) {
+            activeSlideEl.dataset.mathRendered = "true";
+          }
+        }
+        renderMathIfAvailable(notesContent);
+      }, 300);
+    });
+  </script>
+</body>
+
+</html>

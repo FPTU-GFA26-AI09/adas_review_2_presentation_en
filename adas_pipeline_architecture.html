@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADAS Pipeline Architecture - Harmonized 5-Stage Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&family=Orbitron:wght@700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-space: #050813;
+      --bg-card: rgba(11, 19, 36, 0.92);
+      --bg-card-hover: rgba(16, 28, 54, 0.98);
+      --cyan-neon: #00e5ff;
+      --blue-accent: #38bdf8;
+      --emerald-safe: #10b981;
+      --amber-warn: #f59e0b;
+      --rose-alert: #f43f5e;
+      --purple-accent: #a855f7;
+      --border-hud: rgba(0, 229, 255, 0.28);
+      --font-ui: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-heading: 'Orbitron', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--bg-space);
+      font-family: var(--font-ui);
+      color: #e2e8f0;
+      user-select: none;
+    }
+
+    /* Ambient Cyber Background */
+    .bg-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image:
+        linear-gradient(to right, rgba(0, 229, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 229, 255, 0.035) 1px, transparent 1px);
+      background-size: 38px 38px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-radial {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 95vw;
+      height: 95vh;
+      background: radial-gradient(ellipse at center, rgba(14, 165, 233, 0.08) 0%, rgba(5, 8, 19, 0.95) 75%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* App Shell */
+    .app-shell {
+      position: relative;
+      z-index: 2;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Command Header (Clean & Minimal) */
+    header.hud-header {
+      height: 48px;
+      padding: 0 24px;
+      background: rgba(8, 14, 28, 0.92);
+      border-bottom: 1.5px solid var(--border-hud);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      flex-shrink: 0;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: rgba(0, 229, 255, 0.12);
+      border: 1px solid var(--cyan-neon);
+      font-family: var(--font-heading);
+      font-size: 10.5px;
+      font-weight: 800;
+      color: var(--cyan-neon);
+      letter-spacing: 0.8px;
+    }
+
+    .pulse-dot {
+      width: 6.5px;
+      height: 6.5px;
+      border-radius: 50%;
+      background: var(--cyan-neon);
+      box-shadow: 0 0 8px var(--cyan-neon);
+      animation: blinkPulse 1.2s infinite ease-in-out;
+    }
+
+    @keyframes blinkPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.8); }
+    }
+
+    .brand-title {
+      font-family: var(--font-heading);
+      font-size: 14.5px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 0.8px;
+    }
+
+    .header-ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-ctrl {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 5px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      background: rgba(30, 41, 59, 0.7);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      transition: all 0.2s ease;
+    }
+
+    .btn-ctrl:hover {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--cyan-neon);
+      color: var(--cyan-neon);
+    }
+
+    .btn-ctrl.active {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--emerald-safe);
+      color: var(--emerald-safe);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-ctrl.btn-cta {
+      background: rgba(0, 229, 255, 0.12);
+      border-color: rgba(0, 229, 255, 0.4);
+      color: var(--cyan-neon);
+    }
+
+    .btn-ctrl.btn-cta:hover {
+      background: rgba(0, 229, 255, 0.25);
+      border-color: var(--cyan-neon);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+    }
+
+    /* Main Viewport (Full Screen - 0 Footer, Maximal Space) */
+    main.pipeline-viewport {
+      flex: 1;
+      width: 100vw;
+      height: calc(100vh - 48px);
+      padding: 16px 20px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* SVG Connecting Bus Layer */
+    .svg-bus-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .bus-path-static {
+      fill: none;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      opacity: 0.75;
+    }
+
+    .bus-path-animated {
+      fill: none;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-dasharray: 7 14;
+      animation: signalPulse 1.4s linear infinite;
+    }
+
+    @keyframes signalPulse {
+      from { stroke-dashoffset: 42; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* 5-Columns Grid with Optimized Card Widths & Spacious Signal Corridors */
+    .pipeline-track {
+      width: 100%;
+      max-width: 1390px;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 215px 235px 235px 230px 220px;
+      gap: 54px;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      margin: 0 auto;
+      transition: all 0.25s ease;
+    }
+
+    @media (max-width: 1420px) {
+      .pipeline-track {
+        max-width: calc(100vw - 32px);
+        grid-template-columns: 1fr 1.15fr 1.15fr 1.12fr 1.05fr;
+        gap: 38px;
+      }
+    }
+
+    /* Stage Columns */
+    .stage-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      gap: 16px;
+      transition: gap 0.25s ease;
+    }
+
+    /* Presentation-Grade Cards */
+    .node-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-hud);
+      border-radius: 9px;
+      padding: 11px 10px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+      position: relative;
+      z-index: 6;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      justify-content: space-between;
+      min-height: 146px;
+    }
+
+    .node-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--cyan-neon);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 229, 255, 0.25);
+    }
+
+    /* Specific Card Heights in Detailed Mode */
+    #cardInPath, #cardBoxDepth {
+      min-height: 175px;
+    }
+
+    #cardFCW {
+      min-height: 235px;
+      padding: 11px 10px;
+    }
+
+    #cardHud {
+      min-height: 335px;
+      padding: 12px 10px;
+      border-color: rgba(0, 229, 255, 0.4);
+    }
+
+    /* Invisible Layout Spacer in Column 3 */
+    .card-spacer {
+      visibility: hidden !important;
+      pointer-events: none !important;
+      border-color: transparent !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      min-height: 38px;
+      height: 38px;
+    }
+
+    /* Top-aligned Stage Columns (Col 1, Col 4, Col 5) */
+    .col-2cards, .col-engines, .col-hud {
+      justify-content: flex-start !important;
+      gap: 16px;
+    }
+
+    /* COMPACT MODE STYLING (When Toggle Specs is OFF) */
+    .pipeline-track.compact-mode .specs-tag-list,
+    .pipeline-track.compact-mode .alert-pill-stack {
+      display: none !important;
+    }
+
+    .pipeline-track.compact-mode .node-card {
+      min-height: 0 !important;
+      height: auto !important;
+      padding: 9px 11px !important;
+      gap: 3px !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .pipeline-track.compact-mode #cardFCW {
+      min-height: 110px !important;
+    }
+
+    .pipeline-track.compact-mode #cardHud {
+      min-height: 162px !important;
+    }
+
+    .pipeline-track.compact-mode .card-spacer {
+      display: block !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      min-height: 0 !important;
+      height: 36px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .pipeline-track.compact-mode .stage-col {
+      justify-content: flex-start !important;
+      gap: 16px !important;
+    }
+
+    .pipeline-track.compact-mode .col-2cards {
+      gap: 16px !important;
+    }
+
+    .node-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .node-title-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-heading);
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .node-subtitle {
+      font-family: var(--font-mono);
+      font-size: 9.8px;
+      font-weight: 700;
+      color: var(--cyan-neon);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .specs-tag-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-top: 1px;
+    }
+
+    .spec-tag {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      padding: 2.2px 5.5px;
+      font-family: var(--font-mono);
+      font-size: 8.8px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .spec-tag.tag-green {
+      color: var(--emerald-safe);
+      border-color: rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .spec-tag.tag-orange {
+      color: var(--amber-warn);
+      border-color: rgba(245, 158, 11, 0.3);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .spec-tag.tag-purple {
+      color: var(--purple-accent);
+      border-color: rgba(168, 85, 247, 0.3);
+      background: rgba(168, 85, 247, 0.08);
+    }
+
+    .spec-tag.tag-rose {
+      color: var(--rose-alert);
+      border-color: rgba(244, 63, 94, 0.3);
+      background: rgba(244, 63, 94, 0.08);
+    }
+
+    /* Distinct Card Colors */
+    .card-lane {
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    .card-lane:hover {
+      border-color: var(--blue-accent);
+      box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25);
+    }
+
+    .card-detection {
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+    .card-detection:hover {
+      border-color: var(--emerald-safe);
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.25);
+    }
+
+    .card-depth {
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+    .card-depth:hover {
+      border-color: var(--amber-warn);
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25);
+    }
+
+    .card-association {
+      border-color: rgba(168, 85, 247, 0.4);
+      background: rgba(15, 15, 35, 0.92);
+    }
+    .card-association:hover {
+      border-color: var(--purple-accent);
+      box-shadow: 0 10px 25px rgba(168, 85, 247, 0.25);
+    }
+
+    .card-fcw {
+      border-color: rgba(244, 63, 94, 0.45);
+      background: rgba(30, 10, 20, 0.9);
+    }
+    .card-fcw:hover {
+      border-color: var(--rose-alert);
+      box-shadow: 0 10px 25px rgba(244, 63, 94, 0.3);
+    }
+
+    .card-ldw {
+      border-color: rgba(245, 158, 11, 0.45);
+      background: rgba(25, 20, 10, 0.9);
+    }
+    .card-ldw:hover {
+      border-color: var(--amber-warn);
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+    }
+
+    .model-badge {
+      font-family: var(--font-mono);
+      font-size: 8.8px;
+      font-weight: 700;
+      padding: 1.8px 4.5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .alert-pill-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 3.5px;
+      margin-top: 1px;
+    }
+
+    .alert-pill {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2.5px 5.5px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .alert-safe {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+    }
+
+    .alert-warn {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fde68a;
+    }
+
+    .alert-crit {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fda4af;
+    }
+
+    /* Right Slide-out Inspector Drawer */
+    .inspector-modal {
+      position: fixed;
+      top: 48px;
+      right: -480px;
+      width: 460px;
+      height: calc(100vh - 48px);
+      background: rgba(9, 14, 26, 0.98);
+      border-left: 1.5px solid var(--border-hud);
+      box-shadow: -10px 0 35px rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .inspector-modal.open {
+      right: 0;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-hud);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    .modal-title {
+      font-family: var(--font-heading);
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--cyan-neon);
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-close-modal {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #cbd5e1;
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-close-modal:hover {
+      border-color: var(--rose-alert);
+      color: var(--rose-alert);
+      background: rgba(244, 63, 94, 0.15);
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .spec-item {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 9px 12px;
+    }
+
+    .spec-item-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+    }
+
+    .spec-item-value {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: #f8fafc;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .code-box {
+      background: #020617;
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #38bdf8;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-radial"></div>
+
+  <div class="app-shell">
+
+    <!-- Top Command Header (Clean & Minimal) -->
+    <header class="hud-header">
+      <div class="brand-group">
+        <div class="brand-badge">
+          <div class="pulse-dot"></div>
+          <span>FA26AI50</span>
+        </div>
+        <div class="brand-title">ADAS PIPELINE ARCHITECTURE</div>
+      </div>
+
+      <div class="header-ctrl-group">
+        <button class="btn-ctrl active" id="btnToggleAnim">
+          <span id="animIcon">⏸</span>
+          <span id="animText">Pause Flow</span>
+        </button>
+        <button class="btn-ctrl active" id="btnToggleSpecs">
+          <span>🏷️</span>
+          <span id="specsBtnText">Toggle Specs</span>
+        </button>
+        <button class="btn-ctrl btn-cta" id="btnInspectorHint" onclick="openInspector('pipeline_overview')">
+          <span>🔍</span>
+          <span>Click blocks to details</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Viewport (5 Horizontal Columns with Balanced Vertical Stacking) -->
+    <main class="pipeline-viewport" id="viewportMain">
+
+      <!-- Dynamic SVG Connecting Layer -->
+      <svg class="svg-bus-overlay" id="svgBusOverlay">
+        <defs>
+          <!-- Neon Glow Filters for Signal Arrowheads -->
+          <filter id="glowCyan" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#00e5ff" flood-opacity="1"/>
+          </filter>
+          <filter id="glowLane" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#38bdf8" flood-opacity="1"/>
+          </filter>
+          <filter id="glowDet" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#10b981" flood-opacity="1"/>
+          </filter>
+          <filter id="glowDepth" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#f59e0b" flood-opacity="1"/>
+          </filter>
+          <filter id="glowPurple" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#a855f7" flood-opacity="1"/>
+          </filter>
+          <filter id="glowRose" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#f43f5e" flood-opacity="1"/>
+          </filter>
+          <filter id="glowAmber" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#fbbf24" flood-opacity="1"/>
+          </filter>
+
+          <marker id="arrowCyan" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#00e5ff" filter="url(#glowCyan)" />
+          </marker>
+          <marker id="arrowLane" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#38bdf8" filter="url(#glowLane)" />
+          </marker>
+          <marker id="arrowDet" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#10b981" filter="url(#glowDet)" />
+          </marker>
+          <marker id="arrowDepth" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#f59e0b" filter="url(#glowDepth)" />
+          </marker>
+          <marker id="arrowPurple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#a855f7" filter="url(#glowPurple)" />
+          </marker>
+          <marker id="arrowRose" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#f43f5e" filter="url(#glowRose)" />
+          </marker>
+          <marker id="arrowAmber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#fbbf24" filter="url(#glowAmber)" />
+          </marker>
+        </defs>
+        <g id="svgStaticGroup"></g>
+        <g id="svgAnimGroup"></g>
+      </svg>
+
+      <!-- 5-Columns Horizontal Pipeline Grid -->
+      <div class="pipeline-track" id="pipelineGrid">
+
+        <!-- ================= CỘT 1: INGESTION & PREPROCESSING ================= -->
+        <div class="stage-col col-2cards">
+
+          <!-- Khối 1A: Camera Ingest -->
+          <div class="node-card" id="cardCamera" onclick="openInspector('camera')">
+            <div class="node-header-row">
+              <div class="node-title-group">
+                <span>📷</span>
+                <span>Camera Ingest</span>
+              </div>
+            </div>
+            <div class="node-subtitle">
+              <span>1x Monocular RGB</span>
+              <span class="model-badge" style="background: rgba(0, 229, 255, 0.15); color: var(--cyan-neon);">V4L2</span>
+            </div>
+            <div class="specs-tag-list">
+              <span class="spec-tag">1280x720 (720p / 1080p)</span>
+              <span class="spec-tag tag-green">Frame Rate: 30.0 FPS</span>
+              <span class="spec-tag">OpenCV VideoCapture</span>
+              <span class="spec-tag">Clock: timestamp_ns</span>
+            </div>
+          </div>
+
+          <!-- Khối 1B: Preproc & Disp -->
+          <div class="node-card" id="cardPreproc" onclick="openInspector('preprocess')">
+            <div class="node-header-row">
+              <div class="node-title-group">
+                <span>⚙️</span>
+                <span>Preproc &amp; Disp</span>
+              </div>
+            </div>
+            <div class="node-subtitle">
+              <span>Zero-Copy Buffer</span>
+              <span class="model-badge" style="background: rgba(56, 189, 248, 0.15); color: var(--blue-accent);">Pinned</span>
+            </div>
+            <div class="specs-tag-list">
+              <span class="spec-tag">Tensor: [1, 3, 720, 1280]</span>
+              <span class="spec-tag tag-orange">RGB Normalization [0, 1]</span>
+              <span class="spec-tag tag-green">torch.no_grad() Context</span>
+              <span class="spec-tag">Dispatch Latency &lt; 2.5 ms</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= CỘT 2: 3 PERCEPTION BACKBONES ================= -->
+        <div class="stage-col">
+
+          <!-- Backbone 2A: Lane Slicing (HÀNG 1) -->
+          <div class="node-card card-lane" id="cardLane" onclick="openInspector('lane')">
+            <div class="node-header-row">
+              <div class="node-title-group">
+                <span>🛣️</span>
+                <span style="color: #38bdf8;">Lane Slicing</span>
+              </div>
+              <span class="model-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">UFLDv2 R18</span>
+            </div>
+            <div class="node-subtitle" style="color: #93c5fd;">
+              <span>Row-Anchor Slicing</span>
+              <span style="color: var(--emerald-safe); font-size: 10px;">&gt;120 FPS</span>
+            </div>
+            <div class="specs-tag-list">
+              <span class="spec-tag">Grid: 72 rows × 100 cells</span>
+              <span class="spec-tag tag-green">Inference p95: ~6.8 ms</span>
+              <span class="spec-tag">B-Spline Cubic Polyline</span>
+              <span class="spec-tag">Contract: LaneEstimate</span>
+            </div>
+          </div>
+
+          <!-- Backbone 2B: Object Detection (HÀNG 2) -->
+          <div class="node-card card-detection" id="cardDetect" onclick="openInspector('detection')">
+            <div class="node-header-row">
+              <div class="node-title-group">
+                <span>🚗</span>
+                <span style="color: #10b981;">Object Detect</span>
+              </div>
+              <span class="model-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">YOLOv10s</span>
+            </div>
+            <div class="node-subtitle" style="color: #6ee7b7;">
+              <span>Dual-Head NMS-Free</span>
+              <span style="color: var(--emerald-safe); font-size: 10px;">72.2 FPS</span>
+            </div>
+            <div class="specs-tag-list">
+              <span class="spec-tag tag-green">NMS Overhead: 0.0 ms</span>
+              <span class="spec-tag">10 Classes BDD100K</span>
+              <span class="spec-tag">Inference p95: ~13.8 ms</span>
+              <span class="spec-tag">Contract: Detection (BBoxes)</span>
+            </div>
+          </div>
+
+          <!-- Backbone 2C: Metric Depth (HÀNG 3) -->
+          <div class="node-card card-depth" id="cardDepth" onclick="openInspector('depth')">
+            <div class="node-header-row">
+              <div class="node-title-group">
+                <span>📏</span>
+                <span style="color: #f59e0b;">Metric Depth</span>
+              </div>
+              <span class="model-badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">DA-V2 Metric-S</span>
+            </div>
+            <div class="node-subtitle" style="color: #fcd34d;">
+              <span>Vision Transformer</span>
+              <span style="color: var(--amber-warn); font-size: 10px;">&gt;42 FPS</span>
+            </div>
+            <div class="specs-tag-list">
+              <span class="spec-tag tag-orange">Outdoor LiDAR Metric Tuning</span>
+              <span class="spec-tag">AbsRel &le; 0.10, MAE &lt; 4.5m</span>
+              <span class="spec-tag tag-green">VRAM: ~1.4 GB (24.8M params)</span>
+              <span class="spec-tag">Contract: DepthArtifact (.npy)</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= CỘT 3: SPATIAL-TEMPORAL ASSOCIATION ================= -->
+        <div class="stage-col">
+
+          <!-- Invisible Layout Spacer reserving Row 1 for Horizontal LDW Line -->
+          <div class="node-card card-spacer" id="col3Spacer" aria-hidden="true">
+            <div class="node-header-row">
+              <div class="node-title-group"><span>🛣️</span><span>Spacer</span></div>
+            </div>
+            <div class="node-subtitle"><span>Spacer</span></div>
+            <div class="specs-tag-list">
+              <span class="spec-tag">Spacer</span>
+              <span class="spec-tag">Spacer</span>
+              <span class="spec-tag">Spacer</span>
+              <span class="spec-tag">Spacer</span>
+            </div>
+          </div>
+
+          <!-- Module 3A: In-Path Vehicle Filter (HÀNG 2 - ngang hàng Object Detect) -->
+          <div class="node-card card-association" id="cardInPath" onclick="openInspector('inpath')">
+            <div>
+              <div class="node-header-row">
+                <div class="node-title-group">
+                  <span>🛣️🚗</span>
+                  <span style="color: #d8b4fe;">In-Path Vehicle Filter</span>
+                </div>
+                <span class="model-badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">Obstacle Gating</span>
+              </div>
+              <div class="node-subtitle" style="color: #e9d5ff; margin-top: 3px;">
+                <span>Target Vehicle vs Ego-Corridor</span>
+              </div>
+            </div>
+            <div class="specs-tag-list" style="gap: 4px;">
+              <span class="spec-tag">Inputs: Ego-Lane Lines + Target BBoxes</span>
+              <span class="spec-tag tag-purple">Flags: in_ego_path = True / False</span>
+              <span class="spec-tag">Target Lateral Offset |d_lat| &lt; HalfLane</span>
+              <span class="spec-tag tag-green">FCW Anti-False-Alarm (Outer Lanes)</span>
+            </div>
+          </div>
+
+          <!-- Module 3B: ByteTrack & Box-to-Depth ROI -->
+          <div class="node-card card-association" id="cardBoxDepth" onclick="openInspector('association')">
+            <div>
+              <div class="node-header-row">
+                <div class="node-title-group">
+                  <span>📦📏</span>
+                  <span style="color: #d8b4fe;">ByteTrack + ROI</span>
+                </div>
+                <span class="model-badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">Box-to-Depth</span>
+              </div>
+              <div class="node-subtitle" style="color: #e9d5ff; margin-top: 3px;">
+                <span>Persistent ID &amp; Metric Distance</span>
+              </div>
+            </div>
+            <div class="specs-tag-list" style="gap: 4px;">
+              <span class="spec-tag">ByteTrack: 2-stage High/Low Match</span>
+              <span class="spec-tag tag-green">Invariant Track IDs (No Flickering)</span>
+              <span class="spec-tag tag-orange">Distance: median(DepthMap[BBox])</span>
+              <span class="spec-tag">1-D Kalman Filter Temporal Smooth</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= CỘT 4: DUAL RISK ENGINES ================= -->
+        <div class="stage-col col-engines">
+
+          <!-- Engine 4A: LDW Engine -->
+          <div class="node-card card-ldw" id="cardLDW" onclick="openInspector('ldw')">
+            <div>
+              <div class="node-header-row">
+                <div class="node-title-group">
+                  <span>🛣️</span>
+                  <span style="font-family: var(--font-mono); font-weight: 800; letter-spacing: 0.5px; color: #fbbf24;">LDW Engine</span>
+                </div>
+                <span class="model-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">ISO 17361</span>
+              </div>
+              <div class="node-subtitle" style="color: #fde68a; margin-top: 3px;">
+                <span>Ego-Vehicle Lane Departure</span>
+              </div>
+            </div>
+            <div class="specs-tag-list" style="gap: 4px;">
+              <span class="spec-tag tag-orange">Independent Ego Signal from UFLDv2</span>
+              <span class="spec-tag">Zero Obstacle Dependency (Empty Roads)</span>
+              <span class="spec-tag tag-rose">Lateral Offset |y_off| &gt; 0.45m &amp; TLC &lt; 1.0s</span>
+              <span class="spec-tag tag-green">Decoupled from Obstacle Tracking</span>
+            </div>
+          </div>
+
+          <!-- Engine 4B: FCW Engine -->
+          <div class="node-card card-fcw" id="cardFCW" onclick="openInspector('fcw')">
+            <div>
+              <div class="node-header-row">
+                <div class="node-title-group">
+                  <span>🎯</span>
+                  <span style="font-family: var(--font-mono); font-weight: 800; letter-spacing: 0.5px; color: #fb7185;">FCW Engine</span>
+                </div>
+                <span class="model-badge" style="background: rgba(244, 63, 94, 0.2); color: #fb7185;">ISO 15623</span>
+              </div>
+              <div class="node-subtitle" style="color: #fda4af; margin-top: 4px;">
+                <span>Forward Collision Warning</span>
+              </div>
+            </div>
+
+            <div class="alert-pill-stack" style="gap: 4.5px; margin: 6px 0;">
+              <div class="alert-pill alert-safe">
+                <span>🟢 SAFE</span>
+                <span>TTC &gt; 3.0s</span>
+              </div>
+              <div class="alert-pill alert-warn">
+                <span>🟡 WARN</span>
+                <span>1.5 - 3.0s</span>
+              </div>
+              <div class="alert-pill alert-crit">
+                <span>🔴 BRAKE</span>
+                <span>&le; 1.5s / Z &le; 3m</span>
+              </div>
+            </div>
+
+            <div class="specs-tag-list" style="gap: 4px;">
+              <div class="spec-tag tag-purple">
+                <span>Input: in_ego_path Gating</span>
+                <span>In-Path</span>
+              </div>
+              <div class="spec-tag tag-rose">
+                <span>Relative Speed: v_z = dZ/dt</span>
+                <span>Kalman</span>
+              </div>
+              <div class="spec-tag tag-orange">
+                <span>Formula: TTC = -Z / v_z</span>
+                <span>Metric</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= CỘT 5: COCKPIT HUD & ARTIFACTS ================= -->
+        <div class="stage-col col-hud">
+          <div class="node-card" id="cardHud" onclick="openInspector('hud')">
+            <div>
+              <div class="node-header-row">
+                <div class="node-title-group">
+                  <span>🖥️</span>
+                  <span>Cockpit HUD</span>
+                </div>
+                <span class="model-badge" style="background: rgba(0, 229, 255, 0.15); color: var(--cyan-neon);">OpenGL / AR</span>
+              </div>
+              <div class="node-subtitle" style="margin-top: 5px;">
+                <span>Real-Time Live Overlay</span>
+                <span style="color: var(--emerald-safe); font-size: 10px;">&ge; 30 FPS</span>
+              </div>
+            </div>
+
+            <div class="specs-tag-list" style="gap: 7px; margin-top: 10px;">
+              <span class="spec-tag">Neon Green B-Spline Ego-Corridor</span>
+              <span class="spec-tag">3D BBox + [ID | Z: 18m | Speed]</span>
+              <span class="spec-tag">Depth Heatmap Inset (Top-Right)</span>
+              <span class="spec-tag tag-orange">LDW Banner (ISO 17361 Visual)</span>
+              <span class="spec-tag tag-rose">FCW Audio Alert (ISO 15623)</span>
+              <span class="spec-tag tag-green">Artifacts: frames.jsonl, summary</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Right Slide-out Inspector Drawer -->
+    <div class="inspector-modal" id="inspectorModal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">🔍 COMPONENT SPECIFICATION</div>
+        <button class="btn-close-modal" onclick="closeInspector()">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Content injected dynamically -->
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ================= INSPECTOR DATA LINKED TO PHÂN CHIA/ CODEBASE =================
+    const componentSpecs = {
+      pipeline_overview: {
+        title: "Architecture Overview: 5-Stage Decoupled Dataflow",
+        sourceFile: "Phân chia/Triết/src/adas_baselines/pipeline.py",
+        shortSource: "Phân chia/Triết/src/adas_baselines/pipeline.py",
+        specs: [
+          { label: "Dataflow Paradigm", value: "Fork/Broadcast Topology to 3 Independent Perception Backbones" },
+          { label: "Hardware Scheduling", value: "Time-Multiplexed Sequential GPU Execution (Total p95: ~40.8 ms)" },
+          { label: "LDW vs FCW Decoupling", value: "LDW monitors Ego-Vehicle vs Lanes; FCW monitors Ego-Vehicle vs Target Obstacles" },
+          { label: "Memory Footprint", value: "1.84 GB Peak VRAM on single RTX 4060 Laptop GPU" },
+          { label: "Codebase Status", value: "100% Verified against Phân chia/ (Triết, Quân, Khang)" }
+        ],
+        codeSnippet: `# Integrated Pipeline Flow in Phân chia/Triết/src/adas_baselines/pipeline.py:\n# 1. Ingest & Preprocess (Shared Tensor [1, 3, 720, 1280])\n# 2. Parallel Fork: Lane (Quân) | Detection (Triết) | Depth (Khang)\n# 3. Spatial-Temporal: In-Path Vehicle Filter & ByteTrack+Depth Fusion\n# 4. Decoupled Dual Engines: LDW (ISO 17361) & FCW (ISO 15623)\n# 5. Cockpit HUD Live Overlay & Output Artifacts Generation`
+      },
+      camera: {
+        title: "Camera Ingestion & V4L2 Stream",
+        sourceFile: "Phân chia/Triết/src/adas_baselines/notebook_smoke.py",
+        shortSource: "notebook_smoke.py (OpenCV Capture)",
+        specs: [
+          { label: "Hardware Sensor", value: "1x Monocular RGB Dashcam (Aptina / Sony IMX sensor)" },
+          { label: "Native Resolution", value: "1280x720 (720p) at 30.0 FPS native capture" },
+          { label: "Software Interface", value: "V4L2 Linux Driver / OpenCV VideoCapture Video Stream" },
+          { label: "Timing Synchronizer", value: "POSIX monotonic timestamp_ns for exact dt calculation" },
+          { label: "Frame Dispatch Protocol", value: "Frame ID zero-padded index (frame_000001 ... frame_NNNNNN)" }
+        ],
+        codeSnippet: `cap = cv2.VideoCapture(video_path)\nret, frame = cap.read()\ntimestamp_seconds = frame_idx / fps`
+      },
+      preprocess: {
+        title: "Preprocessing, Normalization & Dispatch",
+        sourceFile: "Phân chia/Triết/src/adas_baselines/pipeline.py",
+        shortSource: "pipeline.py (Preprocessing step)",
+        specs: [
+          { label: "Color Conversion", value: "BGR (OpenCV) ➔ RGB Tensor format" },
+          { label: "Normalization", value: "float32 in range [0.0, 1.0], mean/std normalized per model" },
+          { label: "Memory Strategy", value: "Page-locked Pinned Memory with zero-copy CPU-GPU transfer" },
+          { label: "Inference Context", value: "torch.no_grad() global inference manager" },
+          { label: "Preprocessing Latency", value: "2.1 ~ 2.5 ms on RTX 4060 Laptop GPU" }
+        ],
+        codeSnippet: `with torch.no_grad():\n    tensor = torch.from_numpy(frame).permute(2,0,1).float().div(255.0)`
+      },
+      lane: {
+        title: "Lane Perception: UFLDv2 (ResNet-18)",
+        sourceFile: "Phân chia/Quân/src/adas_baselines/lane/external.py & canny_hough.py",
+        shortSource: "Phân chia/Quân/.../lane/external.py",
+        specs: [
+          { label: "Architecture", value: "Ultra Fast Structure-aware Deep Lane Detection v2 (ResNet-18 backbone)" },
+          { label: "Discretization", value: "Row-Anchor Classification (72 rows × 100 column cells)" },
+          { label: "Output Representation", value: "B-Spline cubic polyline curve fitting (left_lane, right_lane)" },
+          { label: "Inference Latency", value: "p95 ~6.8 ms (> 120 FPS on RTX 4060)" },
+          { label: "Export Contract", value: "LaneEstimate(left_boundary, right_boundary, confidence)" }
+        ],
+        codeSnippet: `class ExternalLaneAdapter(LaneEstimator):\n    def estimate(self, frame_bgr: np.ndarray) -> LaneEstimate:\n        # Runs UFLDv2 row-anchor detection and outputs lane boundaries`
+      },
+      detection: {
+        title: "Object Detection: YOLOv10s (NMS-Free)",
+        sourceFile: "Phân chia/Triết/src/adas_baselines/detection/external.py",
+        shortSource: "Phân chia/Triết/.../detection/external.py",
+        specs: [
+          { label: "Architecture", value: "YOLOv10-Small with Dual-Label Assignments for One-to-One Head" },
+          { label: "NMS Overhead", value: "0.0 ms (Completely NMS-free end-to-end inference)" },
+          { label: "Class Vocabulary", value: "10 ADAS Classes (car, truck, bus, pedestrian, cyclist, etc.)" },
+          { label: "Inference Latency", value: "p95 ~13.8 ms (72.2 FPS on RTX 4060)" },
+          { label: "Export Contract", value: "Detection(boxes_xyxy, scores, class_ids, labels)" }
+        ],
+        codeSnippet: `class UltralyticsDetectorAdapter(ObjectDetector):\n    def detect(self, frame_bgr: np.ndarray) -> list[Detection]:\n        results = self.model.predict(frame_bgr, conf=0.25, verbose=False)`
+      },
+      depth: {
+        title: "Metric Depth: Depth Anything V2 Metric-S",
+        sourceFile: "Phân chia/Khang/src/adas_baselines/depth/external.py",
+        shortSource: "Phân chia/Khang/.../depth/external.py",
+        specs: [
+          { label: "Architecture", value: "Foundation Vision Transformer (DA-V2 Metric Small, 24.8M params)" },
+          { label: "Depth Domain", value: "Metric Depth in absolute meters (tuned for outdoor driving scenes)" },
+          { label: "Depth Precision", value: "AbsRel ≤ 0.10, MAE < 4.5m up to 80m range" },
+          { label: "Inference Latency", value: "p95 ~20.2 ms (> 42 FPS on RTX 4060)" },
+          { label: "Export Contract", value: "DepthArtifact(depth_map: float32 ndarray [H, W], min_depth, max_depth)" }
+        ],
+        codeSnippet: `class ExternalDepthAdapter(DepthEstimator):\n    def estimate(self, frame_bgr: np.ndarray) -> DepthArtifact:\n        depth_map = self.model.infer_image(frame_bgr)\n        return DepthArtifact(depth_map=depth_map, ...)`
+      },
+      inpath: {
+        title: "In-Path Vehicle Filtering (Obstacle Gating)",
+        sourceFile: "Phân chia/Triết/src/adas_baselines/contracts.py & depth/ttc.py",
+        shortSource: "contracts.py (RiskAssessment.in_ego_path)",
+        specs: [
+          { label: "Target Monitored", value: "TARGET OBSTACLES (Other vehicles in front) relative to Ego-Corridor" },
+          { label: "Input Requirements", value: "Both UFLDv2 Lane Polylines AND YOLOv10s BBoxes" },
+          { label: "Algorithmic Logic", value: "Checks if bottom-center of target vehicle BBox falls between left & right lane boundaries" },
+          { label: "Crucial Purpose", value: "FCW Gating: Prevents false emergency braking for vehicles in adjacent or oncoming lanes" },
+          { label: "Output Flag", value: "in_ego_path = True / False for each detected target obstacle" }
+        ],
+        codeSnippet: `def is_vehicle_in_corridor(bbox, lane_left, lane_right):\n    center_x = (bbox[0] + bbox[2]) / 2.0\n    return lane_left(bbox[3]) <= center_x <= lane_right(bbox[3])`
+      },
+      association: {
+        title: "Spatial-Temporal Fusion: ByteTrack + ROI Depth",
+        sourceFile: "Phân chia/Triết/.../detection/external.py & notebooks/03_depth_ttc_baselines.ipynb",
+        shortSource: "Phân chia/Triết/.../UltralyticsByteTrackAdapter",
+        specs: [
+          { label: "Tracker Logic", value: "ByteTrack 2-stage association on high/low confidence detections" },
+          { label: "Temporal Coherence", value: "Persistent Track IDs across occlusions, preventing ID switch" },
+          { label: "Distance Extraction", value: "Robust median depth sampling: Z = median(DepthMap[ymin:ymax, xmin:xmax])" },
+          { label: "Filtering", value: "1-D Constant-Velocity Kalman Filter on (Z_t, v_z_t)" },
+          { label: "Downstream Target", value: "Feeds Metric Distance Z and TTC into FCW Engine" }
+        ],
+        codeSnippet: `class UltralyticsByteTrackAdapter:\n    def update(self, frame_bgr):\n        tracked = self.model.track(frame_bgr, persist=True, tracker="bytetrack.yaml")\n        z_metric = np.median(depth_map[ymin:ymax, xmin:xmax])`
+      },
+      ldw: {
+        title: "LDW Engine: Lane Departure Warning (ISO 17361)",
+        sourceFile: "Phân chia/Quân/src/adas_baselines/contracts.py & lane/external.py",
+        shortSource: "contracts.py & lane/external.py",
+        specs: [
+          { label: "International Standard", value: "ISO 17361: Intelligent Transport Systems - Lane Departure Warning" },
+          { label: "Target Monitored", value: "EGO-VEHICLE (Host car) position relative to lane boundaries" },
+          { label: "Obstacle Independence", value: "100% Decoupled from other vehicles (Operates continuously on empty roads)" },
+          { label: "Departure Logic", value: "Lateral offset |d_lat| > 0.45m or Time-to-Line-Crossing (TLC) < 1.0s" },
+          { label: "Alert Modes", value: "Audio beep + Left/Right Steering vibration warning" }
+        ],
+        codeSnippet: `# Ego-vehicle departure check (Independent of obstacles):\noffset = (dist_left - dist_right) / 2.0\nif abs(offset) > 0.45 or tlc < 1.0:\n    trigger_ldw_alert(direction="left" if offset < 0 else "right")`
+      },
+      fcw: {
+        title: "FCW Engine: Forward Collision Warning (ISO 15623)",
+        sourceFile: "Phân chia/Triết & Khang/src/adas_baselines/depth/ttc.py",
+        shortSource: "depth/ttc.py (estimate_ttc & classify_warning)",
+        specs: [
+          { label: "International Standard", value: "ISO 15623: Forward Vehicle Collision Warning Systems" },
+          { label: "Target Monitored", value: "TARGET OBSTACLES in ego path (Leading cars, trucks, pedestrians)" },
+          { label: "Input Convergence", value: "Gated by in_ego_path (from In-Path Filter) + Distance Z & TTC (from ByteTrack+Depth)" },
+          { label: "Relative Speed", value: "v_z = dZ/dt calculated via Theil-Sen or Kalman Constant Velocity" },
+          { label: "Warning Stages", value: "SAFE (> 3.0s), WARN (1.5s - 3.0s), CRITICAL BRAKE (≤ 1.5s or Z ≤ 3.0m)" }
+        ],
+        codeSnippet: `def classify_warning(ttc_seconds: float, distance_m: float, in_ego_path: bool) -> str:\n    if not in_ego_path:\n        return "safe"\n    if distance_m <= 3.0 or (ttc_seconds is not None and ttc_seconds <= 1.5):\n        return "warning"\n    elif ttc_seconds is not None and ttc_seconds <= 3.0:\n        return "caution"\n    return "safe"`
+      },
+      hud: {
+        title: "Cockpit HUD Visualizer & Output Artifacts",
+        sourceFile: "Phân chia/Triết/src/adas_baselines/pipeline.py & artifacts.py",
+        shortSource: "pipeline.py & artifacts.py",
+        specs: [
+          { label: "Render Engine", value: "High-FPS OpenCV / OpenGL UI Overlay renderer (≥ 30 FPS)" },
+          { label: "Visual Augmentations", value: "Neon Green Ego-Corridor B-Spline + 3D Bounding Boxes with Track ID, Z, Speed" },
+          { label: "Heatmap PIP", value: "Color-mapped Depth Heatmap thumbnail (Top-Right HUD corner)" },
+          { label: "Alert Banners", value: "Flashing Audio-Visual Warning Banners for FCW (ISO 15623) & LDW (ISO 17361)" },
+          { label: "Disk Artifacts", value: "Structured frames.jsonl, summary.json, run_manifest.json, demo_hud_annotated.mp4" }
+        ],
+        codeSnippet: `export_artifacts(frame_records, output_dir=output_dir, video_path=video_out)`
+      }
+    };
+
+    // ================= INSPECTOR DRAWER CONTROLLER =================
+    function openInspector(componentKey) {
+      const data = componentSpecs[componentKey];
+      if (!data) return;
+
+      document.getElementById('modalTitle').innerHTML = `🔍 ${data.title}`;
+      let specsHtml = data.specs.map(s => `
+        <div class="spec-item">
+          <div class="spec-item-label">${s.label}</div>
+          <div class="spec-item-value">${s.value}</div>
+        </div>
+      `).join('');
+
+      let html = `
+        <div class="inspector-grid">
+          <div class="spec-item" style="border-color: rgba(0, 229, 255, 0.4); background: rgba(0, 229, 255, 0.06);">
+            <div class="spec-item-label" style="color: var(--cyan-neon);">Verified Source File (Phân chia/)</div>
+            <div class="spec-item-value" style="color: var(--cyan-neon); font-size: 11px;">${data.sourceFile}</div>
+          </div>
+          ${specsHtml}
+          <div class="spec-item">
+            <div class="spec-item-label">Baseline Code Excerpt</div>
+            <pre class="code-box"><code>${escapeHtml(data.codeSnippet)}</code></pre>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modalBody').innerHTML = html;
+      document.getElementById('inspectorModal').classList.add('open');
+    }
+
+    function closeInspector() {
+      document.getElementById('inspectorModal').classList.remove('open');
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    // ================= UI CONTROLS =================
+    let isAnimActive = true;
+    let isSpecsVisible = true;
+
+    document.getElementById('btnToggleAnim').addEventListener('click', function () {
+      isAnimActive = !isAnimActive;
+      const paths = document.querySelectorAll('.bus-path-animated');
+      paths.forEach(p => {
+        p.style.animationPlayState = isAnimActive ? 'running' : 'paused';
+      });
+      document.getElementById('animIcon').textContent = isAnimActive ? '⏸' : '▶';
+      document.getElementById('animText').textContent = isAnimActive ? 'Pause Flow' : 'Resume Flow';
+      this.classList.toggle('active', isAnimActive);
+    });
+
+    document.getElementById('btnToggleSpecs').addEventListener('click', function () {
+      isSpecsVisible = !isSpecsVisible;
+      const grid = document.getElementById('pipelineGrid');
+      grid.classList.toggle('compact-mode', !isSpecsVisible);
+      this.classList.toggle('active', isSpecsVisible);
+      
+      // Update button text & icon
+      const btnText = document.getElementById('specsBtnText');
+      if (btnText) btnText.textContent = isSpecsVisible ? 'Toggle Specs' : 'Specs: Compact';
+
+      // Animate redraw of connecting lines during and after transition
+      setTimeout(drawConnectors, 20);
+      setTimeout(drawConnectors, 100);
+      setTimeout(drawConnectors, 280);
+    });
+
+    // Close modal on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeInspector();
+    });
+
+    // ================= DYNAMIC MULTI-ANCHOR CONNECTOR ARROWS =================
+    function getAnchor(element, side, offsetYRatio = 0.5) {
+      const rect = element.getBoundingClientRect();
+      const parent = document.getElementById('viewportMain').getBoundingClientRect();
+      let x, y;
+      if (side === 'right') {
+        x = rect.right - parent.left;
+        y = rect.top + rect.height * offsetYRatio - parent.top;
+      } else if (side === 'left') {
+        x = rect.left - parent.left;
+        y = rect.top + rect.height * offsetYRatio - parent.top;
+      } else if (side === 'bottom') {
+        x = rect.left + rect.width * 0.5 - parent.left;
+        y = rect.bottom - parent.top;
+      } else if (side === 'top') {
+        x = rect.left + rect.width * 0.5 - parent.left;
+        y = rect.top - parent.top;
+      }
+      return { x, y };
+    }
+
+    function createStraightD(p1, p2) {
+      return `M ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} L ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+
+    function createBezierD(p1, p2) {
+      const dx = (p2.x - p1.x) * 0.52;
+      return `M ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} C ${(p1.x + dx).toFixed(1)} ${p1.y.toFixed(1)}, ${(p2.x - dx).toFixed(1)} ${p2.y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+
+    function drawConnectors() {
+      const svgStatic = document.getElementById('svgStaticGroup');
+      const svgAnim = document.getElementById('svgAnimGroup');
+      if (!svgStatic || !svgAnim) return;
+
+      svgStatic.innerHTML = '';
+      svgAnim.innerHTML = '';
+
+      const cam = document.getElementById('cardCamera');
+      const pre = document.getElementById('cardPreproc');
+      const lane = document.getElementById('cardLane');
+      const detect = document.getElementById('cardDetect');
+      const depth = document.getElementById('cardDepth');
+      const inpath = document.getElementById('cardInPath');
+      const boxdepth = document.getElementById('cardBoxDepth');
+      const ldw = document.getElementById('cardLDW');
+      const fcw = document.getElementById('cardFCW');
+      const hud = document.getElementById('cardHud');
+
+      if (!cam || !pre || !lane || !detect || !depth || !inpath || !boxdepth || !ldw || !fcw || !hud) return;
+
+      const connections = [
+        // 1. Column 1: Camera Ingest -> Preproc (Straight Vertical Downward Arrow)
+        { 
+          d: createStraightD(getAnchor(cam, 'bottom'), getAnchor(pre, 'top')), 
+          marker: 'arrowCyan', 
+          color: '#00e5ff' 
+        },
+        // 2a. Preproc -> UFLDv2 Lane Slicing (Branching Up-Right to Row 1)
+        { 
+          d: createBezierD(getAnchor(pre, 'right', 0.25), getAnchor(lane, 'left', 0.5)), 
+          marker: 'arrowLane', 
+          color: '#38bdf8' 
+        },
+        // 2b. Preproc -> YOLOv10s Detection (100% Straight Horizontal Center Branch to Row 2)
+        { 
+          d: createStraightD(getAnchor(pre, 'right', 0.5), getAnchor(detect, 'left', 0.5)), 
+          marker: 'arrowDet', 
+          color: '#10b981' 
+        },
+        // 2c. Preproc -> Depth Anything V2 (Branching Down-Right to Row 3)
+        { 
+          d: createBezierD(getAnchor(pre, 'right', 0.75), getAnchor(depth, 'left', 0.5)), 
+          marker: 'arrowDepth', 
+          color: '#f59e0b' 
+        },
+
+        // 3. Lane Slicing -> DIRECT STRAIGHT HIGHWAY TO LDW ENGINE (ISO 17361)
+        // 100% Horizontal Straight Line flowing cleanly across Row 1 above Column 3
+        { 
+          d: createStraightD({ x: getAnchor(lane, 'right').x, y: getAnchor(ldw, 'left', 0.5).y }, getAnchor(ldw, 'left', 0.5)), 
+          marker: 'arrowLane', 
+          color: '#38bdf8' 
+        },
+
+        // 4a. Lane Slicing -> In-Path Vehicle Filter (Lane Boundaries branching to In-Path Filter)
+        { 
+          d: createBezierD(getAnchor(lane, 'right', 0.75), getAnchor(inpath, 'left', 0.28)), 
+          marker: 'arrowLane', 
+          color: '#38bdf8' 
+        },
+        // 4b. YOLOv10s -> In-Path Vehicle Filter (Vehicle BBoxes to In-Path Filter)
+        { 
+          d: createBezierD(getAnchor(detect, 'right', 0.35), getAnchor(inpath, 'left', 0.72)), 
+          marker: 'arrowDet', 
+          color: '#10b981' 
+        },
+
+        // 4c. YOLOv10s -> ByteTrack & Box-to-Depth ROI (Vehicle BBoxes to ByteTrack)
+        { 
+          d: createBezierD(getAnchor(detect, 'right', 0.72), getAnchor(boxdepth, 'left', 0.28)), 
+          marker: 'arrowDet', 
+          color: '#10b981' 
+        },
+        // 4d. Depth Anything V2 -> ByteTrack & Box-to-Depth ROI (Metric Depth Map to ByteTrack)
+        { 
+          d: createBezierD(getAnchor(depth, 'right', 0.5), getAnchor(boxdepth, 'left', 0.72)), 
+          marker: 'arrowDepth', 
+          color: '#f59e0b' 
+        },
+
+        // 5a. In-Path Vehicle Filter -> FCW Engine (100% Straight Horizontal Line into FCW)
+        { 
+          d: createStraightD(getAnchor(inpath, 'right', 0.5), { x: getAnchor(fcw, 'left').x, y: getAnchor(inpath, 'right', 0.5).y }), 
+          marker: 'arrowPurple', 
+          color: '#a855f7' 
+        },
+        // 5b. ByteTrack & Box-to-Depth -> FCW Engine (100% Straight Horizontal Line into FCW)
+        { 
+          d: createStraightD(getAnchor(boxdepth, 'right', 0.5), { x: getAnchor(fcw, 'left').x, y: getAnchor(boxdepth, 'right', 0.5).y }), 
+          marker: 'arrowRose', 
+          color: '#f43f5e' 
+        },
+
+        // 6a. LDW Engine -> Cockpit HUD (100% Straight Horizontal Line into HUD)
+        { 
+          d: createStraightD(getAnchor(ldw, 'right', 0.5), { x: getAnchor(hud, 'left').x, y: getAnchor(ldw, 'right', 0.5).y }), 
+          marker: 'arrowAmber', 
+          color: '#fbbf24' 
+        },
+        // 6b. FCW Engine -> Cockpit HUD (100% Straight Horizontal Line into HUD)
+        { 
+          d: createStraightD(getAnchor(fcw, 'right', 0.5), { x: getAnchor(hud, 'left').x, y: getAnchor(fcw, 'right', 0.5).y }), 
+          marker: 'arrowRose', 
+          color: '#f43f5e' 
+        }
+      ];
+
+      connections.forEach(conn => {
+        // Static guide path with arrow marker
+        const pathStatic = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pathStatic.setAttribute('d', conn.d);
+        pathStatic.setAttribute('class', 'bus-path-static');
+        pathStatic.setAttribute('stroke', conn.color);
+        pathStatic.setAttribute('marker-end', `url(#${conn.marker})`);
+        svgStatic.appendChild(pathStatic);
+
+        // Moving animated pulse path
+        const pathAnim = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pathAnim.setAttribute('d', conn.d);
+        pathAnim.setAttribute('class', 'bus-path-animated');
+        pathAnim.setAttribute('stroke', conn.color);
+        if (!isAnimActive) pathAnim.style.animationPlayState = 'paused';
+        svgAnim.appendChild(pathAnim);
+      });
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(drawConnectors, 100);
+    });
+    window.addEventListener('resize', drawConnectors);
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,3848 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FA26AI50 — ADAS Capstone Project Review 1 Presentation</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- KaTeX for Mathematical Formula Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #050811;
+      --bg-card: rgba(13, 20, 38, 0.82);
+      --bg-card-hover: rgba(22, 33, 58, 0.92);
+      --border-card: rgba(56, 189, 248, 0.25);
+      --border-card-active: rgba(0, 229, 255, 0.8);
+
+      --cyan-neon: #00e5ff;
+      --cyan-glow: rgba(0, 229, 255, 0.35);
+      --blue-accent: #38bdf8;
+      --purple-accent: #a78bfa;
+      --emerald-safe: #10b981;
+      --amber-warn: #f59e0b;
+      --rose-alert: #f43f5e;
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #64748b;
+
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+      background-image:
+        radial-gradient(circle at 10% 15%, rgba(0, 229, 255, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(167, 139, 250, 0.09) 0%, transparent 45%),
+        linear-gradient(to bottom, rgba(30, 41, 59, 0.35) 1px, transparent 1px),
+        linear-gradient(to right, rgba(30, 41, 59, 0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+    }
+
+    /* Top Progress Bar */
+    #topProgressBar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--cyan-neon), var(--purple-accent));
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 12px var(--cyan-neon);
+    }
+
+    /* HUD Header */
+    header.hud-header {
+      position: fixed;
+      top: 4px;
+      left: 0;
+      right: 0;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(5, 8, 17, 0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 100;
+    }
+
+    .hud-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-code {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: rgba(0, 229, 255, 0.12);
+      color: var(--cyan-neon);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      letter-spacing: 0.5px;
+    }
+
+    .hud-project-name {
+      font-family: var(--font-heading);
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: 0.2px;
+    }
+
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-hud {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font-main);
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-hud:hover {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--cyan-neon);
+      color: var(--cyan-neon);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    }
+
+    .btn-hud.active {
+      background: var(--cyan-neon);
+      color: #060913;
+      font-weight: 700;
+      border-color: var(--cyan-neon);
+    }
+
+    .slide-counter {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-muted);
+      padding: 0 8px;
+    }
+
+    .slide-counter span {
+      color: var(--cyan-neon);
+      font-weight: 700;
+    }
+
+    /* Viewport */
+    #viewport {
+      position: absolute;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 38px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide {
+      position: absolute;
+      width: 96%;
+      max-width: 1520px;
+      height: 94%;
+      max-height: 860px;
+      background: var(--bg-card);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 24px 34px;
+      display: none;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(16px) scale(0.985);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      overflow-y: hidden;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Slide Header */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 8px;
+      flex-shrink: 0;
+    }
+
+    .slide-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .slide-num-badge {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--cyan-neon);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .slide-title {
+      font-family: var(--font-heading);
+      font-size: clamp(22px, 1.8vw, 27px);
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .slide-subtitle {
+      font-size: clamp(13px, 1.0vw, 14.5px);
+      color: var(--text-muted);
+    }
+
+    .slide-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+    }
+
+    /* Slide Body */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 0;
+      justify-content: space-between;
+    }
+
+    /* Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: var(--border-card-active);
+      background: var(--bg-card-hover);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .card.track-quan {
+      border-top: 3px solid #38bdf8;
+    }
+
+    .card.track-triet {
+      border-top: 3px solid #10b981;
+    }
+
+    .card.track-khang {
+      border-top: 3px solid #f59e0b;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: clamp(16.5px, 1.3vw, 19.5px);
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-member {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .badge-quan {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .badge-triet {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-khang {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* Scaled-up Bullet Lists (High Visual Readability) */
+    ul.bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      font-size: clamp(14px, 1.1vw, 16px);
+      line-height: 1.55;
+    }
+
+    ul.bullet-list li {
+      position: relative;
+      padding-left: 18px;
+      color: #cbd5e1;
+    }
+
+    ul.bullet-list li::before {
+      content: "▹";
+      position: absolute;
+      left: 0;
+      color: var(--cyan-neon);
+      font-weight: bold;
+    }
+
+    /* Visual Feature Item Card inside Slide 13 / Deliverables */
+    .deliverable-item {
+      background: rgba(10, 16, 32, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 11px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .deliverable-item:hover {
+      background: rgba(0, 229, 255, 0.08);
+      border-color: rgba(0, 229, 255, 0.3);
+    }
+
+    .del-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .del-name {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .del-desc {
+      font-size: 14.5px;
+      color: #cbd5e1;
+      line-height: 1.45;
+    }
+
+    /* Metric Boxes */
+    .metric-box {
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px dashed rgba(0, 229, 255, 0.3);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      margin-top: auto;
+    }
+
+    .metric-item {
+      text-align: center;
+    }
+
+    .metric-val {
+      font-family: var(--font-mono);
+      font-size: clamp(17px, 1.35vw, 20px);
+      font-weight: 700;
+      color: var(--cyan-neon);
+    }
+
+    .metric-lbl {
+      font-size: 11.5px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      margin-right: 4px;
+    }
+
+    .status-pick {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .status-ref {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .status-reject {
+      background: rgba(244, 63, 94, 0.15);
+      color: #f43f5e;
+      border: 1px solid rgba(244, 63, 94, 0.4);
+    }
+
+    .hud-table-compact td {
+      padding: 6px 10px !important;
+      font-size: 13.5px !important;
+      line-height: 1.3 !important;
+      white-space: nowrap;
+    }
+
+    .hud-table-compact th {
+      padding: 7px 10px !important;
+      font-size: 13.5px !important;
+      white-space: nowrap;
+    }
+
+    /* Tables */
+    table.hud-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: clamp(13px, 1.0vw, 14.5px);
+      margin-top: 2px;
+    }
+
+    table.hud-table th {
+      background: rgba(30, 41, 59, 0.7);
+      color: var(--cyan-neon);
+      font-family: var(--font-heading);
+      font-weight: 600;
+      text-align: left;
+      padding: 7px 10px;
+      border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+      letter-spacing: 0.5px;
+    }
+
+    table.hud-table td {
+      padding: 5px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+      vertical-align: middle;
+      line-height: 1.35;
+    }
+
+    table.hud-table tr:hover td {
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    /* Badges */
+    .badge-safe {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid #10b981;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12.5px;
+    }
+
+    .badge-warn {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid #f59e0b;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12.5px;
+    }
+
+    .badge-alert {
+      background: rgba(244, 63, 94, 0.2);
+      color: #f43f5e;
+      border: 1px solid #f43f5e;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12.5px;
+    }
+
+    /* Evidence Badges (Papers & Datasets) */
+    .card-evidence-wrap {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+
+    .badge-evidence {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .badge-evidence-paper {
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+
+    .badge-evidence-paper:hover {
+      background: rgba(56, 189, 248, 0.28);
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    }
+
+    .badge-evidence-dataset {
+      background: rgba(167, 139, 250, 0.12);
+      color: #c084fc;
+      border: 1px solid rgba(167, 139, 250, 0.4);
+    }
+
+    .badge-evidence-dataset:hover {
+      background: rgba(167, 139, 250, 0.28);
+      color: #ffffff;
+      border-color: #c084fc;
+      box-shadow: 0 0 10px rgba(167, 139, 250, 0.4);
+    }
+
+    .badge-evidence-std {
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .badge-evidence-std:hover {
+      background: rgba(16, 185, 129, 0.28);
+      color: #ffffff;
+      border-color: #34d399;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+
+    .badge-potential-report {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 11px;
+      border-radius: 5px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      color: var(--purple-accent);
+      background: rgba(168, 85, 247, 0.14);
+      border: 1.2px solid rgba(168, 85, 247, 0.5);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 8px rgba(168, 85, 247, 0.2);
+    }
+
+    .badge-potential-report:hover {
+      background: rgba(168, 85, 247, 0.3);
+      color: #ffffff;
+      border-color: var(--purple-accent);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.6);
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    .badge-paper-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 1.5px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      text-decoration: none;
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    .badge-paper-sm:hover {
+      background: rgba(56, 189, 248, 0.28);
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+      transform: translateY(-1px);
+    }
+
+    /* Pipeline Diagram (Slide 03) */
+    .pipeline-diagram {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      gap: 0;
+    }
+
+    .pipeline-node {
+      background: rgba(10, 16, 30, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 9px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      margin: 0;
+    }
+
+    .pipeline-node.input-node {
+      border-color: var(--blue-accent);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .pipeline-node.output-node {
+      border-color: var(--emerald-safe);
+      background: rgba(16, 185, 129, 0.1);
+      margin: 0;
+    }
+
+    .pipeline-branches-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1.8px dashed rgba(0, 229, 255, 0.55);
+      border-radius: 12px;
+      padding: 14px 14px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      box-shadow: 0 0 24px rgba(0, 229, 255, 0.1);
+      margin-top: 14px;
+      margin-bottom: 0px;
+      position: relative;
+    }
+
+    .branches-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      padding: 0 8px;
+    }
+
+    .branch-card {
+      border-radius: 8px;
+      padding: 12px 6px;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: all 0.25s ease;
+    }
+
+    .branch-card.b-lane {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1.5px solid #38bdf8;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+    }
+
+    .branch-card.b-lane:hover {
+      background: rgba(56, 189, 248, 0.24);
+      border-color: #7dd3fc;
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .branch-card.b-det {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1.5px solid #10b981;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .branch-card.b-det:hover {
+      background: rgba(16, 185, 129, 0.24);
+      border-color: #34d399;
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .branch-card.b-depth {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1.5px solid #f59e0b;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+    }
+
+    .branch-card.b-depth:hover {
+      background: rgba(245, 158, 11, 0.24);
+      border-color: #fbbf24;
+      box-shadow: 0 0 18px rgba(245, 158, 11, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .branch-head {
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .branch-head .branch-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .branch-head .branch-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .flow-split-container,
+    .flow-merge-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .flow-svg {
+      width: 100%;
+      display: block;
+    }
+
+    .flow-arrow-down {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .btn-expand-full {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 16px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.28), rgba(14, 165, 233, 0.45));
+      color: #ffffff;
+      border: 1.8px solid var(--cyan-neon);
+      font-family: var(--font-heading);
+      font-size: 12.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.55);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      animation: pulseExpandBtn 2.0s infinite alternate;
+      white-space: nowrap;
+    }
+
+    .btn-expand-full:hover {
+      background: var(--cyan-neon);
+      color: #030712;
+      border-color: #ffffff;
+      box-shadow: 0 0 28px rgba(0, 229, 255, 0.95);
+      transform: translateY(-2px) scale(1.05);
+    }
+
+    @keyframes pulseExpandBtn {
+      0% {
+        box-shadow: 0 0 12px rgba(0, 229, 255, 0.4), inset 0 0 8px rgba(0, 229, 255, 0.2);
+      }
+
+      100% {
+        box-shadow: 0 0 26px rgba(0, 229, 255, 0.85), inset 0 0 14px rgba(0, 229, 255, 0.35);
+      }
+    }
+
+    /* Gantt Chart Component */
+    .gantt-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      height: 100%;
+      background: rgba(10, 16, 32, 0.75);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      padding: 10px 18px;
+      position: relative;
+      overflow: hidden;
+      justify-content: space-between;
+    }
+
+    .gantt-header {
+      display: grid;
+      grid-template-columns: 350px 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+      padding-bottom: 6px;
+      font-family: var(--font-heading);
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--cyan-neon);
+      text-align: center;
+    }
+
+    .gantt-header .col-task {
+      text-align: left;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+    }
+
+    .gantt-body {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      justify-content: space-between;
+      position: relative;
+      min-height: 0;
+    }
+
+    .gantt-row {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 12px;
+      align-items: center;
+      font-size: 12.5px;
+    }
+
+    .gantt-task-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #e2e8f0;
+      white-space: nowrap;
+    }
+
+    .gantt-track-area {
+      position: relative;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.025);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      border-left: 1px solid rgba(255, 255, 255, 0.05);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .gantt-track-area.milestone-track {
+      background: rgba(0, 229, 255, 0.04);
+      border: 1px dashed rgba(0, 229, 255, 0.35);
+      height: 24px;
+    }
+
+    .gantt-bar {
+      position: absolute;
+      height: 16px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s ease;
+      cursor: default;
+    }
+
+    .gantt-bar:hover {
+      transform: scaleY(1.15);
+      filter: brightness(1.2);
+      z-index: 15;
+    }
+
+    .gantt-bar.done {
+      background: linear-gradient(90deg, #059669, #10b981);
+      border: 1px solid #34d399;
+    }
+
+    .gantt-bar.track-triet {
+      background: linear-gradient(90deg, #047857, #10b981);
+      border: 1px solid #6ee7b7;
+    }
+
+    .gantt-bar.track-quan {
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      border: 1px solid #7dd3fc;
+    }
+
+    .gantt-bar.track-khang {
+      background: linear-gradient(90deg, #d97706, #f59e0b);
+      border: 1px solid #fcd34d;
+    }
+
+    .gantt-bar.pipe-int {
+      background: linear-gradient(90deg, #7c3aed, #a78bfa);
+      border: 1px solid #c4b5fd;
+    }
+
+    .gantt-bar.final {
+      background: linear-gradient(90deg, #e11d48, #f43f5e);
+      border: 1px solid #fda4af;
+    }
+
+    .gantt-milestone-pin {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      transform: translateX(-50%);
+      z-index: 10;
+      padding: 2px 8px;
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      white-space: nowrap;
+    }
+
+    .pin-r1 {
+      background: rgba(0, 229, 255, 0.2);
+      border: 1px solid var(--cyan-neon);
+      color: var(--cyan-neon);
+    }
+
+    .pin-r2 {
+      background: rgba(56, 189, 248, 0.2);
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+    }
+
+    .pin-r3 {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid #f59e0b;
+      color: #f59e0b;
+    }
+
+    .pin-final {
+      background: rgba(244, 63, 94, 0.25);
+      border: 1px solid #f43f5e;
+      color: #ff8597;
+    }
+
+    .today-v-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #f43f5e;
+      box-shadow: 0 0 12px #f43f5e;
+      z-index: 14;
+      pointer-events: none;
+    }
+
+    .today-flag {
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      background: #f43f5e;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+      box-shadow: 0 0 8px rgba(244, 63, 94, 0.6);
+    }
+
+    /* Footer Status Bar */
+    footer.hud-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(5, 8, 17, 0.94);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 11px;
+      color: var(--text-muted);
+      z-index: 100;
+    }
+
+    .hud-status-items {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .hud-status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+    }
+
+    .dot-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald-safe);
+      box-shadow: 0 0 8px var(--emerald-safe);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      }
+
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+      }
+
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    /* Speaker Notes Drawer */
+    #notesDrawer {
+      position: fixed;
+      top: 56px;
+      right: -550px;
+      width: 530px;
+      bottom: 38px;
+      background: rgba(8, 14, 28, 0.98);
+      backdrop-filter: blur(24px);
+      border-left: 1px solid var(--border-card-active);
+      box-shadow: -12px 0 45px rgba(0, 0, 0, 0.7);
+      z-index: 200;
+      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 22px;
+    }
+
+    #notesDrawer.open {
+      right: 0;
+    }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+    }
+
+    .drawer-title {
+      font-family: var(--font-heading);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--cyan-neon);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      padding-right: 6px;
+    }
+
+    .drawer-body h4 {
+      color: #ffffff;
+      font-size: 15px;
+      margin: 0 0 10px 0;
+      border-left: 3px solid var(--cyan-neon);
+      padding-left: 8px;
+    }
+
+    .notes-section {
+      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .notes-heading {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+
+    .drawer-body p,
+    .drawer-body li {
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .drawer-body ul,
+    .drawer-body ol {
+      padding-left: 18px;
+      margin-bottom: 6px;
+    }
+
+    /* Overview Modal Grid */
+    #overviewModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 16, 0.95);
+      backdrop-filter: blur(24px);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      padding: 34px 48px;
+      overflow-y: auto;
+    }
+
+    #overviewModal.open {
+      display: flex;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .overview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .overview-card:hover {
+      border-color: var(--cyan-neon);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 229, 255, 0.25);
+    }
+
+    .overview-card.current {
+      border: 2px solid var(--cyan-neon);
+      background: rgba(0, 229, 255, 0.12);
+    }
+
+    .overview-card .num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--cyan-neon);
+      font-weight: 700;
+    }
+
+    .overview-card .title {
+      font-family: var(--font-heading);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--cyan-neon);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top Progress Bar -->
+  <div id="topProgressBar"></div>
+
+  <!-- HUD Navigation Header -->
+  <header class="hud-header">
+    <div class="hud-title-group">
+      <span class="badge-code">FA26AI50</span>
+      <span class="hud-project-name">Real-time Vision ADAS: Lane, Detection & Collision Warning</span>
+    </div>
+
+    <div class="hud-controls">
+      <button class="btn-hud" id="btnPrev" title="Previous Slide (← / Backspace)">◀ Prev</button>
+      <div class="slide-counter"><span id="currSlideNum">01</span> / <span id="totalSlideNum">25</span></div>
+      <button class="btn-hud" id="btnNext" title="Next Slide (→ / Space)">Next ▶</button>
+      <button class="btn-hud" id="btnOverview" title="Slide Overview Grid (O)">⊞ Grid</button>
+      <button class="btn-hud" id="btnNotes" title="Toggle Speaker Notes (N)">📝 Notes (N)</button>
+      <button class="btn-hud" id="btnFullscreen" title="Toggle Fullscreen (F)">⛶ Full</button>
+    </div>
+  </header>
+
+  <!-- Viewport for Presentation Slides -->
+  <main id="viewport">
+
+    <!-- ================= SLIDE 1: TITLE ================= -->
+    <section class="slide active" id="slide-1" data-slide="1">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 01 • Title Cover</span>
+          <h2 class="slide-title">KLTN-AI-FA26AI50_GFA26AI09 • REVIEW-1 CAPSTONE DEFENSE</h2>
+          <span class="slide-subtitle">Hội đồng Đánh giá Khóa luận Tốt nghiệp Ngành Trí tuệ Nhân tạo</span>
+        </div>
+        <span class="slide-tag">25/09/2026</span>
+      </div>
+      <div class="slide-body" style="justify-content: center; align-items: center; text-align: center; gap: 24px;">
+        <div style="max-width: 980px; display: flex; flex-direction: column; gap: 14px;">
+          <div
+            style="font-family: var(--font-mono); font-size: 20px; color: var(--cyan-neon); letter-spacing: 1.5px; font-weight: 700;">
+            MÃ ĐỀ TÀI: FA26AI50
+          </div>
+          <h1
+            style="font-family: var(--font-heading); font-size: clamp(26px, 2.2vw, 34px); font-weight: 800; color: #ffffff; line-height: 1.25;">
+            REAL-TIME VISION-BASED LANE DETECTION, OBJECT DETECTION, AND COLLISION WARNING SYSTEM FOR DRIVER ASSISTANCE
+          </h1>
+          <p style="font-size: clamp(15px, 1.1vw, 17px); color: var(--text-muted); max-width: 880px; margin: 0 auto;">
+            Hệ thống hỗ trợ lái xe thời gian thực dựa trên thị giác máy tính: nhận diện làn đường, vật cản và cảnh báo
+            va chạm
+          </p>
+        </div>
+
+        <div
+          style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 900px; margin-top: 8px;">
+          <div class="card" style="text-align: left;">
+            <div class="card-title" style="font-size: 15px; color: var(--blue-accent);">👨‍🏫 GIẢNG VIÊN HƯỚNG DẪN</div>
+            <ul class="bullet-list">
+              <li><strong>Thầy Nguyễn Xuân Huy</strong></li>
+              <li><strong>Thầy Nguyễn Quốc Trung</strong></li>
+            </ul>
+          </div>
+
+          <div class="card" style="text-align: left;">
+            <div class="card-title" style="font-size: 15px; color: var(--emerald-safe);">👥 THÀNH VIÊN NHÓM THỰC HIỆN
+            </div>
+            <ul class="bullet-list">
+              <li><strong>Nguyễn Trần Minh Quân</strong> (Leader — SE194342)</li>
+              <li><strong>Nguyễn Minh Triết</strong> (Member — SE194257)</li>
+              <li><strong>Đỗ Khang</strong> (Member — SE196305)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-2" data-slide="2">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 02 • Team & Roles</span>
+          <h2 class="slide-title">CƠ CẤU & PHÂN CÔNG KỸ THUẬT 3 THÀNH VIÊN</h2>
+          <span class="slide-subtitle">Trách nhiệm kỹ thuật độc lập gắn liền với 3 phân hệ cốt lõi</span>
+        </div>
+        <span class="slide-tag">Team Structure</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <!-- Quân -->
+          <div class="card track-quan">
+            <div class="card-header">
+              <span class="badge-member badge-quan">LEADER</span>
+              <span style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-sub);">SE194342</span>
+            </div>
+            <div class="card-title">Nguyễn Trần Minh Quân</div>
+            <div style="font-size: 14px; font-weight: 600; color: #38bdf8;">🛣️ Phân hệ Làn đường (Lane Track)</div>
+            <ul class="bullet-list">
+              <li>Nghiên cứu & thực nghiệm <strong>Lane Detection</strong> (CULane, Canny-Hough, UFLDv2).</li>
+              <li>Xây dựng kiến trúc điều phối chung <code>IntegratedPipeline</code>.</li>
+              <li>Quản lý đồng bộ mã nguồn & Hợp đồng dữ liệu <code>FrameRecord v1.0</code>.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">F1 ≥ 76.5%</div>
+                <div class="metric-lbl">Target Metric</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&gt; 120 FPS</div>
+                <div class="metric-lbl">Inference Speed</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Triết -->
+          <div class="card track-triet">
+            <div class="card-header">
+              <span class="badge-member badge-triet">MEMBER</span>
+              <span style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-sub);">SE194257</span>
+            </div>
+            <div class="card-title">Nguyễn Minh Triết</div>
+            <div style="font-size: 14px; font-weight: 600; color: #10b981;">🚗 Phân hệ Vật thể & Bám vết (Track)</div>
+            <ul class="bullet-list">
+              <li>Nghiên cứu <strong>Object Detection & ByteTrack</strong> (BDD100K 10 classes, YOLOv10).</li>
+              <li>Đột phá NMS-free Dual Head triệt tiêu độ trễ hậu xử lý.</li>
+              <li>Tối ưu hóa bài toán Pareto Trade-off 4 chiều (mAP, p95 Latency, FPS, VRAM).</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">52.87%</div>
+                <div class="metric-lbl">mAP50 Achieved</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">7.15 ms</div>
+                <div class="metric-lbl">Detector Latency</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Khang -->
+          <div class="card track-khang">
+            <div class="card-header">
+              <span class="badge-member badge-khang">MEMBER</span>
+              <span style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-sub);">SE196305</span>
+            </div>
+            <div class="card-title">Đỗ Khang</div>
+            <div style="font-size: 14px; font-weight: 600; color: #f59e0b;">📏 Phân hệ Độ sâu & TTC (Depth Track)</div>
+            <ul class="bullet-list">
+              <li>Nghiên cứu <strong>Monocular Metric Depth</strong> (KITTI Raw, CARLA, Depth Anything V2).</li>
+              <li>Xây dựng thuật toán tính vận tốc tiếp cận <code>v_z</code> và thời gian va chạm
+                <code>TTC = Z / v_z</code>.
+              </li>
+              <li>Thiết lập logic cảnh báo va chạm trước FCW 3 cấp độ (Safe / Warning / Critical).</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">AbsRel &lt; 0.10</div>
+                <div class="metric-lbl">Depth Metric</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">TTC ≤ 1.5s</div>
+                <div class="metric-lbl">Critical FCW</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Supervisors Footer Bar -->
+        <div class="card"
+          style="padding: 9px 18px; margin-top: 10px; background: rgba(56, 189, 248, 0.04); border-color: rgba(56, 189, 248, 0.25); display: flex; flex-direction: row; justify-content: space-between; align-items: center; flex-shrink: 0;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 15px;">👨‍🏫</span>
+            <span
+              style="font-family: var(--font-heading); font-size: 12.5px; font-weight: 700; color: var(--blue-accent); letter-spacing: 0.5px;">GIẢNG
+              VIÊN HƯỚNG DẪN:</span>
+            <span style="font-size: 13.5px; color: #ffffff; font-weight: 600;">Thầy: Nguyễn Xuân Huy</span>
+            <span style="color: var(--border-card-active); margin: 0 6px;">•</span>
+            <span style="font-size: 13.5px; color: #ffffff; font-weight: 600;">Thầy: Nguyễn Quốc Trung</span>
+          </div>
+          <div
+            style="font-family: var(--font-mono); font-size: 11px; color: var(--cyan-neon); font-weight: 700; letter-spacing: 0.5px;">
+            BỘ MÔN TRÍ TUỆ NHÂN TẠO (AI)
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-3" data-slide="3">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 03 • Problem Statement</span>
+          <h2 class="slide-title">BÀI TOÁN & SƠ ĐỒ LUỒNG AI PIPELINE</h2>
+          <span class="slide-subtitle">Camera đơn chi phí thấp thay thế cảm biến LiDAR đắt đỏ</span>
+        </div>
+        <span class="slide-tag">Perception Flow</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Bối cảnh -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title">🎯 Vấn đề Thực tế & Mục tiêu Đề tài</div>
+            <ul class="bullet-list">
+              <li><strong>Thực trạng & Cảnh báo giả</strong>: Tai nạn do mất tập trung/phanh gấp; các hệ thống
+                Radar/LiDAR đắt đỏ (&gt; $5.000) dễ bị cảnh báo giả hoặc phanh gấp (Phantom Braking) do nhầm nắp cống,
+                mối nối cầu kim loại là vật cản.</li>
+              <li><strong>Mục tiêu bài toán</strong>: Xây dựng hệ thống ADAS đa nhiệm toàn trình <strong>chỉ dùng 01
+                  Camera RGB đơn</strong> gắn kính lái, tận dụng <strong>ngữ nghĩa hình ảnh (Vision Semantics)</strong>
+                để triệt tiêu báo động giả.</li>
+              <li><strong>Phần cứng & Chi phí Biên</strong>: Tối ưu hóa triển khai trên thiết bị AI nhúng (NVIDIA Jetson
+                Orin Nano, <strong>tổng chi phí phần cứng &lt; \$800</strong>), mang tính khả thi cao để phổ cập cho xe
+                bình dân.</li>
+              <li><strong>Yêu cầu cốt lõi</strong>: Vận hành thời gian thực <strong>≥ 30 FPS</strong> và độ trễ phân vị
+                <strong>p95 &lt; 33 ms</strong> trên GPU biên thương mại.
+              </li>
+            </ul>
+          </div>
+
+          <!-- Sơ đồ Luồng Native HTML/CSS Hoàn Mỹ -->
+          <div class="card" style="border-color: rgba(0, 229, 255, 0.4); display: flex; flex-direction: column;">
+            <div class="card-title"
+              style="color: var(--cyan-neon); display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 6px;">
+              <span
+                style="font-family: var(--font-heading); font-size: 14px; font-weight: 800; letter-spacing: 0.4px;">⚡
+                ADAS Pipeline Architecture</span>
+              <a href="adas_pipeline_architecture.html" target="_blank" class="btn-expand-full"
+                title="Mở Lưu đồ Kiến trúc Ngang Toàn màn hình & Luồng Chuyển động Tương tác">🔗 Click to Expand Full
+                ↗</a>
+            </div>
+
+            <div class="pipeline-diagram">
+              <!-- Input Node -->
+              <div class="pipeline-node input-node">
+                <div style="font-weight: 700; font-size: 13px; color: var(--blue-accent);">📹 INPUT STREAM (Camera)
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">1x Monocular RGB
+                  (720p @ 30 FPS)</div>
+              </div>
+
+              <!-- Split Connector: Direct from Camera touching the 3 cards -->
+              <div class="flow-split-container" style="height: 38px; margin: 0; line-height: 0;">
+                <svg class="flow-svg" viewBox="0 0 400 38" preserveAspectRatio="none"
+                  style="height: 38px; width: 100%; display: block;">
+                  <!-- Trunk touching bottom edge of Camera (y=0) -->
+                  <line x1="200" y1="0" x2="200" y2="18" stroke="var(--cyan-neon)" stroke-width="2.5" />
+                  <!-- Horizontal distribution bus -->
+                  <line x1="68" y1="18" x2="332" y2="18" stroke="var(--cyan-neon)" stroke-width="2.5" />
+                  <!-- Branch 1 touching Lane Perception (tip at y=37) -->
+                  <line x1="68" y1="18" x2="68" y2="27" stroke="#38bdf8" stroke-width="2.5" />
+                  <polygon points="62,25 74,25 68,37" fill="#38bdf8" />
+                  <!-- Branch 2 touching Detection & Track (tip at y=37) -->
+                  <line x1="200" y1="18" x2="200" y2="27" stroke="#10b981" stroke-width="2.5" />
+                  <polygon points="194,25 206,25 200,37" fill="#10b981" />
+                  <!-- Branch 3 touching Depth & TTC (tip at y=37) -->
+                  <line x1="332" y1="18" x2="332" y2="27" stroke="#f59e0b" stroke-width="2.5" />
+                  <polygon points="326,25 338,25 332,37" fill="#f59e0b" />
+                </svg>
+              </div>
+
+              <!-- 3 Parallel Model Cards -->
+              <div class="branches-grid">
+                <div class="branch-card b-lane">
+                  <div class="branch-head" style="color: #38bdf8;">
+                    <span class="branch-icon">🛣️</span>
+                    <span class="branch-title">Lane Perception</span>
+                  </div>
+                </div>
+
+                <div class="branch-card b-det">
+                  <div class="branch-head" style="color: #10b981;">
+                    <span class="branch-icon">🚗</span>
+                    <span class="branch-title">Detection & Track</span>
+                  </div>
+                </div>
+
+                <div class="branch-card b-depth">
+                  <div class="branch-head" style="color: #f59e0b;">
+                    <span class="branch-icon">📏</span>
+                    <span class="branch-title">Depth & TTC</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Merge Flow Connector: touching bottom of 3 cards and top of Contract Merge -->
+              <div class="flow-merge-container" style="height: 34px; margin: 0; line-height: 0;">
+                <svg class="flow-svg" viewBox="0 0 400 34" preserveAspectRatio="none"
+                  style="height: 34px; width: 100%; display: block;">
+                  <line x1="68" y1="0" x2="68" y2="16" stroke="#38bdf8" stroke-width="2.5" />
+                  <line x1="200" y1="0" x2="200" y2="16" stroke="#10b981" stroke-width="2.5" />
+                  <line x1="332" y1="0" x2="332" y2="16" stroke="#f59e0b" stroke-width="2.5" />
+                  <line x1="68" y1="16" x2="332" y2="16" stroke="var(--purple-accent)" stroke-width="2.5" />
+                  <line x1="200" y1="16" x2="200" y2="23" stroke="var(--purple-accent)" stroke-width="2.5" />
+                  <polygon points="194,21 206,21 200,33" fill="var(--purple-accent)" />
+                </svg>
+              </div>
+
+              <!-- Merge Layer (Solid border) -->
+              <div
+                style="background: rgba(168, 85, 247, 0.14); border: 1.5px solid var(--purple-accent); border-radius: 8px; padding: 11px 16px; display: flex; justify-content: space-between; align-items: center; margin: 0;">
+                <span style="font-size: 12px; font-weight: 700; color: #fff;">📦 Immutable Contract Merge</span>
+                <span style="font-family: var(--font-mono); font-size: 11px; color: #c084fc;">FrameRecord contract
+                  v1.0</span>
+              </div>
+
+              <!-- Direct Down Connector: touching bottom of Contract Merge (y=0) and top of HUD (tip at y=37) -->
+              <div class="flow-arrow-down" style="height: 38px; margin: 0; line-height: 0;">
+                <svg width="24" height="38" viewBox="0 0 24 38" style="display: block;">
+                  <line x1="12" y1="0" x2="12" y2="26" stroke="var(--emerald-safe)" stroke-width="2.5"
+                    stroke-linecap="round" />
+                  <polygon points="6,24 18,24 12,37" fill="var(--emerald-safe)" />
+                </svg>
+              </div>
+
+              <!-- Output Node -->
+              <div class="pipeline-node output-node">
+                <div style="font-weight: 700; font-size: 12.5px; color: var(--emerald-safe);">🎬 REAL-TIME HUD & ALERTS
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  <span class="badge-safe">SAFE</span>
+                  <span class="badge-warn">WARN</span>
+                  <span class="badge-alert">CRITICAL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-4" data-slide="4">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 04 • Research Questions & Gap</span>
+          <h2 class="slide-title">CÂU HỎI NGHIÊN CỨU & KHOẢNG TRỐNG HỌC THUẬT</h2>
+          <span class="slide-subtitle">Xác lập ranh giới khoa học và giá trị đóng góp của Đồ án</span>
+        </div>
+        <span class="slide-tag">Academic Gaps</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Research Questions -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">🎯 Research Questions (RQ)</div>
+            <ul class="bullet-list">
+              <li><strong>Main RQ</strong>: Làm thế nào để tích hợp đồng thời <strong>Lane + Tracking + Metric Depth &
+                  TTC</strong> trên 01 Camera RGB đơn đạt độ chính xác cao mà vẫn duy trì thông lượng <strong>≥ 30
+                  FPS</strong> (độ trễ phân vị <strong>p95 &lt; 33 ms</strong>)?</li>
+              <li><strong>Sub-RQ1 (Lane - Quân)</strong>: Row-based Anchor Classification duy trì F1 &gt; 75% trên
+                CULane trong điều kiện ánh sáng yếu/bóng râm mà không tốn chi phí tính toán như Segmentation?</li>
+              <li><strong>Sub-RQ2 (Track - Triết)</strong>: Cơ chế NMS-free (YOLOv10) + ByteTrack mang lại ưu thế định
+                lượng thế nào về p95 Latency và độ ổn định ID trên BDD100K 10 lớp?</li>
+              <li><strong>Sub-RQ3 (Depth - Khang)</strong>: Monocular Metric Depth (Depth Anything V2) có đạt AbsRel
+                &lt; 0.12 để cảnh báo va chạm trước TTC ≥ 1.5s không cần LiDAR?</li>
+            </ul>
+          </div>
+
+          <!-- Research Gaps -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--amber-warn);">🔍 Khoảng trống Nghiên cứu (Research Gaps)</div>
+            <ul class="bullet-list">
+              <li><strong>1. Task Isolation Gap</strong>: Các nghiên cứu SOTA hiện nay chỉ tập trung đơn lẻ từng bài
+                toán (chỉ Detection, hoặc chỉ Lane, hoặc chỉ Depth). Rất hiếm công trình tích hợp khép kín từ Perception
+                đến Cảnh báo va chạm thực tế trên camera đơn.</li>
+              <li><strong>2. Latency Bottleneck Gap</strong>: Các mạng Monocular Depth có độ chính xác cao nhưng rất
+                nặng, khó kết hợp với Object Tracking để chạy mượt mà ≥ 30 FPS.</li>
+              <li><strong>3. Gradient Conflict Gap</strong>: Các mạng Multitask chia sẻ chung backbone (YOLOPv2) bị hiện
+                tượng suy giảm độ chính xác do xung đột gradient giữa các nhánh.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-5" data-slide="5">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 05 • Kiến trúc Dữ liệu</span>
+          <h2 class="slide-title">BẢN ĐỒ 5 BỘ DỮ LIỆU CHUẨN ĐỐI SÁNH ĐA NHIỆM</h2>
+          <span class="slide-subtitle">Năm bộ dữ liệu độc lập phục vụ nhận diện 2D, bám vết thời gian, độ sâu mét và kiểm thử an toàn</span>
+        </div>
+        <span class="slide-tag">Kiến trúc Dữ liệu</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2" style="gap: 16px;">
+          <!-- Trái: Sơ đồ Kiến trúc Dữ liệu -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">🗺️ Phân bổ Tập Dữ liệu Độc lập theo Phân hệ</div>
+            <div style="width: 100%; height: 320px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 540 310" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Khung Trung tâm -->
+                <rect x="180" y="125" width="180" height="60" rx="8" fill="rgba(0, 229, 255, 0.12)" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <text x="270" y="152" fill="#ffffff" font-size="13" font-weight="700" text-anchor="middle">ADAS PERCEPTION</text>
+                <text x="270" y="170" fill="var(--cyan-neon)" font-size="11" text-anchor="middle">Master Pipeline Core</text>
+
+                <!-- Dataset 1: BDD100K -->
+                <rect x="20" y="20" width="160" height="65" rx="6" fill="rgba(16, 185, 129, 0.1)" stroke="var(--emerald-safe)" stroke-width="1.5"/>
+                <text x="100" y="42" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">BDD100K (10 Lớp)</text>
+                <text x="100" y="60" fill="var(--text-muted)" font-size="10" text-anchor="middle">100k Ảnh • Object Detection</text>
+                <text x="100" y="74" fill="var(--emerald-safe)" font-size="9" text-anchor="middle">Gói Niêm Phong 4.69 GB</text>
+                <line x1="140" y1="85" x2="210" y2="125" stroke="var(--emerald-safe)" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+                <!-- Dataset 2: CULane -->
+                <rect x="360" y="20" width="160" height="65" rx="6" fill="rgba(56, 189, 248, 0.1)" stroke="var(--blue-accent)" stroke-width="1.5"/>
+                <text x="440" y="42" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">CULane (9 Kịch bản)</text>
+                <text x="440" y="60" fill="var(--text-muted)" font-size="10" text-anchor="middle">133k Khung hình • Row Anchors</text>
+                <text x="440" y="74" fill="var(--blue-accent)" font-size="9" text-anchor="middle">Tập Val Chuẩn 3.39 GB</text>
+                <line x1="400" y1="85" x2="330" y2="125" stroke="var(--blue-accent)" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+                <!-- Dataset 3: KITTI Tracking -->
+                <rect x="20" y="225" width="160" height="65" rx="6" fill="rgba(245, 158, 11, 0.1)" stroke="var(--amber-warn)" stroke-width="1.5"/>
+                <text x="100" y="247" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">KITTI Tracking</text>
+                <text x="100" y="265" fill="var(--text-muted)" font-size="10" text-anchor="middle">834 Frames Replay • LiDAR</text>
+                <text x="100" y="279" fill="var(--amber-warn)" font-size="9" text-anchor="middle">Quỹ đạo Động học</text>
+                <line x1="140" y1="225" x2="210" y2="185" stroke="var(--amber-warn)" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+                <!-- Dataset 4: CCD Tai Nạn -->
+                <rect x="360" y="225" width="160" height="65" rx="6" fill="rgba(244, 63, 94, 0.1)" stroke="var(--rose-alert)" stroke-width="1.5"/>
+                <text x="440" y="247" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">Car Crash Dataset (CCD)</text>
+                <text x="440" y="265" fill="var(--text-muted)" font-size="10" text-anchor="middle">4.500 Video • Ca Nguy Hiểm</text>
+                <text x="440" y="279" fill="var(--rose-alert)" font-size="9" text-anchor="middle">Kiểm thử Cực hạn FCW</text>
+                <line x1="400" y1="225" x2="330" y2="185" stroke="var(--rose-alert)" stroke-width="1.5" stroke-dasharray="4,4"/>
+              </svg>
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-sub); text-align: center;">
+              Cấu trúc tách rời từng tập dữ liệu bảo đảm tính kiểm thử khách quan, triệt tiêu hiện tượng ô nhiễm chéo giữa các tác vụ.
+            </div>
+          </div>
+
+          <!-- Phải: Thông số Kỹ thuật Tập Dữ liệu -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--blue-accent);">📊 Quy chuẩn và Đặc trưng Dữ liệu</div>
+            <ul class="bullet-list" style="font-size: 13.5px; gap: 10px;">
+              <li><strong>BDD100K 10 Lớp</strong>: Quy mô 100k ảnh đa dạng thời tiết, ban đêm chói đèn và đô thị. Phục hồi đầy đủ 3 lớp đối tượng yếu thế (VRU).</li>
+              <li><strong>CULane Benchmark</strong>: 133k khung hình bao quát 9 điều kiện khắc nghiệt (bóng râm, chói đèn, ban đêm, đường cong, mất vạch kẻ).</li>
+              <li><strong>KITTI Temporal Tracking</strong>: Chuỗi thời gian liên tục 834 khung hình đối chuẩn trực tiếp với LiDAR 64 tia Velodyne ($Z \le 80\text{ m}$).</li>
+              <li><strong>Car Crash Dataset (CCD)</strong>: Bộ video va chạm thực tế kiểm thử ngưỡng kích hoạt cảnh báo va chạm trước (TTC).</li>
+              <li><strong>CARLA Simulator</strong>: Dữ liệu mô phỏng cung cấp Ground Truth 3D tuyệt đối để xác lập giới hạn sai số trên lý thuyết.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">5</div>
+                <div class="metric-lbl">Bộ Benchmark</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">100%</div>
+                <div class="metric-lbl">Tách Rời Tác Vụ</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">4.69 GB</div>
+                <div class="metric-lbl">Gói Niêm Phong</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-6" data-slide="6">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 06 • Tiền Xử Lý Dữ Liệu</span>
+          <h2 class="slide-title">PHỤC HỒI NHÃN 10 LỚP & QUY TRÌNH LÀM SẠCH BDD100K</h2>
+          <span class="slide-subtitle">Sửa lỗi thiếu bí danh danh mục, khôi phục 755.927 nhãn cho người đi bộ và phương tiện hai bánh</span>
+        </div>
+        <span class="slide-tag">Làm sạch Nhãn</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Lưu đồ Phục hồi Nhãn -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--emerald-safe);">⚙️ Luồng Xử Lý Khắc Phục Lỗi Nhãn Bí Danh</div>
+            <div style="width: 100%; height: 310px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 280" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Bước 1 -->
+                <rect x="20" y="30" width="135" height="70" rx="6" fill="rgba(244, 63, 94, 0.12)" stroke="var(--rose-alert)" stroke-width="1.5"/>
+                <text x="87" y="55" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">Bộ Parser Cũ</text>
+                <text x="87" y="72" fill="var(--rose-alert)" font-size="10" text-anchor="middle">Thiếu Quy Tắc Alias</text>
+                <text x="87" y="88" fill="var(--text-sub)" font-size="9" text-anchor="middle">755k Nhãn Bị Rớt</text>
+
+                <!-- Mũi tên 1 -->
+                <line x1="155" y1="65" x2="195" y2="65" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <polygon points="195,60 205,65 195,70" fill="var(--cyan-neon)"/>
+
+                <!-- Bước 2 -->
+                <rect x="205" y="30" width="155" height="70" rx="6" fill="rgba(0, 229, 255, 0.12)" stroke="var(--cyan-neon)" stroke-width="1.5"/>
+                <text x="282" y="55" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">Khắc Phục Alias Map</text>
+                <text x="282" y="72" fill="var(--cyan-neon)" font-size="10" text-anchor="middle">Khớp Đúng Danh Mục</text>
+                <text x="282" y="88" fill="var(--text-sub)" font-size="9" text-anchor="middle">pedestrian, bike, motor</text>
+
+                <!-- Mũi tên 2 -->
+                <line x1="360" y1="65" x2="400" y2="65" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <polygon points="400,60 410,65 400,70" fill="var(--cyan-neon)"/>
+
+                <!-- Bước 3 -->
+                <rect x="410" y="30" width="95" height="70" rx="6" fill="rgba(16, 185, 129, 0.12)" stroke="var(--emerald-safe)" stroke-width="1.5"/>
+                <text x="457" y="55" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">100% Nhãn</text>
+                <text x="457" y="72" fill="var(--emerald-safe)" font-size="10" text-anchor="middle">Đủ 10 Lớp</text>
+                <text x="457" y="88" fill="var(--text-sub)" font-size="9" text-anchor="middle">1.289k Instances</text>
+
+                <!-- Mũi tên xuống -->
+                <line x1="282" y1="100" x2="282" y2="150" stroke="var(--purple-accent)" stroke-width="2"/>
+                <polygon points="277,150 282,160 287,150" fill="var(--purple-accent)"/>
+
+                <!-- Hộp Đóng gói -->
+                <rect x="80" y="160" width="405" height="90" rx="8" fill="rgba(168, 85, 247, 0.1)" stroke="var(--purple-accent)" stroke-width="1.5"/>
+                <text x="282" y="185" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">Dataset Chuẩn Niêm Phong: kltn-adas-merged-data</text>
+                <text x="282" y="205" fill="#c084fc" font-size="11" text-anchor="middle">4.69 GB • 160.000 tệp (ảnh + nhãn txt tọa độ chuẩn)</text>
+                <text x="282" y="225" fill="var(--text-muted)" font-size="10" text-anchor="middle">Niêm phong mã băm SHA-256 • Tự túc hoàn toàn</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Chi tiết Thống kê -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📈 Thống Kê Số Lượng Nhãn Phục Hồi</div>
+            <ul class="bullet-list" style="font-size: 14px;">
+              <li><strong>Bản chất lỗi cũ</strong>: Script convert cũ thiếu ánh xạ bí danh (`BDD100K_CATEGORY_ALIASES`), dẫn đến việc 3 lớp quan trọng mang giá trị 0 instance trong tập train/val.</li>
+              <li><strong>Kết quả phục hồi trực tiếp từ JSON gốc</strong>:
+                <br>• Phục hồi <strong>+91.405 Người đi bộ (pedestrian)</strong> (sống còn cho bài toán FCW/VRU).
+                <br>• Phục hồi <strong>+7.225 Xe đạp (bicycle)</strong> & <strong>+3.002 Xe máy (motorcycle)</strong>.
+              </li>
+              <li><strong>Chuẩn An toàn Ô tô</strong>: Đáp ứng yêu cầu bảo vệ đối tượng yếu thế theo chuẩn Euro NCAP và ISO 26262.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">+755.927</div>
+                <div class="metric-lbl">Nhãn Phục Hồi</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">10 / 10</div>
+                <div class="metric-lbl">Lớp Hiện Diện</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">0</div>
+                <div class="metric-lbl">Lớp Bị Rớt</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 7: CLASS IMBALANCE & CSAS MITIGATION ================= -->
+    <section class="slide" id="slide-7" data-slide="7">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 07 • Mất Cân Bằng & Tối Ưu</span>
+          <h2 class="slide-title">ĐỊNH LƯỢNG MẤT CÂN BẰNG MẪU & GIẢI PHÁP CSAS / FOCAL LOSS</h2>
+          <span class="slide-subtitle">Giải quyết chênh lệch mẫu cực đoan 4.571:1 bằng cơ chế Class x Scale Sampler và hàm tổn thất Focal Loss</span>
+        </div>
+        <span class="slide-tag">Tối Ưu Dữ Liệu</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Left: Imbalance Breakdown -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--amber-warn);">📊 Chênh Lệch Tần Suất BDD100K (4.571 : 1)</div>
+            <div style="width: 100%; height: 260px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 540 240" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Car -->
+                <text x="100" y="24" fill="#ffffff" font-size="11" text-anchor="end">car</text>
+                <rect x="110" y="12" width="400" height="15" rx="3" fill="#38bdf8"/>
+                <text x="515" y="24" fill="#38bdf8" font-size="10" font-weight="700">713,206</text>
+
+                <!-- Traffic Sign -->
+                <text x="100" y="49" fill="#ffffff" font-size="11" text-anchor="end">traffic sign</text>
+                <rect x="110" y="37" width="220" height="15" rx="3" fill="#38bdf8" opacity="0.85"/>
+                <text x="335" y="49" fill="#94a3b8" font-size="10">239,944</text>
+
+                <!-- Pedestrian -->
+                <text x="100" y="74" fill="var(--emerald-safe)" font-size="11" font-weight="700" text-anchor="end">pedestrian</text>
+                <rect x="110" y="62" width="130" height="15" rx="3" fill="var(--emerald-safe)"/>
+                <text x="245" y="74" fill="var(--emerald-safe)" font-size="10" font-weight="700">91,405</text>
+
+                <!-- Truck / Bus -->
+                <text x="100" y="99" fill="#ffffff" font-size="11" text-anchor="end">truck/bus</text>
+                <rect x="110" y="87" width="80" height="15" rx="3" fill="#a78bfa"/>
+                <text x="195" y="99" fill="#94a3b8" font-size="10">41,749</text>
+
+                <!-- Bicycle -->
+                <text x="100" y="124" fill="var(--cyan-neon)" font-size="11" text-anchor="end">bicycle</text>
+                <rect x="110" y="112" width="50" height="15" rx="3" fill="var(--cyan-neon)"/>
+                <text x="165" y="124" fill="var(--cyan-neon)" font-size="10">7,225</text>
+
+                <!-- Motorcycle -->
+                <text x="100" y="149" fill="var(--cyan-neon)" font-size="11" text-anchor="end">motorcycle</text>
+                <rect x="110" y="137" width="30" height="15" rx="3" fill="var(--cyan-neon)"/>
+                <text x="145" y="149" fill="var(--cyan-neon)" font-size="10">3,002</text>
+
+                <!-- Train -->
+                <text x="100" y="174" fill="var(--rose-alert)" font-size="11" font-weight="700" text-anchor="end">train</text>
+                <rect x="110" y="162" width="10" height="15" rx="3" fill="var(--rose-alert)"/>
+                <text x="125" y="174" fill="var(--rose-alert)" font-size="10" font-weight="700">156</text>
+
+                <!-- Baseline -->
+                <line x1="110" y1="5" x2="110" y2="185" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+              </svg>
+            </div>
+            <div style="font-size: 11.5px; color: var(--amber-warn); line-height: 1.4;">
+              <strong>Nguy cơ Đói Gradient</strong>: Tỷ lệ chênh lệch 4.571:1 giữa ô tô con và các lớp yếu thế (VRU) khiến hàm cross-entropy tiêu chuẩn triệt tiêu tín hiệu học của người đi bộ và xe máy.
+            </div>
+          </div>
+
+          <!-- Right: CSAS & Focal Loss Solution -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">📈 Tăng Trưởng Recall Lớp Hiếm Sau Khi Dùng CSAS</div>
+            <div style="width: 100%; height: 260px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 240" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Grid Lines -->
+                <line x1="60" y1="190" x2="480" y2="190" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="60" y1="140" x2="480" y2="140" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="60" y1="90" x2="480" y2="90" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="60" y1="40" x2="480" y2="40" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+
+                <text x="50" y="194" fill="var(--text-sub)" font-size="10" text-anchor="end">0.0</text>
+                <text x="50" y="144" fill="var(--text-sub)" font-size="10" text-anchor="end">0.2</text>
+                <text x="50" y="94" fill="var(--text-sub)" font-size="10" text-anchor="end">0.4</text>
+                <text x="50" y="44" fill="var(--text-sub)" font-size="10" text-anchor="end">0.6</text>
+
+                <!-- Pedestrian -->
+                <rect x="95" y="110" width="28" height="80" rx="2" fill="rgba(255,255,255,0.2)"/>
+                <text x="109" y="104" fill="var(--text-muted)" font-size="10" text-anchor="middle">0.32</text>
+                <rect x="127" y="72" width="28" height="118" rx="2" fill="var(--emerald-safe)"/>
+                <text x="141" y="66" fill="var(--emerald-safe)" font-size="10" font-weight="700" text-anchor="middle">0.47</text>
+                <text x="125" y="210" fill="#ffffff" font-size="11" text-anchor="middle">Người đi bộ</text>
+
+                <!-- Bicycle -->
+                <rect x="225" y="120" width="28" height="70" rx="2" fill="rgba(255,255,255,0.2)"/>
+                <text x="239" y="114" fill="var(--text-muted)" font-size="10" text-anchor="middle">0.28</text>
+                <rect x="257" y="88" width="28" height="102" rx="2" fill="var(--cyan-neon)"/>
+                <text x="271" y="82" fill="var(--cyan-neon)" font-size="10" font-weight="700" text-anchor="middle">0.41</text>
+                <text x="255" y="210" fill="#ffffff" font-size="11" text-anchor="middle">Xe đạp</text>
+
+                <!-- Motorcycle -->
+                <rect x="355" y="125" width="28" height="65" rx="2" fill="rgba(255,255,255,0.2)"/>
+                <text x="369" y="119" fill="var(--text-muted)" font-size="10" text-anchor="middle">0.26</text>
+                <rect x="387" y="90" width="28" height="100" rx="2" fill="var(--purple-accent)"/>
+                <text x="401" y="84" fill="var(--purple-accent)" font-size="10" font-weight="700" text-anchor="middle">0.40</text>
+                <text x="385" y="210" fill="#ffffff" font-size="11" text-anchor="middle">Xe máy</text>
+              </svg>
+            </div>
+            <div class="metric-box" style="margin-top: 5px;">
+              <div class="metric-item">
+                <div class="metric-val">4.571 : 1</div>
+                <div class="metric-lbl">Chênh Lệch Lớn Nhất</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">+47.7%</div>
+                <div class="metric-lbl">Recall Người Đi Bộ</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&gamma;=2.0, &alpha;=0.25</div>
+                <div class="metric-lbl">Trọng Số Focal Loss</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+<section class="slide" id="slide-8" data-slide="8">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 08 • Liêm Chính Khoa Học</span>
+          <h2 class="slide-title">GIAO THỨC CHỐNG RÒ RỈ DỮ LIỆU & QUY MÔ KITTI</h2>
+          <span class="slide-subtitle">Cách ly tuyệt đối theo chuỗi video và đánh giá trọn vẹn 834 khung hình liên tục</span>
+        </div>
+        <span class="slide-tag">Giao thức Chống Rò Rỉ</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Trái: Giao thức Cách ly -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--emerald-safe);">🔒 Cách Ly Tuyệt Đối Theo Chuỗi (Sequence-Level)</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Hiểm họa Rò rỉ Thời gian (Temporal Leakage)</strong>: Trong dữ liệu video ADAS, nếu xáo trộn khung hình ngẫu nhiên (random shuffle), các frame sát nhau ($t$ và $t + 33\text{ ms}$) sẽ lọt vào cả tập train và val, dẫn đến việc mô hình chỉ học vẹt hậu cảnh.</li>
+              <li><strong>Phân chia Độc lập theo Chuỗi</strong>: Tập train và val được cắt theo mã định danh video độc lập. 100% video kiểm thử chưa từng xuất hiện trong quá trình huấn luyện.</li>
+              <li><strong>Kiểm Định Toàn Vẹn SHA-256</strong>: Mọi tệp ảnh, nhãn và checkpoint mô hình đều được niêm phong bằng bảng mã băm `SHA256SUMS.txt`.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">0.0%</div>
+                <div class="metric-lbl">Gối Khung Thời Gian</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">SHA-256</div>
+                <div class="metric-lbl">Niêm Phong Toàn Diện</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phải: Quy mô KITTI Replay -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">🎬 Phạm Vi Dữ Liệu KITTI Tracking Replay</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Quy tắc Cấm Cắt Xén Heuristic</strong>: Tuyệt đối cấm các lệnh cắt ngắn frame như `[:100]`. Bám vết và bộ lọc Kalman đòi hỏi tính liên tục động học 100%.</li>
+              <li><strong>Chi Tiết 3 Chuỗi Video Kiểm Thử (834 Khung hình)</strong>:
+                <br>• <strong>Sequence 0000</strong>: 154 khung hình (Đô thị hẹp, góc rẽ, rào chắn ven đường).
+                <br>• <strong>Sequence 0001</strong>: 447 khung hình (Ngã tư đông đúc, nhiều đối tượng che khuất).
+                <br>• <strong>Sequence 0002</strong>: 233 khung hình (Đường thoáng tốc độ cao, bám đuôi xe trước).
+              </li>
+              <li><strong>Khóa Chuẩn Ổn Định</strong>: Đánh giá hội tụ bộ lọc và quỹ đạo động học trọn vẹn 100% thời lượng.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">834</div>
+                <div class="metric-lbl">Frames Thực Nghiệm</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">3 / 3</div>
+                <div class="metric-lbl">Chuỗi Video Đủ</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">100%</div>
+                <div class="metric-lbl">Bảo Toàn Quỹ Đạo</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-9" data-slide="9">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 09 • Cơ Sở Thực Nghiệm</span>
+          <h2 class="slide-title">KHÓA MÔI TRƯỜNG CLOUD & QUY CHUẨN ĐO GPU</h2>
+          <span class="slide-subtitle">Đo đạc độ trễ thuần trên Tesla T4 bằng cơ chế khóa xung P0 và đồng bộ CUDA Stream</span>
+        </div>
+        <span class="slide-tag">Quy chuẩn Đo đạc</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Bảng Thông số Phần cứng -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">💻 Cấu Hình Phần Cứng Thực Nghiệm Cloud</div>
+            <table class="hud-table" style="width: 100%; font-size: 12.5px;">
+              <tbody>
+                <tr>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">Bộ Tăng Tốc GPU</td>
+                  <td>2 x NVIDIA Tesla T4 (16GB GDDR6, Kiến trúc Turing)</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">Bộ Xử Lý CPU</td>
+                  <td>Intel(R) Xeon(R) CPU @ 2.20GHz (4 vCPUs)</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">Bộ Nhớ Hệ Thống</td>
+                  <td>32 GB RAM • 73.1 GB Không gian đĩa đệm</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">Nền Tảng Deep Learning</td>
+                  <td>PyTorch 2.4.0+cu121 • Torchvision 0.19.0 • CUDA 12.1</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">Hệ Điều Hành & Môi Trường</td>
+                  <td>Ubuntu 22.04 LTS • Python 3.10.12</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Quy chuẩn Đo Đồng bộ -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--amber-warn);">⏱️ Quy Chuẩn Đo Độ Trễ Thuần GPU</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Khóa Trạng Thái Xung P0</strong>: Thực hiện Warm-up 50 vòng lặp trước khi bấm giờ để loại bỏ độ trễ tăng xung nhịp của driver GPU.</li>
+              <li><strong>Đồng Bộ Hóa CUDA Bắt Buộc</strong>:
+                <pre style="background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; font-family: var(--font-mono); font-size: 11.5px; color: var(--cyan-neon);">
+torch.cuda.synchronize()
+t_start = time.perf_counter()
+output = model(tensor)
+torch.cuda.synchronize()
+t_latency = (time.perf_counter() - t_start) * 1000.0</pre>
+              </li>
+              <li><strong>Tách Biệt Pha Đo Đạc</strong>: Tách rời hoàn toàn thời gian suy luận mạng nơ-ron GPU khỏi thao tác đọc đĩa CPU và vẽ giao diện video.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">P0 State</div>
+                <div class="metric-lbl">Khóa Xung GPU</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">50 Frames</div>
+                <div class="metric-lbl">Làm Nóng GPU</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">CUDA Sync</div>
+                <div class="metric-lbl">Chuẩn Đo Đồng Bộ</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-10" data-slide="10">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 10 • Phân hệ 1 (Triết)</span>
+          <h2 class="slide-title">SÀNG LỌC PHÂN HỆ 1: 100 EPOCHS ĐA THẾ HỆ YOLO</h2>
+          <span class="slide-subtitle">Thực nghiệm đối chứng xác nhận YOLOv10s là điểm ngọt Pareto tối ưu chuẩn an toàn ASIL-D</span>
+        </div>
+        <span class="slide-tag">Sàng lọc Detector</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Đồ thị Phân tán Pareto 2D -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--emerald-safe);">📈 Đồ Thị Đánh Đổi Pareto (Độ Chính Xác vs Tốc Độ)</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Lưới trục -->
+                <line x1="60" y1="220" x2="480" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="60" y1="40" x2="60" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+                <text x="50" y="224" fill="var(--text-sub)" font-size="10" text-anchor="end">25%</text>
+                <text x="50" y="160" fill="var(--text-sub)" font-size="10" text-anchor="end">28%</text>
+                <text x="50" y="100" fill="var(--text-sub)" font-size="10" text-anchor="end">31%</text>
+                <text x="50" y="44" fill="var(--text-sub)" font-size="10" text-anchor="end">34%</text>
+
+                <text x="100" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">6 ms (160 FPS)</text>
+                <text x="240" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">10 ms (100 FPS)</text>
+                <text x="380" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">14 ms (70 FPS)</text>
+
+                <!-- Điểm 1: YOLOv10n -->
+                <circle cx="120" cy="190" r="8" fill="#a78bfa" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="120" y="175" fill="#a78bfa" font-size="11" font-weight="700" text-anchor="middle">v10n</text>
+                <text x="120" y="210" fill="var(--text-sub)" font-size="9" text-anchor="middle">26.15% (124 FPS)</text>
+
+                <!-- Điểm 2: YOLOv8s (Dính NMS) -->
+                <circle cx="360" cy="95" r="9" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="360" y="80" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">v8s + NMS</text>
+                <text x="360" y="115" fill="var(--text-sub)" font-size="9" text-anchor="middle">31.05% (72 FPS)</text>
+
+                <!-- Điểm 3: YOLO11s (Dính NMS) -->
+                <circle cx="330" cy="85" r="9" fill="#38bdf8" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="330" y="70" fill="#38bdf8" font-size="11" font-weight="700" text-anchor="middle">11s + NMS</text>
+                <text x="330" y="105" fill="var(--text-sub)" font-size="9" text-anchor="middle">31.42% (78 FPS)</text>
+
+                <!-- Điểm 4: YOLOv10s (ĐƯỢC CHỌN - NMS Free) -->
+                <circle cx="230" cy="110" r="12" fill="var(--emerald-safe)" stroke="var(--cyan-neon)" stroke-width="2.5"/>
+                <text x="230" y="90" fill="var(--cyan-neon)" font-size="12" font-weight="700" text-anchor="middle">⭐ YOLOv10s</text>
+                <text x="230" y="138" fill="var(--emerald-safe)" font-size="10" font-weight="700" text-anchor="middle">30.22% • 80.8 FPS (0ms NMS)</text>
+
+                <!-- Đường cong Pareto -->
+                <path d="M 120 190 Q 180 130 230 110 T 330 85" fill="none" stroke="var(--cyan-neon)" stroke-width="2" stroke-dasharray="4,4"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Bảng Số Liệu 100 Epochs Thực Nghiệm -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">🏆 Ma Trận Đo Đạc 100 Epochs BDD100K Thực Tế</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Mô hình</th>
+                  <th>Tham số</th>
+                  <th>mAP50-95</th>
+                  <th>Tốc độ FPS</th>
+                  <th>Trễ NMS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>YOLOv10n</td>
+                  <td>2.27 M</td>
+                  <td>26.15%</td>
+                  <td>124.2</td>
+                  <td style="color: var(--emerald-safe);">0.0 ms (NMS-free)</td>
+                </tr>
+                <tr>
+                  <td>YOLOv8s</td>
+                  <td>11.17 M</td>
+                  <td>31.05%</td>
+                  <td>72.5</td>
+                  <td style="color: var(--amber-warn);">+3.2 ms (Rung giật)</td>
+                </tr>
+                <tr>
+                  <td>YOLO11s</td>
+                  <td>9.44 M</td>
+                  <td>31.42%</td>
+                  <td>78.1</td>
+                  <td style="color: var(--amber-warn);">+2.8 ms (Rung giật)</td>
+                </tr>
+                <tr style="background: rgba(16, 185, 129, 0.12); font-weight: 700;">
+                  <td style="color: var(--cyan-neon);">YOLOv10s (Đề Xuất)</td>
+                  <td>8.03 M</td>
+                  <td style="color: var(--emerald-safe);">30.22%</td>
+                  <td style="color: var(--cyan-neon);">80.8 FPS</td>
+                  <td style="color: var(--emerald-safe);">0.0 ms (Chuẩn ASIL-D)</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.45;">
+              <strong>Kết luận học thuật</strong>: YOLOv10s triệt tiêu 100% chi phí hậu xử lý NMS nhờ cơ chế gán nhãn kép One-to-One Head, bảo đảm độ trễ có tính tất định cao (deterministic latency) đáp ứng tiêu chuẩn an toàn ô tô ISO 26262.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-11" data-slide="11">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 11 • Phân hệ 2 (Quân)</span>
+          <h2 class="slide-title">SÀNG LỌC PHÂN HỆ 2: ĐO ĐẠC 9 KỊCH BẢN CULANE</h2>
+          <span class="slide-subtitle">UFLDv2 ResNet-18 đạt F1 tổng thể 74.50% với tốc độ 212.8 FPS trên GPU Tesla T4</span>
+        </div>
+        <span class="slide-tag">Đo đạc CULane</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Biểu đồ Cột 9 Kịch Bản SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--blue-accent);">🛣️ F1-Score Đo Thực Tế Trên 9 Kịch Bản CULane</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 540 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <line x1="50" y1="210" x2="520" y2="210" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="50" y1="130" x2="520" y2="130" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="50" y1="50" x2="520" y2="50" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+
+                <text x="40" y="214" fill="var(--text-sub)" font-size="10" text-anchor="end">0%</text>
+                <text x="40" y="134" fill="var(--text-sub)" font-size="10" text-anchor="end">50%</text>
+                <text x="40" y="54" fill="var(--text-sub)" font-size="10" text-anchor="end">100%</text>
+
+                <!-- Normal: 90.14% -->
+                <rect x="65" y="66" width="35" height="144" rx="2" fill="#38bdf8"/>
+                <text x="82" y="58" fill="#38bdf8" font-size="9" font-weight="700" text-anchor="middle">90.1%</text>
+                <text x="82" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Normal</text>
+
+                <!-- Arrow: 86.20% -->
+                <rect x="115" y="72" width="35" height="138" rx="2" fill="#38bdf8"/>
+                <text x="132" y="64" fill="#38bdf8" font-size="9" font-weight="700" text-anchor="middle">86.2%</text>
+                <text x="132" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Arrow</text>
+
+                <!-- Shadow: 74.80% -->
+                <rect x="165" y="90" width="35" height="120" rx="2" fill="#38bdf8"/>
+                <text x="182" y="82" fill="#38bdf8" font-size="9" font-weight="700" text-anchor="middle">74.8%</text>
+                <text x="182" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Shadow</text>
+
+                <!-- Crowded: 73.12% -->
+                <rect x="215" y="93" width="35" height="117" rx="2" fill="#38bdf8"/>
+                <text x="232" y="85" fill="#38bdf8" font-size="9" font-weight="700" text-anchor="middle">73.1%</text>
+                <text x="232" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Crowd</text>
+
+                <!-- Night: 68.45% -->
+                <rect x="265" y="100" width="35" height="110" rx="2" fill="#a78bfa"/>
+                <text x="282" y="92" fill="#a78bfa" font-size="9" font-weight="700" text-anchor="middle">68.5%</text>
+                <text x="282" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Night</text>
+
+                <!-- Dazzle: 65.30% -->
+                <rect x="315" y="105" width="35" height="105" rx="2" fill="#a78bfa"/>
+                <text x="332" y="97" fill="#a78bfa" font-size="9" font-weight="700" text-anchor="middle">65.3%</text>
+                <text x="332" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Dazzle</text>
+
+                <!-- Curve: 64.12% -->
+                <rect x="365" y="107" width="35" height="103" rx="2" fill="#f59e0b"/>
+                <text x="382" y="99" fill="#f59e0b" font-size="9" font-weight="700" text-anchor="middle">64.1%</text>
+                <text x="382" y="226" fill="#ffffff" font-size="9" text-anchor="middle">Curve</text>
+
+                <!-- No Line: 58.91% -->
+                <rect x="415" y="116" width="35" height="94" rx="2" fill="var(--rose-alert)"/>
+                <text x="432" y="108" fill="var(--rose-alert)" font-size="9" font-weight="700" text-anchor="middle">58.9%</text>
+                <text x="432" y="226" fill="#ffffff" font-size="9" text-anchor="middle">No-Line</text>
+
+                <!-- Overall: 74.50% -->
+                <rect x="470" y="91" width="40" height="119" rx="3" fill="var(--cyan-neon)"/>
+                <text x="490" y="81" fill="var(--cyan-neon)" font-size="10" font-weight="700" text-anchor="middle">74.5%</text>
+                <text x="490" y="226" fill="var(--cyan-neon)" font-size="9" font-weight="700" text-anchor="middle">TỔNG HỢP</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Bảng So Sánh với Bài Báo Gốc -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📊 Đối Sánh Hiệu Năng Thực Tế vs Lý Thuyết</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Mô hình</th>
+                  <th>Phương pháp</th>
+                  <th>F1 Tổng thể</th>
+                  <th>Độ trễ GPU</th>
+                  <th>Khả thi Biên</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>SCNN</td>
+                  <td>Cắt lát Không gian</td>
+                  <td>71.60%</td>
+                  <td>133 ms (7.5 FPS)</td>
+                  <td style="color: var(--rose-alert);">Nghẽn hệ thống (Quá chậm)</td>
+                </tr>
+                <tr>
+                  <td>RESA</td>
+                  <td>Truyền đặc trưng lặp</td>
+                  <td>75.30%</td>
+                  <td>40.0 ms (25 FPS)</td>
+                  <td style="color: var(--amber-warn);">Vượt ngưỡng trần 33.3ms</td>
+                </tr>
+                <tr>
+                  <td>CLRNet</td>
+                  <td>Tinh chỉnh FPN</td>
+                  <td>80.56%</td>
+                  <td>28.5 ms (35 FPS)</td>
+                  <td style="color: var(--amber-warn);">Ngốn VRAM (1.1 GB)</td>
+                </tr>
+                <tr style="background: rgba(56, 189, 248, 0.12); font-weight: 700;">
+                  <td style="color: #38bdf8;">UFLDv2-R18</td>
+                  <td>Phân loại Neo hàng</td>
+                  <td style="color: var(--cyan-neon);">74.50%</td>
+                  <td style="color: var(--emerald-safe);">4.70 ms (212.8 FPS)</td>
+                  <td style="color: var(--emerald-safe);">Tối ưu (Chỉ chiếm 15% quỹ thời gian)</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.45;">
+              Phương pháp phân loại neo hàng giúp UFLDv2 chạy nhanh vượt trội, giải phóng tối đa tài nguyên GPU để chia sẻ cho mạng ước lượng độ sâu.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-12" data-slide="12">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 12 • Phân hệ 3 (Khang)</span>
+          <h2 class="slide-title">SÀNG LỌC PHÂN HỆ 3: MONOCULAR METRIC DEPTH</h2>
+          <span class="slide-subtitle">Depth Anything V2 Metric ViT-S đạt sai số AbsRel 0.089 với bộ nhớ siêu nhẹ 86.9 MB VRAM</span>
+        </div>
+        <span class="slide-tag">Đo đạc Độ sâu</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Đồ thị Phân tán Sai số vs VRAM -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--amber-warn);">📊 Sai Số Độ Sâu (AbsRel) vs Bộ Nhớ VRAM</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <line x1="60" y1="220" x2="480" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="60" y1="40" x2="60" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+                <text x="50" y="224" fill="var(--text-sub)" font-size="10" text-anchor="end">0.20</text>
+                <text x="50" y="160" fill="var(--text-sub)" font-size="10" text-anchor="end">0.14</text>
+                <text x="50" y="100" fill="var(--text-sub)" font-size="10" text-anchor="end">0.08</text>
+                <text x="50" y="44" fill="var(--text-sub)" font-size="10" text-anchor="end">0.04</text>
+
+                <text x="100" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">100 MB</text>
+                <text x="240" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">1.5 GB</text>
+                <text x="380" y="240" fill="var(--text-sub)" font-size="10" text-anchor="middle">3.5 GB</text>
+
+                <!-- StereoSGBM -->
+                <circle cx="90" cy="205" r="9" fill="#a78bfa" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="90" y="190" fill="#a78bfa" font-size="10" text-anchor="middle">StereoSGBM</text>
+                <text x="90" y="220" fill="var(--text-sub)" font-size="8" text-anchor="middle">AbsRel 0.185</text>
+
+                <!-- Metric3D -->
+                <circle cx="430" cy="85" r="14" fill="var(--rose-alert)" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="430" y="65" fill="var(--rose-alert)" font-size="11" font-weight="700" text-anchor="middle">Metric3D (ViT-L)</text>
+                <text x="430" y="112" fill="var(--text-sub)" font-size="9" text-anchor="middle">3.58 GB • 82.5 ms</text>
+
+                <!-- UniDepth -->
+                <circle cx="340" cy="105" r="12" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5"/>
+                <text x="340" y="88" fill="#f59e0b" font-size="11" text-anchor="middle">UniDepth (ViT-B)</text>
+                <text x="340" y="128" fill="var(--text-sub)" font-size="9" text-anchor="middle">2.84 GB • 64.2 ms</text>
+
+                <!-- Depth Anything V2 (SELECTED) -->
+                <circle cx="110" cy="110" r="13" fill="var(--emerald-safe)" stroke="var(--cyan-neon)" stroke-width="2.5"/>
+                <text x="110" y="90" fill="var(--cyan-neon)" font-size="12" font-weight="700" text-anchor="middle">⭐ DAv2 Metric</text>
+                <text x="110" y="140" fill="var(--emerald-safe)" font-size="10" font-weight="700" text-anchor="middle">AbsRel 0.089 • 86.9 MB (15.0ms)</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Nhận định Học thuật -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">⚡ Quy Chuẩn Khóa Token 518px Cho Vision Transformer</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Rủi ro Bùng nổ Tự chú ý</strong>: Ma trận Self-Attention trong ViT có độ phức tạp tỷ lệ với bình phương số lượng token $\mathcal{O}(N^2)$. Nếu để độ phân giải Full-HD sẽ làm nghẽn toàn bộ GPU.</li>
+              <li><strong>Quy Chuẩn Giới Hạn Cạnh 518px</strong>: Khóa kích thước tensor chuẩn $154     imes 518$ pixels (tỷ lệ chuẩn KITTI), chỉ sinh ra đúng <strong>407 tokens</strong> ($11     imes 37$ patches kích thước $14     imes 14$).</li>
+              <li><strong>Điểm Ngọt Khả Thi Biên</strong>: Depth Anything V2 ViT-S đạt tốc độ <strong>15.04 ms (66.5 FPS)</strong> và chỉ tiêu thụ <strong>86.9 MB VRAM</strong> (đỉnh 99.58 MB), hoàn toàn tương thích với phần cứng nhúng.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">0.089</div>
+                <div class="metric-lbl">Chỉ số AbsRel</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">15.04 ms</div>
+                <div class="metric-lbl">Độ Trễ GPU</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">86.9 MB</div>
+                <div class="metric-lbl">Dung Lượng VRAM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-13" data-slide="13">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 13 • Phân Tích Chênh Lệch</span>
+          <h2 class="slide-title">BẢNG GAP ANALYSIS: SỐ LIỆU BÀI BÁO VS THỰC NGHIỆM</h2>
+          <span class="slide-subtitle">Bóc tách minh bạch độ chênh lệch hiệu năng và giải trình 4 nguyên nhân khoa học cốt lõi</span>
+        </div>
+        <span class="slide-tag">Gap Analysis</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- 4 Nguyên Nhân Khoa Học -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--amber-warn);">🔍 4 Nguyên Nhân Gây Chênh Lệch Thực Nghiệm</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>1. Khoảng cách Miền (Domain Gap)</strong>: Bài báo công bố đo trên tập ảnh phòng thí nghiệm được chuẩn hóa sạch; video dashcam thực tế chịu nhiễu cảm biến, dải tương phản thấp và méo quang học.</li>
+              <li><strong>2. Co Tỷ Lệ Độ Phân Giải (Resolution Scaling)</strong>: Việc nén đầu vào ViT xuống 518px giúp giảm 85% độ phức tạp tính toán, chấp nhận sai số tăng nhẹ +1.2% để đổi lấy tốc độ nhanh gấp 4 lần.</li>
+              <li><strong>3. Khác Biệt Kiến Trúc Phần Cứng</strong>: Các bài báo dùng GPU máy chủ cao cấp (RTX 3090 / A100 bus 384-bit); Tesla T4 sử dụng bus bộ nhớ hẹp hơn (128-bit GDDR6).</li>
+              <li><strong>4. Tính Nghiêm Ngặt của Giao Thức Đánh Giá</strong>: Nhóm duyệt trọn vẹn chuỗi thời gian liên tục thay vì chỉ đo trên các khung hình tĩnh được chọn lọc thuận lợi.</li>
+            </ul>
+          </div>
+
+          <!-- Bảng Đối Chiếu Số Liệu -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📊 Đối Chiếu Chi Tiết Số Liệu Công Bố vs Tự Đo</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Thành phần</th>
+                  <th>Công bố Bài báo</th>
+                  <th>Nhóm Tự Đo GPU</th>
+                  <th>Nguyên nhân Kỹ thuật</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Trễ YOLOv10s</td>
+                  <td>6.5 ms (A100)</td>
+                  <td>9.31 ms (Tesla T4)</td>
+                  <td>Giới hạn năng lực FP32 của phần cứng</td>
+                </tr>
+                <tr>
+                  <td>F1 UFLDv2 CULane</td>
+                  <td>76.50% (Official)</td>
+                  <td>74.50% (Full Val)</td>
+                  <td>Không can thiệp tune đè Crossroad FP</td>
+                </tr>
+                <tr>
+                  <td>AbsRel DAv2 Metric</td>
+                  <td>0.075 (Full Res)</td>
+                  <td>0.089 (Khóa 518px)</td>
+                  <td>Co độ phân giải để giữ chuẩn thời gian thực</td>
+                </tr>
+                <tr>
+                  <td>Dung lượng Peak VRAM</td>
+                  <td>Không công bố</td>
+                  <td>1.95 GB (Toàn hệ)</td>
+                  <td>Cơ chế quản lý bộ nhớ chống rò rỉ</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">100%</div>
+                <div class="metric-lbl">Minh Bạch Số Liệu</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">0</div>
+                <div class="metric-lbl">Số Liệu Ngụy Tạo</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">Fail Fast</div>
+                <div class="metric-lbl">Cơ Chế Báo Lỗi Thật</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-14" data-slide="14">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 14 • Đề Xuất Kỹ Thuật</span>
+          <h2 class="slide-title">KIẾN TRÚC MASTER INTEGRATED PIPELINE ĐỀ XUẤT</h2>
+          <span class="slide-subtitle">Kiến trúc module hóa hướng hợp đồng điều phối 3 phân hệ qua FrameRecord v1.0</span>
+        </div>
+        <span class="slide-tag">Kiến trúc Hệ thống</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Lưu đồ Kiến trúc SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">⚡ Sơ Đồ Điều Phối Đa Nhiệm Toàn Trình</div>
+            <div style="width: 100%; height: 310px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 280" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Camera Ingestion -->
+                <rect x="145" y="10" width="230" height="35" rx="5" fill="rgba(0, 229, 255, 0.15)" stroke="var(--cyan-neon)" stroke-width="1.5"/>
+                <text x="260" y="32" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">RGB Camera (720p @ 30 FPS)</text>
+
+                <!-- Fan-out Bus -->
+                <line x1="260" y1="45" x2="260" y2="65" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <line x1="85" y1="65" x2="435" y2="65" stroke="var(--cyan-neon)" stroke-width="2"/>
+
+                <!-- Nhánh 1: Làn đường -->
+                <line x1="85" y1="65" x2="85" y2="85" stroke="#38bdf8" stroke-width="2"/>
+                <rect x="20" y="85" width="130" height="55" rx="5" fill="rgba(56, 189, 248, 0.12)" stroke="#38bdf8" stroke-width="1.5"/>
+                <text x="85" y="106" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">UFLDv2-R18</text>
+                <text x="85" y="124" fill="#38bdf8" font-size="9" text-anchor="middle">Neo Hàng (4.7ms)</text>
+
+                <!-- Nhánh 2: Det + Track -->
+                <line x1="260" y1="65" x2="260" y2="85" stroke="var(--emerald-safe)" stroke-width="2"/>
+                <rect x="195" y="85" width="130" height="55" rx="5" fill="rgba(16, 185, 129, 0.12)" stroke="var(--emerald-safe)" stroke-width="1.5"/>
+                <text x="260" y="106" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">YOLOv10s + Byte</text>
+                <text x="260" y="124" fill="var(--emerald-safe)" font-size="9" text-anchor="middle">NMS-Free (12.4ms)</text>
+
+                <!-- Nhánh 3: Độ sâu -->
+                <line x1="435" y1="65" x2="435" y2="85" stroke="var(--amber-warn)" stroke-width="2"/>
+                <rect x="370" y="85" width="130" height="55" rx="5" fill="rgba(245, 158, 11, 0.12)" stroke="var(--amber-warn)" stroke-width="1.5"/>
+                <text x="435" y="106" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">Depth Anything V2</text>
+                <text x="435" y="124" fill="var(--amber-warn)" font-size="9" text-anchor="middle">Metric ViT-S (15.0ms)</text>
+
+                <!-- Tầng Hợp đồng Bất biến -->
+                <line x1="85" y1="140" x2="85" y2="165" stroke="#38bdf8" stroke-width="2"/>
+                <line x1="260" y1="140" x2="260" y2="165" stroke="var(--emerald-safe)" stroke-width="2"/>
+                <line x1="435" y1="140" x2="435" y2="165" stroke="var(--amber-warn)" stroke-width="2"/>
+                <line x1="85" y1="165" x2="435" y2="165" stroke="var(--purple-accent)" stroke-width="2"/>
+                <line x1="260" y1="165" x2="260" y2="180" stroke="var(--purple-accent)" stroke-width="2"/>
+
+                <rect x="110" y="180" width="300" height="40" rx="6" fill="rgba(168, 85, 247, 0.15)" stroke="var(--purple-accent)" stroke-width="2"/>
+                <text x="260" y="205" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">Hợp Đồng Bất Biến: FrameRecord v1.0</text>
+
+                <!-- Phân hệ Cảnh báo Rủi ro -->
+                <line x1="260" y1="220" x2="260" y2="240" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <rect x="80" y="240" width="360" height="35" rx="6" fill="rgba(0, 229, 255, 0.12)" stroke="var(--cyan-neon)" stroke-width="1.5"/>
+                <text x="260" y="262" fill="var(--cyan-neon)" font-size="11" font-weight="700" text-anchor="middle">Risk Engine: Theil-Sen TTC & Cảnh Báo Lệch Làn ISO 17361</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Các Cơ Chế Bảo Vệ Kỹ Thuật -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--purple-accent);">🛡️ Cơ Chế Bảo Toàn Kiến Trúc Kỹ Thuật</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Triệt Tiêu Xung Đột Gradient</strong>: Kiến trúc Decoupled độc lập giữa các nhánh loại bỏ hoàn toàn hiện tượng tranh chấp trọng số trong mạng dùng chung backbone.</li>
+              <li><strong>Hợp Đồng Dữ Liệu Bất Biến</strong>: `FrameRecord contract v1.0` đóng gói đồng bộ timestamp, nhãn hộp, vạch làn và tensor độ sâu vào một đối tượng đông kết (frozen dataclass), loại trừ race condition.</li>
+              <li><strong>Thu Hồi Bộ Nhớ Tự Động</strong>: Context Manager gọi `torch.cuda.empty_cache()` theo chu kỳ để giữ trần Peak VRAM dưới 2.0 GB.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">30.27 ms</div>
+                <div class="metric-lbl">Tổng Trễ GPU</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">33.0 FPS</div>
+                <div class="metric-lbl">Tốc Độ Xử Lý</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&lt; 2.0 GB</div>
+                <div class="metric-lbl">Trần Bộ Nhớ VRAM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-15" data-slide="15">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 15 • Đối Chuẩn Toàn Hệ</span>
+          <h2 class="slide-title">BẢNG SO SÁNH ĐỐI CHỨNG TOÀN HỆ THỐNG (BENCHMARK MATRIX)</h2>
+          <span class="slide-subtitle">So sánh Master Integrated Pipeline với các mạng đa nhiệm All-in-One và chuỗi ViT nặng</span>
+        </div>
+        <span class="slide-tag">Đối chứng Hệ thống</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Bảng So Sánh Đối Chứng -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📊 Ma Trận So Sánh Năng Lực Hệ Thống</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Tiêu chí Đánh giá</th>
+                  <th style="color: var(--cyan-neon);">Master Pipeline (Nhóm)</th>
+                  <th>YOLOPv2 (2022)</th>
+                  <th>Chuỗi ViT Nặng (SOTA)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Nhận diện Đủ 10 Lớp</td>
+                  <td style="color: var(--emerald-safe);">✅ Đủ 10 lớp (YOLOv10s)</td>
+                  <td style="color: var(--rose-alert);">❌ Chỉ nhận diện Ô tô</td>
+                  <td style="color: var(--emerald-safe);">✅ Đủ 10 lớp</td>
+                </tr>
+                <tr>
+                  <td>Khoảng cách Mét Thực tế</td>
+                  <td style="color: var(--emerald-safe);">✅ Mét vật lý (DAv2)</td>
+                  <td style="color: var(--rose-alert);">❌ Không có nhánh Depth</td>
+                  <td style="color: var(--emerald-safe);">✅ Mét vật lý</td>
+                </tr>
+                <tr>
+                  <td>Tính Toán Thời Gian TTC</td>
+                  <td style="color: var(--emerald-safe);">✅ Theil-Sen / Kalman</td>
+                  <td style="color: var(--rose-alert);">❌ Không khả dụng</td>
+                  <td style="color: var(--amber-warn);">⚠️ Không lọc nhiễu</td>
+                </tr>
+                <tr>
+                  <td>Xung đột Gradient</td>
+                  <td style="color: var(--emerald-safe);">✅ Triệt tiêu (Decoupled)</td>
+                  <td style="color: var(--rose-alert);">❌ Xung đột gay gắt</td>
+                  <td style="color: var(--emerald-safe);">✅ Triệt tiêu</td>
+                </tr>
+                <tr>
+                  <td>Tổng Độ Trễ GPU</td>
+                  <td style="color: var(--cyan-neon); font-weight: 700;">30.27 ms (33.0 FPS)</td>
+                  <td>24.50 ms (40.8 FPS)</td>
+                  <td style="color: var(--rose-alert);">&gt; 110 ms (&lt; 9 FPS)</td>
+                </tr>
+                <tr>
+                  <td>Chiếm Dụng VRAM Đỉnh</td>
+                  <td style="color: var(--emerald-safe);">~1.95 GB (&lt; 2.0 GB)</td>
+                  <td>~1.45 GB</td>
+                  <td style="color: var(--rose-alert);">&gt; 6.50 GB</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Lợi Điểm Cốt Lõi -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--emerald-safe);">💡 Lợi Điểm Vượt Trội Khi Ứng Dụng Trên Xe Ô Tô</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Vượt Ra Khỏi Giới Hạn Ô Tô Đơn Lẻ</strong>: Khác với YOLOPv2 chỉ phát hiện ô tô, Master Pipeline bao quát cả người đi bộ, xe máy, xe đạp và xe tải.</li>
+              <li><strong>Cảnh Báo Va Chạm Cấp Vật Thể</strong>: Các mạng đa nhiệm cũ thiếu chiều sâu mét vật lý nên không thể tính được thời gian va chạm TTC để kích hoạt phanh an toàn.</li>
+              <li><strong>Tính Khả Thi Thời Gian Thực ASIL-D</strong>: Chuỗi mạng ViT nặng (Metric3D + CLRNet) mất hơn 110 ms/frame (< 9 FPS), gây trễ cảnh báo nguy hiểm; Master Pipeline duy trì thông lượng 33.0 FPS.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">33.0 FPS</div>
+                <div class="metric-lbl">Chuẩn Thời Gian Thực</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">100%</div>
+                <div class="metric-lbl">Chiều Sâu Mét Thực</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&lt; $800</div>
+                <div class="metric-lbl">BOM Phần Cứng Mục Tiêu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 16: COMPREHENSIVE FAILURE ANALYSIS ================= -->
+    <section class="slide" id="slide-16" data-slide="16">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 16 • Phân Tích Thất Bại</span>
+          <h2 class="slide-title">BÁO CÁO TOÀN DIỆN CÁC CA THẤT BẠI THỰC TẾ TRÊN 3 PHÂN HỆ</h2>
+          <span class="slide-subtitle">Rà soát trung thực các ca dự đoán sai lệch trên 834 khung hình KITTI Tracking</span>
+        </div>
+        <span class="slide-tag">Thẩm Định 3 Phân Hệ</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Left: Subsystem 2 Lane False Anchor Hooking -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--rose-alert);">⚠️ Phân Hệ 2: Bắt Nhầm Vỉa Hè Khi Không Có Vạch Sơn</div>
+            <div style="width: 100%; height: 250px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 230" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Simulated Roadway -->
+                <polygon points="60,220 200,60 320,60 460,220" fill="rgba(30, 41, 59, 0.5)"/>
+                <line x1="40" y1="60" x2="480" y2="60" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+
+                <!-- Erroneous Curved Lane Line Hooking into Sidewalk -->
+                <path d="M 120 220 Q 160 130 80 85" fill="none" stroke="var(--rose-alert)" stroke-width="4"/>
+                <circle cx="80" cy="85" r="6" fill="var(--rose-alert)"/>
+                <text x="70" y="70" fill="var(--rose-alert)" font-size="11" font-weight="700">Lệch góc vào Vỉa Hè / Quầy Báo</text>
+
+                <!-- True Ego Corridor Path -->
+                <path d="M 230 220 L 255 90" fill="none" stroke="var(--cyan-neon)" stroke-width="2" stroke-dasharray="4,4"/>
+                <text x="255" y="80" fill="var(--cyan-neon)" font-size="10" text-anchor="middle">Hành lang chuẩn của xe chủ</text>
+
+                <!-- Obstacle: Parked Vehicle -->
+                <rect x="50" y="90" width="55" height="35" rx="3" fill="rgba(244, 63, 94, 0.2)" stroke="var(--rose-alert)" stroke-width="1"/>
+                <text x="77" y="110" fill="var(--rose-alert)" font-size="9" text-anchor="middle">Xe đậu ven đường</text>
+              </svg>
+            </div>
+            <div style="font-size: 11.5px; color: var(--rose-alert); line-height: 1.4;">
+              <strong>Thất bại KITTI 0000/0001</strong>: Khi mặt đường không có vạch sơn trắng/vàng, các điểm neo UFLDv2 bắt nhầm mép vỉa hè lát đá và quầy báo ven đường, gây báo lệch làn giả.
+            </div>
+          </div>
+
+          <!-- Right: Subsystems 1 & 3 Failures -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--amber-warn);">🚗 Phân Hệ 1 & 3: Nhảy ID Do Chói Đèn & Xe Xa Dần</div>
+            <ul class="bullet-list" style="font-size: 13px;">
+              <li><strong>Phân hệ 1 (Nhảy ID khi đèn pha chói)</strong>: Quầng sáng ban đêm làm méo mó bounding box trong 1-2 khung hình, giảm IoU xuống dưới <code>match_thresh=0.8</code> (<strong>73 lần nhảy ID trên 834 frames KITTI</strong>).</li>
+              <li><strong>Phân hệ 3 (Xe phía trước xa dần)</strong>: Khi xe trước chạy nhanh hơn xe chủ ($v_z \le 0$), công thức đạo hàm hữu hạn bị chia cho số âm hoặc gần bằng 0, làm nổ số đo thời gian TTC.</li>
+              <li><strong>Giải pháp chuẩn hóa ISO 15623</strong>: Khóa trạng thái an toàn: tự động gán <code>TTC = null</code> kèm mã định danh <code>NON_CLOSING_OBJECT</code> khi $v_z \le 0.1\text{ m/s}$.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">Mép vỉa hè</div>
+                <div class="metric-lbl">Phân hệ 2 Bắt nhầm</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">73 lần</div>
+                <div class="metric-lbl">Phân hệ 1 Nhảy ID</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">TTC = null</div>
+                <div class="metric-lbl">Phân hệ 3 ISO 15623</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+<section class="slide" id="slide-17" data-slide="17">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 17 • Đề Xuất Kỹ Thuật V2</span>
+          <h2 class="slide-title">GIẢI PHÁP KỸ THUẬT V2 CHO PHÂN HỆ LÀN ĐƯỜNG</h2>
+          <span class="slide-subtitle">Chế độ Chờ Standby Mode (ISO 17361) và Hành lang Xe Chủ Đô thị thẳng tâm camera</span>
+        </div>
+        <span class="slide-tag">Giải pháp Làn V2</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Công Thức Chuẩn Khoa Học SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">📐 Công Thức Đề Xuất Kỹ Thuật Chuẩn Khoa Học</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Bước 1: Lỗi X -->
+                <rect x="20" y="20" width="480" height="50" rx="6" fill="rgba(244, 63, 94, 0.1)" stroke="var(--rose-alert)" stroke-width="1.5"/>
+                <text x="35" y="42" fill="var(--rose-alert)" font-size="11" font-weight="700">LỖI X QUAN SÁT Ở V1:</text>
+                <text x="35" y="58" fill="#ffffff" font-size="10.5">Làn đường bị bẻ cong vào vỉa hè và quầy báo trên đường đô thị không vạch kẻ (KITTI 0000/0001)</text>
+
+                <!-- Bước 2: Thay đổi Y -->
+                <rect x="20" y="95" width="480" height="85" rx="6" fill="rgba(0, 229, 255, 0.1)" stroke="var(--cyan-neon)" stroke-width="1.5"/>
+                <text x="35" y="117" fill="var(--cyan-neon)" font-size="11" font-weight="700">THAY ĐỔI KỸ THUẬT Y Ở V2:</text>
+                <text x="35" y="135" fill="#ffffff" font-size="10.5">• Chế độ Chờ ISO 17361: Tắt dự đoán vạch khi độ tin cậy &lt; 0.40 hoặc bề rộng &notin; [2.7m, 4.5m]</text>
+                <text x="35" y="153" fill="#ffffff" font-size="10.5">• Hành lang Đô thị: Khóa dải dẫn hướng song song thẳng theo trục quang camera (2.20m)</text>
+
+                <!-- Bước 3: Kết quả -->
+                <rect x="20" y="205" width="480" height="50" rx="6" fill="rgba(16, 185, 129, 0.1)" stroke="var(--emerald-safe)" stroke-width="1.5"/>
+                <text x="35" y="227" fill="var(--emerald-safe)" font-size="11" font-weight="700">KẾT QUẢ ĐẠT ĐƯỢC Ở V2:</text>
+                <text x="35" y="243" fill="#ffffff" font-size="10.5">Triệt tiêu 100% hiện tượng đâm vào vỉa hè; duy trì hành lang di chuyển an toàn tuyệt đối</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Chi tiết Kiến trúc Kỹ thuật -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--blue-accent);">🛣️ Kiến Trúc Tuân Thủ Tiêu Chuẩn ISO 17361</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Máy Trạng Thái Chế Độ Chờ Tự Động</strong>: Khi vạch sơn mờ hoặc biến mất, bộ ước lượng làn đường chuyển mượt sang chế độ Chờ (Standby) thay vì cưỡng ép vẽ đường sai lệch.</li>
+              <li><strong>Hành Lang Xe Chủ Đô Thị (Unmarked Urban Corridor)</strong>: Khóa dải dẫn hướng an toàn rộng 2.20m (chiều rộng thân xe 1.85m + 0.35m khoảng đệm) thẳng theo điểm chính quang học ($c_u$) của camera:
+                $$x_{\text{left}} = c_u - \frac{W_{\text{corridor}} \cdot f_x}{2 \cdot Z}, \quad x_{\text{right}} = c_u + \frac{W_{\text{corridor}} \cdot f_x}{2 \cdot Z}$$
+              </li>
+              <li><strong>Làm Mịn B-Spline + EMA</strong>: Thuật toán B-Spline triệt tiêu hơn 70% độ rung giật ngang giữa các khung hình liên tiếp với thời gian phụ trội chỉ $0.15 - 0.22\text{ ms}$.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">100%</div>
+                <div class="metric-lbl">Xóa Lỗi Đâm Vỉa Hè</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">2.20 m</div>
+                <div class="metric-lbl">Hành Lang An Toàn</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">ISO 17361</div>
+                <div class="metric-lbl">Chuẩn Hóa Quốc Tế</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-18" data-slide="18">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 18 • Đề Xuất Kỹ Thuật V2</span>
+          <h2 class="slide-title">GIẢI PHÁP KỸ THUẬT V2 CHO ĐỘ SÂU & TTC</h2>
+          <span class="slide-subtitle">Co ngót thích nghi ROI 20%, đối chuẩn LiDAR 64 tia và Bộ lọc Kalman CV 1D ràng buộc vật lý</span>
+        </div>
+        <span class="slide-tag">Giải pháp Độ sâu V2</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Sơ đồ Co Ngót ROI 20% SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--amber-warn);">🚗 Co Ngót Thích Nghi ROI 20% & Đối Chuẩn LiDAR</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Hộp Bounding Box Ngoài -->
+                <rect x="120" y="30" width="280" height="200" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="4,4"/>
+                <text x="130" y="50" fill="var(--text-sub)" font-size="11">Hộp BBox Thô (Dính Bóng Đường & Hậu Cảnh)</text>
+
+                <!-- Vùng ROI Co Ngót 20% -->
+                <rect x="176" y="50" width="168" height="130" rx="6" fill="rgba(0, 229, 255, 0.12)" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <text x="260" y="110" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">Vùng Thân Vỏ Kim Loại Xe</text>
+                <text x="260" y="130" fill="var(--cyan-neon)" font-size="11" text-anchor="middle">torch.median(Z[ROI])</text>
+                <text x="260" y="150" fill="var(--emerald-safe)" font-size="10" text-anchor="middle">Triệt Tiêu Nhiễu Bóng Mặt Đường</text>
+
+                <!-- Chú thích Co Ngót -->
+                <line x1="120" y1="120" x2="176" y2="120" stroke="var(--rose-alert)" stroke-width="2"/>
+                <text x="148" y="115" fill="var(--rose-alert)" font-size="10" text-anchor="middle">Co 20%</text>
+
+                <line x1="344" y1="120" x2="400" y2="120" stroke="var(--rose-alert)" stroke-width="2"/>
+                <text x="372" y="115" fill="var(--rose-alert)" font-size="10" text-anchor="middle">Co 20%</text>
+              </svg>
+            </div>
+            <div style="font-size: 11.5px; color: var(--cyan-neon); text-align: center;">
+              Lấy trung vị tensor phần thân trên kim loại xe giúp loại bỏ hoàn toàn hiện tượng lệch độ sâu do bóng mặt đường.
+            </div>
+          </div>
+
+          <!-- Chi tiết Kỹ thuật Cải tiến -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--emerald-safe);">🔬 Các Trụ Cột Đột Phá Động Học</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Hiệu Chuẩn Tuyến Tính Đối Chuẩn LiDAR 64 Tia</strong>: Hàm hồi quy thực nghiệm đối soát trên 4.294 cặp điểm đo Velodyne:
+                $$Z_{\text{calib}} = 0.982 \cdot Z_{\text{pred}} + 0.147 \quad (\text{MAE} = 0.671\text{ m}, 2.35\%)$$
+              </li>
+              <li><strong>Bộ Lọc Kalman CV 1D Thích Nghi</strong>: Ma trận hiệp phương sai đo lường $R(z)$ thích nghi theo cự ly: khi $z < 15\text{ m}$ ($R \approx 0.05$, tin camera); khi $z > 40\text{ m}$ ($R \approx 3.39$, tin quán tính động học).</li>
+              <li><strong>Ràng Buộc Gia Tốc Vật Lý & Bảo Toàn Quán Tính</strong>: Giới hạn gia tốc ô tô ($|a| \le 6.0\text{ m/s}^2$) cùng cơ chế giữ trạng thái 1-3 khung hình (Inertial Coasting) khi xe chạy đều.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">0.05 s</div>
+                <div class="metric-lbl">Sai Số TTC V2</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">0.671 m</div>
+                <div class="metric-lbl">Sai Số Cự Ly LiDAR</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">|a| &le; 6m/s&sup2;</div>
+                <div class="metric-lbl">Ràng Buộc Gia Tốc</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-19" data-slide="19">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 19 • Nghiên Cứu Bóc Tách (TR-10)</span>
+          <h2 class="slide-title">ABLATION STUDY 1: NGƯỠNG GHÉP NỐI BYTETRACK</h2>
+          <span class="slide-subtitle">Khảo sát sự đánh đổi định lượng giữa số lần nhảy ID và vết bám giả trên 834 khung hình KITTI</span>
+        </div>
+        <span class="slide-tag">Ablation ByteTrack</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Đồ thị Hai Trục SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--emerald-safe);">📈 Đánh Đổi Giữa Nhảy ID (Switches) và IDF1 (%)</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <line x1="60" y1="220" x2="480" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="60" y1="40" x2="60" y2="220" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+                <text x="50" y="224" fill="var(--rose-alert)" font-size="10" text-anchor="end">70</text>
+                <text x="50" y="160" fill="var(--rose-alert)" font-size="10" text-anchor="end">73</text>
+                <text x="50" y="100" fill="var(--rose-alert)" font-size="10" text-anchor="end">75</text>
+                <text x="50" y="44" fill="var(--rose-alert)" font-size="10" text-anchor="end">78</text>
+
+                <text x="120" y="240" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">thresh = 0.10</text>
+                <text x="270" y="240" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">thresh = 0.20</text>
+                <text x="420" y="240" fill="var(--cyan-neon)" font-size="11" font-weight="700" text-anchor="middle">thresh = 0.30 (Tối ưu)</text>
+
+                <!-- Đường Nhảy ID (Màu Đỏ Rose) -->
+                <path d="M 120 130 L 270 100 L 420 160" fill="none" stroke="var(--rose-alert)" stroke-width="2.5"/>
+                <circle cx="120" cy="130" r="6" fill="var(--rose-alert)"/>
+                <text x="120" y="120" fill="var(--rose-alert)" font-size="10" text-anchor="middle">74 lần</text>
+                <circle cx="270" cy="100" r="6" fill="var(--rose-alert)"/>
+                <text x="270" y="90" fill="var(--rose-alert)" font-size="10" text-anchor="middle">75 lần</text>
+                <circle cx="420" cy="160" r="7" fill="var(--emerald-safe)" stroke="#ffffff" stroke-width="2"/>
+                <text x="420" y="180" fill="var(--emerald-safe)" font-size="11" font-weight="700" text-anchor="middle">73 lần (Thấp nhất)</text>
+
+                <!-- Đường IDF1 (Màu Cyan Đứt nét) -->
+                <path d="M 120 180 L 270 140 L 420 110" fill="none" stroke="var(--cyan-neon)" stroke-width="2" stroke-dasharray="4,4"/>
+                <circle cx="120" cy="180" r="5" fill="var(--cyan-neon)"/>
+                <text x="120" y="195" fill="var(--cyan-neon)" font-size="10" text-anchor="middle">59.6%</text>
+                <circle cx="270" cy="140" r="5" fill="var(--cyan-neon)"/>
+                <text x="270" y="130" fill="var(--cyan-neon)" font-size="10" text-anchor="middle">60.9%</text>
+                <circle cx="420" cy="110" r="6" fill="var(--cyan-neon)"/>
+                <text x="420" y="95" fill="var(--cyan-neon)" font-size="11" font-weight="700" text-anchor="middle">61.2% (Cao nhất)</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Bảng Đo Đạc Thực Tế TR-10 -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📊 Ma Trận Thực Nghiệm Bóc Tách TR-10 Bắt Buộc</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Ngưỡng</th>
+                  <th>Tổng Vết Bám</th>
+                  <th>ID Switches</th>
+                  <th>IDF1 (%)</th>
+                  <th>Tốc Độ Bám Vết</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>0.10</td>
+                  <td>352</td>
+                  <td>74 lần</td>
+                  <td>59.62%</td>
+                  <td>81.4 FPS (12.28ms)</td>
+                </tr>
+                <tr>
+                  <td>0.20</td>
+                  <td>358</td>
+                  <td>75 lần</td>
+                  <td>60.92%</td>
+                  <td>81.1 FPS (12.33ms)</td>
+                </tr>
+                <tr style="background: rgba(0, 229, 255, 0.12); font-weight: 700;">
+                  <td style="color: var(--cyan-neon);">0.30 (Tối ưu)</td>
+                  <td style="color: var(--emerald-safe);">348</td>
+                  <td style="color: var(--emerald-safe);">73 lần</td>
+                  <td style="color: var(--cyan-neon);">61.22%</td>
+                  <td style="color: var(--emerald-safe);">81.8 FPS (12.23ms)</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.45;">
+              <strong>Kết luận học thuật</strong>: Nâng `track_low_thresh` lên 0.30 giúp lọc sạch các phát hiện nền nhiễu, hạn chế tối đa việc sinh vết bám rác và đạt chỉ số IDF1 cao nhất.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-20" data-slide="20">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 20 • Nghiên Cứu Bóc Tách (KH-08)</span>
+          <h2 class="slide-title">ABLATION STUDY 3: MA TRẬN 12 TỔ HỢP ĐẠO HÀM TTC</h2>
+          <span class="slide-subtitle">So sánh 3 mô hình độ sâu x 4 thuật toán vận tốc khẳng định ưu thế vượt trội của Theil-Sen</span>
+        </div>
+        <span class="slide-tag">Ablation Động Học TTC</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Biểu đồ So sánh Sai số Vận tốc SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--amber-warn);">📊 Sai Số Ước Lượng Vận Tốc Tiếp Cận (m/s)</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <line x1="60" y1="210" x2="480" y2="210" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                <line x1="60" y1="130" x2="480" y2="130" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="60" y1="50" x2="480" y2="50" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+
+                <text x="50" y="214" fill="var(--text-sub)" font-size="10" text-anchor="end">0.0</text>
+                <text x="50" y="134" fill="var(--text-sub)" font-size="10" text-anchor="end">2.0</text>
+                <text x="50" y="54" fill="var(--text-sub)" font-size="10" text-anchor="end">4.0 m/s</text>
+
+                <!-- Sai phân Hữu hạn (3.97 m/s) -->
+                <rect x="90" y="52" width="55" height="158" rx="3" fill="var(--rose-alert)"/>
+                <text x="117" y="44" fill="var(--rose-alert)" font-size="11" font-weight="700" text-anchor="middle">3.97 m/s</text>
+                <text x="117" y="226" fill="#ffffff" font-size="10" text-anchor="middle">Sai Phân</text>
+
+                <!-- Hồi quy Tuyến tính OLS (0.65 m/s) -->
+                <rect x="195" y="184" width="55" height="26" rx="3" fill="#f59e0b"/>
+                <text x="222" y="176" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">0.65 m/s</text>
+                <text x="222" y="226" fill="#ffffff" font-size="10" text-anchor="middle">Hồi Quy OLS</text>
+
+                <!-- Kalman CV (0.33 m/s) -->
+                <rect x="300" y="197" width="55" height="13" rx="3" fill="#38bdf8"/>
+                <text x="327" y="189" fill="#38bdf8" font-size="11" font-weight="700" text-anchor="middle">0.33 m/s</text>
+                <text x="327" y="226" fill="#ffffff" font-size="10" text-anchor="middle">Kalman CV</text>
+
+                <!-- Theil-Sen Robust (0.21 m/s - SELECTED) -->
+                <rect x="405" y="202" width="55" height="8" rx="3" fill="var(--emerald-safe)"/>
+                <text x="432" y="194" fill="var(--emerald-safe)" font-size="11" font-weight="700" text-anchor="middle">0.21 m/s</text>
+                <text x="432" y="226" fill="var(--emerald-safe)" font-size="10" font-weight="700" text-anchor="middle">Theil-Sen</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Bảng Tổng Hợp Thực Nghiệm -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">🏆 Bảng Tổng Hợp Đo Đạc 12 Tổ Hợp Động Học</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Phương pháp Động học</th>
+                  <th>Sai số Vận tốc (MAE)</th>
+                  <th>Sai số TTC (MAE)</th>
+                  <th>Thời gian Xử lý</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Sai phân hữu hạn (&Delta;Z/&Delta;t)</td>
+                  <td style="color: var(--rose-alert);">3.97 m/s</td>
+                  <td>2.12 s</td>
+                  <td>0.002 ms</td>
+                </tr>
+                <tr>
+                  <td>Hồi quy tuyến tính (OLS)</td>
+                  <td>0.65 m/s</td>
+                  <td>0.18 s</td>
+                  <td>0.015 ms</td>
+                </tr>
+                <tr>
+                  <td>Bộ lọc Kalman CV Thích nghi</td>
+                  <td>0.33 m/s</td>
+                  <td>0.08 s</td>
+                  <td>0.038 ms</td>
+                </tr>
+                <tr style="background: rgba(16, 185, 129, 0.12); font-weight: 700;">
+                  <td style="color: var(--emerald-safe);">Theil-Sen Robust (Đề xuất)</td>
+                  <td style="color: var(--cyan-neon);">0.21 m/s</td>
+                  <td style="color: var(--emerald-safe);">0.05 s</td>
+                  <td style="color: var(--emerald-safe);">0.049 ms</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.45;">
+              <strong>Kết luận học thuật</strong>: Theil-Sen tính toán trung vị của tất cả các cặp độ dốc giúp <strong>giảm sai số vận tốc gấp 19 lần</strong> so với sai phân hữu hạn, triệt tiêu hoàn toàn nhiễu dao động hộp chỉ với 0.049 ms.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 21: DECOUPLED REPLAY & HUD VERIFICATION ================= -->
+    <section class="slide" id="slide-21" data-slide="21">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 21 • Kiến Trúc & Replay</span>
+          <h2 class="slide-title">KIẾN TRÚC REPLAY 2 PHA ĐỘC LẬP & MINH CHỨNG TRỰC QUAN HUD BUỒNG LÁI (834F)</h2>
+          <span class="slide-subtitle">Bóc tách độ trễ AI GPU thuần (30.27 ms) và xác thực toàn vẹn 834 khung hình KITTI 0000, 0001, 0002</span>
+        </div>
+        <span class="slide-tag">Replay 2 Pha Tách Rời</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Left: Decoupled 2-Stage Architecture -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">⚡ Quy Trình Xử Lý 2 Pha Tách Rời Độc Lập</div>
+            <div style="width: 100%; height: 260px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 230" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Phase 1 Container -->
+                <rect x="20" y="15" width="480" height="95" rx="8" fill="rgba(16, 185, 129, 0.08)" stroke="var(--emerald-safe)" stroke-width="1.5"/>
+                <text x="35" y="38" fill="var(--emerald-safe)" font-size="12" font-weight="700">PHA 1: SUY LUẬN AI GPU THUẦN (GPU BOUND)</text>
+                <text x="35" y="58" fill="#ffffff" font-size="10.5">• YOLOv10s + ByteTrack + UFLDv2-R18 + DAv2 Metric + Risk Engine</text>
+                <text x="35" y="76" fill="var(--cyan-neon)" font-size="10.5">• Đồng bộ CUDA Stream • Khóa P-State P0 • Xuất FrameRecord JSONL</text>
+                <text x="35" y="96" fill="var(--emerald-safe)" font-size="12" font-weight="700">Độ trễ AI E2E thực tế: 30.27 ms (33.0 FPS)</text>
+
+                <!-- Connector Arrow -->
+                <line x1="260" y1="110" x2="260" y2="135" stroke="var(--cyan-neon)" stroke-width="2"/>
+                <polygon points="255,135 260,145 265,135" fill="var(--cyan-neon)"/>
+                <text x="270" y="128" fill="var(--text-sub)" font-size="9">Tệp Dữ Liệu Cấu Trúc JSONL</text>
+
+                <!-- Phase 2 Container -->
+                <rect x="20" y="145" width="480" height="75" rx="8" fill="rgba(56, 189, 248, 0.08)" stroke="var(--blue-accent)" stroke-width="1.5"/>
+                <text x="35" y="167" fill="#38bdf8" font-size="12" font-weight="700">PHA 2: RENDER HUD GIAO DIỆN BẤT ĐỒNG BỘ (CPU BOUND)</text>
+                <text x="35" y="187" fill="#ffffff" font-size="10.5">• Vẽ hộp 3D, hành lang xe chủ neon và thông số đo lường</text>
+                <text x="35" y="205" fill="var(--text-muted)" font-size="10.5">• Render video MP4 demo không làm méo mó bộ đếm giờ GPU (15.2 ms CPU)</text>
+              </svg>
+            </div>
+            <div style="font-size: 11.5px; color: var(--emerald-safe); line-height: 1.4;">
+              <strong>Tính Chuẩn Mực</strong>: Loại bỏ hoàn toàn thời gian ghi video CPU ra khỏi phép đo tốc độ mạng nơ-ron sâu.
+            </div>
+          </div>
+
+          <!-- Right: Visual HUD Cockpit Replay -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--purple-accent);">🚗 Giao Diện HUD Buồng Lái Thực Tế (834 Khung Hình)</div>
+            <ul class="bullet-list" style="font-size: 13px;">
+              <li><strong>Toàn Vẹn Dữ Liệu Thời Gian</strong>: Kiểm thử trên 100% khung hình thật: Chuỗi 0000 (154f), Chuỗi 0001 (447f), Chuỗi 0002 (233f).</li>
+              <li><strong>Minh Bạch Trên Banner HUD</strong>:
+                <br>• <code>AI Pipeline E2E Latency: 30.27 ms (33.0 FPS)</code>
+                <br>• <code>Display / Render: 15.2 ms (CPU Async)</code>
+              </li>
+              <li><strong>Tuân Thủ Chuẩn An Toàn Xe Hơi</strong>: Xuất trọn bộ hợp đồng bất biến <code>FrameRecord</code> v1.0, đáp ứng trọn vẹn ngân sách độ trễ ISO 15623 (&le; 33.3 ms).</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">834 / 834</div>
+                <div class="metric-lbl">Khung hình Replay</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">30.27 ms</div>
+                <div class="metric-lbl">Độ trễ AI GPU</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">33.0 FPS</div>
+                <div class="metric-lbl">Tốc độ (&ge;30 FPS)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+<section class="slide" id="slide-22" data-slide="22">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 22 • Mô Hình Hóa Toán Học</span>
+          <h2 class="slide-title">LAN TRUYỀN SAI SỐ TOÀN HỆ THỐNG (ERROR PROPAGATION)</h2>
+          <span class="slide-subtitle">Mô hình hóa định lượng cơ chế dập tắt sai số từ dao động hộp qua trung vị độ sâu đến TTC</span>
+        </div>
+        <span class="slide-tag">Lan truyền Sai số</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Sơ đồ Chuỗi Lan Truyền -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--purple-accent);">⛓️ Chuỗi Bất Định Nối Tầng & Cơ Chế Giảm Chấn</div>
+            <div style="display: flex; flex-direction: column; justify-content: space-between; flex: 1; padding: 6px 0; gap: 4px;">
+              <!-- Tầng 1 -->
+              <div style="background: rgba(56, 189, 248, 0.08); border: 1.5px solid #38bdf8; border-radius: 6px; padding: 8px 14px;">
+                <div style="color: #38bdf8; font-size: 13.5px; font-weight: 700;">TẦNG 1: DAO ĐỘNG RUNG LẮC HỘP DETECTOR 2D</div>
+                <div style="color: #e2e8f0; font-size: 12.5px; margin-top: 3px;">Nhiễu Biên Hộp: &sigma;_bbox &plusmn; 2.1 px &bull; Được làm mượt qua Kalman ByteTrack</div>
+              </div>
+
+              <!-- Mũi tên 1 -->
+              <div style="display: flex; justify-content: center; align-items: center; height: 16px;">
+                <svg width="24" height="16" viewBox="0 0 24 16">
+                  <line x1="12" y1="0" x2="12" y2="9" stroke="var(--cyan-neon)" stroke-width="2.5"/>
+                  <polygon points="7,9 17,9 12,16" fill="var(--cyan-neon)"/>
+                </svg>
+              </div>
+
+              <!-- Tầng 2 -->
+              <div style="background: rgba(245, 158, 11, 0.08); border: 1.5px solid var(--amber-warn); border-radius: 6px; padding: 8px 14px;">
+                <div style="color: var(--amber-warn); font-size: 13.5px; font-weight: 700;">TẦNG 2: TRÍCH XUẤT ĐỘ SÂU ĐƠN ẢNH METRIC</div>
+                <div style="color: #e2e8f0; font-size: 12.5px; margin-top: 3px;">Độ Lệch Cự Ly: &sigma;_Z &plusmn; 0.35m (ở 30m) &bull; Dập tắt nhờ Co ngót thích nghi ROI 20%</div>
+              </div>
+
+              <!-- Mũi tên 2 -->
+              <div style="display: flex; justify-content: center; align-items: center; height: 16px;">
+                <svg width="24" height="16" viewBox="0 0 24 16">
+                  <line x1="12" y1="0" x2="12" y2="9" stroke="var(--cyan-neon)" stroke-width="2.5"/>
+                  <polygon points="7,9 17,9 12,16" fill="var(--cyan-neon)"/>
+                </svg>
+              </div>
+
+              <!-- Tầng 3 -->
+              <div style="background: rgba(168, 85, 247, 0.08); border: 1.5px solid var(--purple-accent); border-radius: 6px; padding: 8px 14px;">
+                <div style="color: var(--purple-accent); font-size: 13.5px; font-weight: 700;">TẦNG 3: ƯỚC LƯỢNG VẬN TỐC TIẾP CẬN V_Z</div>
+                <div style="color: #e2e8f0; font-size: 12.5px; margin-top: 3px;">Sai Số Vận Tốc: &sigma;_v &plusmn; 0.21 m/s &bull; Dập tắt bằng Hồi quy trung vị Theil-Sen Robust</div>
+              </div>
+
+              <!-- Mũi tên 3 -->
+              <div style="display: flex; justify-content: center; align-items: center; height: 16px;">
+                <svg width="24" height="16" viewBox="0 0 24 16">
+                  <line x1="12" y1="0" x2="12" y2="9" stroke="var(--cyan-neon)" stroke-width="2.5"/>
+                  <polygon points="7,9 17,9 12,16" fill="var(--cyan-neon)"/>
+                </svg>
+              </div>
+
+              <!-- Tầng 4 -->
+              <div style="background: rgba(16, 185, 129, 0.1); border: 1.5px solid var(--emerald-safe); border-radius: 6px; padding: 8px 14px;">
+                <div style="color: var(--emerald-safe); font-size: 13.5px; font-weight: 700;">TẦNG 4: PHÁN QUYẾT AN TOÀN THỜI GIAN VA CHẠM (TTC)</div>
+                <div style="color: var(--cyan-neon); font-size: 12.5px; font-weight: 600; margin-top: 3px;">Biên Bất Định Cuối: &Delta;TTC &le; 0.05 s &bull; Ổn định cảnh báo, không kích hoạt phanh ảo</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nhận định Học thuật -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">🔬 Chứng Minh Cơ Chế Giảm Chấn Sai Số</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Mối Đe Dọa Khuếch Đại</strong>: Trong giải thuật thô sơ, phép tính đạo hàm số $\frac{\Delta Z}{\Delta t}$ sẽ phóng đại nhiễu pixel biên thành sai số vận tốc khổng lồ $\pm 4.0\text{ m/s}$.</li>
+              <li><strong>Cơ Chế Giảm Chấn Phi Tuyến Hai Cấp</strong>:
+                <br>• <em>Giảm chấn Không gian</em>: Co ngót 20% ROI loại bỏ điểm ảnh bóng đường, giữ sai số độ sâu ở mức $\pm 2.35\%$.
+                <br>• <em>Giảm chấn Động học</em>: Theil-Sen tính toán trung vị tất cả các cặp độ dốc, loại bỏ triệt để các cú nhảy vọt ngoại lai.
+              </li>
+              <li><strong>Kết Quả</strong>: Sai số phán quyết an toàn TTC được khống chế chặt chẽ <strong>$\le 0.05\text{ giây}$</strong>.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">&plusmn; 2.1 px</div>
+                <div class="metric-lbl">Nhiễu Hộp BBox</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&plusmn; 0.21 m/s</div>
+                <div class="metric-lbl">Sai Số Vận Tốc</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">0.05 s</div>
+                <div class="metric-lbl">Sai Số TTC Cuối</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-23" data-slide="23">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 23 • Đánh Giá Khả Thi</span>
+          <h2 class="slide-title">ĐÁNH GIÁ KHẢ THI: LATENCY THUẦN GPU & VRAM</h2>
+          <span class="slide-subtitle">Suy luận GPU thuần đạt 33.0 FPS (30.27 ms) với tổng bộ nhớ 1.95 GB trên GPU Tesla T4</span>
+        </div>
+        <span class="slide-tag">Khả thi Thời gian thực</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Biểu đồ Thanh Xếp Chồng SVG -->
+          <div class="card" style="justify-content: space-between;">
+            <div class="card-title" style="color: var(--cyan-neon);">📊 Phân Bổ Thời Gian Thực Thi Từng Module GPU (ms)</div>
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 520 270" style="width: 100%; height: 100%; font-family: var(--font-mono);">
+                <!-- Vạch Ngưỡng 33.3ms (30 FPS) -->
+                <line x1="450" y1="30" x2="450" y2="230" stroke="var(--rose-alert)" stroke-width="2" stroke-dasharray="4,4"/>
+                <text x="450" y="25" fill="var(--rose-alert)" font-size="10" font-weight="700" text-anchor="middle">Ngưỡng Trần 33.3 ms (30 FPS)</text>
+
+                <!-- Thanh Xếp Chồng (Tổng 30.27ms) -->
+                <rect x="40" y="70" width="370" height="40" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)"/>
+
+                <!-- Module 1: YOLOv10s (9.31ms) -->
+                <rect x="40" y="70" width="114" height="40" rx="3" fill="var(--emerald-safe)"/>
+                <text x="97" y="94" fill="#ffffff" font-size="10" font-weight="700" text-anchor="middle">Det 9.3ms</text>
+
+                <!-- Module 2: ByteTrack (3.07ms) -->
+                <rect x="154" y="70" width="38" height="40" fill="#a78bfa"/>
+                <text x="173" y="94" fill="#ffffff" font-size="8.5" text-anchor="middle">3.1ms</text>
+
+                <!-- Module 3: UFLDv2 Lane (4.70ms) -->
+                <rect x="192" y="70" width="57" height="40" fill="#38bdf8"/>
+                <text x="220" y="94" fill="#ffffff" font-size="9" text-anchor="middle">Lane 4.7ms</text>
+
+                <!-- Module 4: Depth Anything V2 (15.04ms) -->
+                <rect x="249" y="70" width="184" height="40" rx="3" fill="var(--amber-warn)"/>
+                <text x="341" y="94" fill="#ffffff" font-size="10" font-weight="700" text-anchor="middle">DAv2 Depth 15.0ms</text>
+
+                <!-- Module 5: Fusion/Risk (0.17ms) -->
+                <rect x="433" y="70" width="5" height="40" fill="var(--cyan-neon)"/>
+
+                <!-- Nhãn Tổng Đo Đạc -->
+                <text x="225" y="140" fill="var(--cyan-neon)" font-size="13" font-weight="700" text-anchor="middle">TỔNG GPU AI THUẦN: 30.27 ms (33.0 FPS)</text>
+                <text x="225" y="160" fill="var(--emerald-safe)" font-size="11" text-anchor="middle">✓ Vượt tiêu chuẩn thời gian thực khắt khe &ge; 30 FPS</text>
+
+                <!-- Khung Bộ Nhớ VRAM -->
+                <rect x="40" y="180" width="410" height="45" rx="6" fill="rgba(0, 229, 255, 0.08)" stroke="var(--cyan-neon)" stroke-width="1"/>
+                <text x="55" y="202" fill="#ffffff" font-size="11" font-weight="700">Tổng VRAM Chiếm Dụng: 1.950 MB (&lt; 2.0 GB)</text>
+                <text x="55" y="217" fill="var(--text-sub)" font-size="10">Chỉ chiếm 12.2% của Tesla T4 16GB • Sẵn sàng triển khai lên Jetson Orin Nano 8GB</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Bảng Chi Tiết Phân Bổ Thực Nghiệm -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--emerald-safe);">📋 Bảng Thống Kê Chi Tiết Từng Module</div>
+            <table class="hud-table" style="width: 100%; font-size: 11.5px;">
+              <thead>
+                <tr>
+                  <th>Module Phân Hệ</th>
+                  <th>Thời gian (ms)</th>
+                  <th>Tỷ trọng (%)</th>
+                  <th>Bộ nhớ VRAM (MB)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1. Phát hiện đối tượng (YOLOv10s)</td>
+                  <td>9.31 ms</td>
+                  <td>30.8%</td>
+                  <td>~850 MB</td>
+                </tr>
+                <tr>
+                  <td>2. Bám vết đa đối tượng (ByteTrack)</td>
+                  <td>3.07 ms</td>
+                  <td>10.1%</td>
+                  <td>~50 MB</td>
+                </tr>
+                <tr>
+                  <td>3. Nhận diện làn đường (UFLDv2-R18)</td>
+                  <td>4.70 ms</td>
+                  <td>15.5%</td>
+                  <td>~550 MB</td>
+                </tr>
+                <tr>
+                  <td>4. Độ sâu đơn ảnh (Depth Anything V2)</td>
+                  <td>15.04 ms</td>
+                  <td>49.7%</td>
+                  <td>~99.6 MB</td>
+                </tr>
+                <tr>
+                  <td>5. Khối Cảnh báo rủi ro (Kalman & LDW)</td>
+                  <td>0.17 ms</td>
+                  <td>0.6%</td>
+                  <td>~20 MB</td>
+                </tr>
+                <tr style="background: rgba(16, 185, 129, 0.12); font-weight: 700;">
+                  <td style="color: var(--cyan-neon);">TỔNG CỘNG TOÀN HỆ THỐNG GPU</td>
+                  <td style="color: var(--emerald-safe);">30.27 ms</td>
+                  <td style="color: var(--cyan-neon);">100.0%</td>
+                  <td style="color: var(--emerald-safe);">~1.950 MB</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-24" data-slide="24">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge">Slide 24 • Sản Phẩm Bàn Giao</span>
+          <h2 class="slide-title">BÀI BÁO SPRINGER NATURE & LỘ TRÌNH TASK 3</h2>
+          <span class="slide-subtitle">Bản thảo bài báo khoa học sn-article.tex và kế hoạch chuyển giao máy tính nhúng ô tô</span>
+        </div>
+        <span class="slide-tag">Lộ trình Task 3</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Trái: Bài Báo Khoa Học -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--cyan-neon);">📄 Bài Báo Khoa Học Chuẩn Springer Nature</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Template Chuẩn Quốc Tế</strong>: Soạn thảo trực tiếp trên mẫu định dạng chính thức `sn-article.tex` (quy mô 8 trang tiêu chuẩn Springer Nature LNCS).</li>
+              <li><strong>Trọn Bộ 6 Hình Xuất Bản</strong>: 6 biểu đồ độ phân giải cao 300 DPI và vector PDF (Pareto frontier, 9 kịch bản CULane, mật độ LiDAR 64 tia, đồ thị TTC).</li>
+              <li><strong>Thư Mục Trích Dẫn Toàn Diện</strong>: 28 bài báo khoa học bình duyệt chuẩn IEEE TPAMI, CVPR, ECCV, NeurIPS.</li>
+              <li><strong>Gói Overleaf Tự Túc</strong>: Gói `springer_nature_overleaf_package.zip` biên dịch 100% không lỗi trên Overleaf.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">8 Phần</div>
+                <div class="metric-lbl">Khung Bài Báo</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">6 Hình Vẽ</div>
+                <div class="metric-lbl">Độ Phân Giải Cao</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">Zero Lỗi</div>
+                <div class="metric-lbl">Sẵn Sàng Overleaf</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phải: Lộ Trình Task 3 -->
+          <div class="card" style="justify-content: space-around;">
+            <div class="card-title" style="color: var(--emerald-safe);">🚗 Lộ Trình Triển Khai Thực Nghiệm Task 3</div>
+            <ul class="bullet-list" style="font-size: 13.5px;">
+              <li><strong>Giai đoạn 1: Lượng Tử Hóa TensorRT FP16</strong>: Biên dịch mạng PyTorch sang TensorRT Engine, hướng tới tăng tốc $1.8    imes$ trên Jetson Orin Nano.</li>
+              <li><strong>Giai đoạn 2: Đo Đạc Phần Cứng Nhúng Thực Tế</strong>: Triển khai Master Pipeline lên Kit máy tính nhúng ô tô NVIDIA Jetson Orin Nano 8GB (BOM &lt; $800).</li>
+              <li><strong>Giai đoạn 3: Thực Nghiệm Trên Xe Ô Tô Thật</strong>: Gắn Dashcam 1080p sau kính lái xe ô tô, chạy thử nghiệm trên sa hình kín để kiểm chứng FCW và LDW.</li>
+              <li><strong>Giai đoạn 4: Hoàn Thiện Khóa Luận Tốt Nghiệp</strong>: Hoàn thành toàn diện báo cáo KLTN xuất sắc và bảo vệ đồ án chính thức.</li>
+            </ul>
+            <div class="metric-box">
+              <div class="metric-item">
+                <div class="metric-val">TensorRT</div>
+                <div class="metric-lbl">FP16 Engine</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">Orin Nano</div>
+                <div class="metric-lbl">Phần Cứng Nhúng</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-val">&lt; $800</div>
+                <div class="metric-lbl">Chi Phí Thương Mại</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<section class="slide" id="slide-25" data-slide="25">
+      <div class="slide-header">
+        <div class="slide-title-wrap">
+          <span class="slide-num-badge" style="color: var(--purple-accent);">Slide 25 • Thank You & Q&A</span>
+          <h2 class="slide-title">CHÂN THÀNH CẢM ƠN & LẮNG NGHE Ý KIẾN ĐÓNG GÓP</h2>
+          <span class="slide-subtitle">Phiên giải trình và trả lời câu hỏi chất vấn từ Hội đồng Review 1</span>
+        </div>
+        <span class="slide-tag"
+          style="background: rgba(167, 139, 250, 0.15); color: var(--purple-accent); border-color: rgba(167, 139, 250, 0.3);">Q&A
+          Session</span>
+      </div>
+      <div class="slide-body" style="justify-content: center; align-items: center; text-align: center; gap: 24px;">
+        <div style="max-width: 980px; display: flex; flex-direction: column; gap: 14px;">
+          <div
+            style="font-family: var(--font-mono); font-size: clamp(45px, 2.4vw, 36px); color: var(--cyan-neon); letter-spacing: 2px; font-weight: 700;">
+            THANK YOU FOR LISTENING!
+          </div>
+          <h1
+            style="font-family: var(--font-heading); font-size: clamp(15px, 2.4vw, 36px); font-weight: 800; color: #ffffff; line-height: 1.25;">
+            Capstone Project Team: KLTN-AI-FA26AI50_GFA26AI09
+          </h1>
+          <p
+            style="font-size: clamp(15px, 1.1vw, 17px); color: var(--text-muted); max-width: 840px; margin: 0 auto; line-height: 1.6;">
+            Nhóm sẵn sàng lắng nghe và giải trình mọi câu hỏi chuyên môn từ <br>
+            <strong>Thầy Nguyễn Trọng Tài</strong>,<strong>Thầy Lê Phú Nguyên</strong> <br>
+            cùng quý Thầy Cô trong Hội đồng.
+          </p>
+        </div>
+
+        <div
+          style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 960px; margin-top: 4px;">
+          <div class="card"
+            style="text-align: center; align-items: center; border-color: rgba(56, 189, 248, 0.4); padding: 18px 20px;">
+            <div style="font-size: 28px;">🛣️</div>
+            <div class="card-title" style="font-size: 15px; color: #38bdf8; margin-top: 4px;">LANE PERCEPTION</div>
+            <div style="font-size: 13.5px; color: var(--text-muted);">Nguyễn Trần Minh Quân<br><span
+                style="color: var(--cyan-neon); font-family: var(--font-mono); font-weight: 700;">SE194342</span></div>
+          </div>
+
+          <div class="card"
+            style="text-align: center; align-items: center; border-color: rgba(16, 185, 129, 0.4); padding: 18px 20px;">
+            <div style="font-size: 28px;">🚗</div>
+            <div class="card-title" style="font-size: 15px; color: #10b981; margin-top: 4px;">DETECTION & TRACK</div>
+            <div style="font-size: 13.5px; color: var(--text-muted);">Nguyễn Minh Triết<br><span
+                style="color: var(--cyan-neon); font-family: var(--font-mono); font-weight: 700;">SE194257</span></div>
+          </div>
+
+          <div class="card"
+            style="text-align: center; align-items: center; border-color: rgba(245, 158, 11, 0.4); padding: 18px 20px;">
+            <div style="font-size: 28px;">📏</div>
+            <div class="card-title" style="font-size: 15px; color: #f59e0b; margin-top: 4px;">DEPTH & FCW ALERT</div>
+            <div style="font-size: 13.5px; color: var(--text-muted);">Đỗ Khang<br><span
+                style="color: var(--cyan-neon); font-family: var(--font-mono); font-weight: 700;">SE196305</span></div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 14px; align-items: center; justify-content: center; margin-top: 4px;">
+          <span class="badge-code">CODEBASE: src/adas_baselines/</span>
+          <span class="badge-code">CONTRACT: FrameRecord v1.0</span>
+          <span class="badge-code">PYTEST: 100% PASS</span>
+        </div>
+      </div>
+    </section>
+
+
+  </main>
+
+  <!-- Bottom HUD Status Bar -->
+  <footer class="hud-footer">
+    <div class="hud-status-items">
+      <div class="hud-status-item">
+        <div class="dot-pulse"></div>
+        <span>AI PIPELINE READY</span>
+      </div>
+      <div class="hud-status-item">
+        <span>CONTRACT:</span>
+        <span style="color: var(--cyan-neon);">v1.0 IMMUTABLE</span>
+      </div>
+    </div>
+    <div class="hud-status-items">
+      <div class="hud-status-item">
+        <span>PHÍM TẮT: <strong>← / →</strong> (Chuyển Slide) | <strong>N</strong> (Notes) | <strong>O</strong> (Grid) |
+          <strong>F</strong> (Full)</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Slide-in Speaker Notes Drawer -->
+  <aside id="notesDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span>📝 SPEAKER NOTES (KỊCH BẢN THUYẾT TRÌNH)</span>
+      </div>
+      <button class="btn-hud" id="btnCloseNotes">✕</button>
+    </div>
+    <div class="drawer-body" id="notesContent">
+      <!-- Injected by JavaScript based on active slide -->
+    </div>
+  </aside>
+
+  <!-- Overview Grid Modal -->
+  <div id="overviewModal">
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px;">
+      <h2 style="font-family: var(--font-heading); color: #fff; font-size: 22px;">⊞ TỔNG QUAN 15 SLIDE BÁO CÁO REVIEW 1
+      </h2>
+      <button class="btn-hud" id="btnCloseOverview">✕ Đóng (Esc)</button>
+    </div>
+    <div class="overview-grid" id="overviewGrid">
+      <!-- Generated by JavaScript -->
+    </div>
+  </div>
+
+  <!-- JavaScript for Presentation Engine -->
+  <script>
+
+    // Speaker Notes Data Dictionary for all 25 slides (Vietnamese)
+        const speakerNotes = {
+      1: `
+        <h4>Slide 01: Báo Cáo Tiến Độ Review 2 — Trang Bìa</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Kính thưa quý Thầy Cô trong Hội đồng Đánh giá Khóa luận Tốt nghiệp, hôm nay nhóm FA26AI50 xin báo cáo tiến độ Review 2 đề tài "Hệ thống hỗ trợ lái xe thời gian thực dựa trên thị giác máy tính: nhận diện làn đường, vật thể và cảnh báo va chạm" dưới sự hướng dẫn của Thầy Nguyễn Xuân Huy và Thầy Nguyễn Quốc Trung.</p>
+          <p>Tại mốc Review 2, nhóm đã hoàn thiện trọn vẹn chu trình tích hợp đa nhiệm trên 01 camera RGB đơn, đo đạc độ trễ thuần GPU 30.27 ms và cảnh báo va chạm thực tế trên 834 khung hình xe chạy liên tục.</p>
+        </div>
+      `,
+      2: `
+        <h4>Slide 02: Cơ Cấu & Phân Công Kỹ Thuật 3 Thành Viên</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Để đảm bảo tính độc lập học thuật và chiều sâu nghiên cứu, nhóm phân định trách nhiệm rõ ràng:</p>
+          <ul>
+            <li><strong>Nguyễn Trần Minh Quân (Leader)</strong>: Phân hệ Làn đường (UFLDv2 ResNet-18, CULane) và khung điều phối chung FrameRecord v1.0.</li>
+            <li><strong>Nguyễn Minh Triết</strong>: Phân hệ Vật thể & Bám vết (YOLOv10s NMS-free, BDD100K 10 lớp, ByteTrack).</li>
+            <li><strong>Đỗ Khang</strong>: Phân hệ Đo độ sâu mét & Cảnh báo va chạm (Depth Anything V2 ViT-S, LiDAR 64 tia, Theil-Sen TTC).</li>
+          </ul>
+        </div>
+      `,
+      3: `
+        <h4>Slide 03: Bài Toán & Sơ Đồ Luồng AI Pipeline</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Hệ thống Radar ô tô truyền thống dễ bị phanh gấp ảo (Phantom Braking) do nhầm nắp cống kim loại hoặc khe co giãn mố cầu. Nhóm sử dụng 01 camera RGB đơn tận dụng ngữ nghĩa hình ảnh để loại bỏ phanh ảo, đồng thời bảo đảm trần độ trễ p95 < 33.3 ms trên phần cứng biên chi phí thấp (< $800).</p>
+        </div>
+      `,
+      4: `
+        <h4>Slide 04: Câu Hỏi Nghiên Cứu & Khoảng Trống Học Thuật</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Đề tài giải quyết câu hỏi trung tâm: Làm thế nào để tích hợp đồng thời làn đường, bám vết vật thể và độ sâu mét trên 01 camera RGB đạt tốc độ ≥ 30 FPS?</p>
+          <p>Chúng em khắc phục 3 khoảng trống: Task Isolation Gap, Latency Bottleneck Gap của mạng Depth, và Gradient Conflict Gap của mạng chia sẻ backbone.</p>
+        </div>
+      `,
+      5: `
+        <h4>Slide 05: Bản Đồ 5 Bộ Dữ Liệu Chuẩn Đối Sánh</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Nhóm sử dụng 5 bộ dữ liệu chuẩn hóa độc lập: BDD100K 10 lớp cho phát hiện vật thể, CULane cho làn đường, KITTI Tracking (834 frames liên tục đối chuẩn LiDAR 64 tia), CCD cho kiểm thử va chạm cực hạn, và CARLA cho giới hạn lý thuyết.</p>
+        </div>
+      `,
+      6: `
+        <h4>Slide 06: Phục Hồi Nhãn 10 Lớp & Làm Sạch BDD100K</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Nhóm phát hiện và sửa dứt điểm lỗi rớt nhãn bí danh của bộ convert cũ, phục hồi trọn vẹn 755.927 nhãn bao gồm 91.405 người đi bộ, 7.225 xe đạp và 3.002 xe máy, đóng gói niêm phong bộ dữ liệu kltn-adas-merged-data 4.69 GB độc lập 100%.</p>
+        </div>
+      `,
+      7: `
+        <h4>Slide 07: Định Lượng Mất Cân Bằng Mẫu & Giải Pháp CSAS / Focal Loss</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT MINH:</div>
+          <p>Kính thưa Hội đồng, phân tích phân bố dữ liệu BDD100K cho thấy sự chênh lệch tần suất cực đoan lên tới 4.571:1 giữa ô tô con (713.206 mẫu) và các lớp hiếm như tàu hỏa (156 mẫu) hay người đi bộ. Để tránh việc gradient của ô tô triệt tiêu tín hiệu học của người đi bộ, nhóm xây dựng giải pháp Class x Scale Sampler (CSAS) kết hợp hàm tổn thất Focal Loss.</p>
+          <p>Giải pháp này giúp nâng vượt bậc độ nhạy Recall của người đi bộ từ 0.321 lên 0.474 (+47.7%) và xe đạp từ 0.28 lên 0.41, triệt tiêu các điểm mù nguy hiểm trong đô thị.</p>
+        </div>
+      `,
+      8: `
+        <h4>Slide 08: Giao Thức Chống Rò Rỉ Dữ Liệu & Quy Mô KITTI</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Tập train và val được cắt độc lập tuyệt đối theo mã chuỗi video (0% rò rỉ bối cảnh). Đồng thời, nhóm tuân thủ nghiêm ngặt quy tắc không cắt xén khung hình, duyệt trọn vẹn 100% cả 3 video KITTI (834 khung hình) để bảo toàn quỹ đạo động học.</p>
+        </div>
+      `,
+      9: `
+        <h4>Slide 09: Khóa Môi Trường Cloud & Quy Chuẩn Đo GPU</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Mọi phép đo được thực hiện trên Kaggle GPU Tesla T4 16GB ở trạng thái khóa xung P0. Nhóm sử dụng lệnh torch.cuda.synchronize() trước và sau forward pass để đo độ trễ suy luận AI thuần túy, bóc tách hoàn toàn khỏi thời gian hiển thị giao diện.</p>
+        </div>
+      `,
+      10: `
+        <h4>Slide 10: Sàng Lọc Phân Hệ 1: 100 Epochs Đa Thế Hệ YOLO</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Qua 100 epochs huấn luyện trên BDD100K 10 lớp, YOLOv10s được chọn làm mô hình tối ưu với 30.22% mAP50-95 tại tốc độ 80.8 FPS. Điểm mấu chốt là kiến trúc One-to-One Head giúp loại bỏ hoàn toàn độ trễ khâu NMS (0.0 ms), đáp ứng tiêu chuẩn an toàn ô tô ASIL-D.</p>
+        </div>
+      `,
+      11: `
+        <h4>Slide 11: Sàng Lọc Phân Hệ 2: Đo Đạc 9 Kịch Bản CULane</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Phân hệ làn đường UFLDv2-ResNet18 đạt F1 tổng hợp 74.50% trên tập CULane validation với tốc độ 212.8 FPS (chỉ mất 4.70 ms và 99.6 MB VRAM). Nhờ đó, phân hệ làn đường chỉ chiếm 15% quỹ thời gian, dành trọn GPU cho phân hệ đo độ sâu.</p>
+        </div>
+      `,
+      12: `
+        <h4>Slide 12: Sàng Lọc Phân Hệ 3: Monocular Metric Depth</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Đối chuẩn các mô hình độ sâu cho thấy Metric3D và UniDepth ngốn hơn 2.8 GB VRAM và mất 64-82 ms. Depth Anything V2 Metric ViT-S khóa kích thước 518px (chỉ sinh 407 tokens) đạt sai số AbsRel 0.089 tại tốc độ 15.04 ms với chỉ 86.9 MB VRAM.</p>
+        </div>
+      `,
+      13: `
+        <h4>Slide 13: Bảng Gap Analysis: Số Liệu Bài Báo vs Thực Nghiệm</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Nhóm giải trình minh bạch độ lệch giữa số liệu bài báo và số liệu đo thực tế qua 4 nguyên nhân: Nhiễu cảm biến dashcam thực tế, co kích thước ViT để chống bùng nổ token, bus bộ nhớ GPU thương mại, và quy trình kiểm thử chuỗi thời gian liên tục.</p>
+        </div>
+      `,
+      14: `
+        <h4>Slide 14: Kiến Trúc Master Integrated Pipeline Đề Xuất</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Kiến trúc đề xuất tách rời 3 luồng công nhân độc lập, tích hợp dữ liệu qua đối tượng bất biến FrameRecord contract v1.0. Giải pháp này loại bỏ 100% xung đột gradient của các mạng chia sẻ backbone và giữ mức trần VRAM dưới 2.0 GB.</p>
+        </div>
+      `,
+      15: `
+        <h4>Slide 15: Bảng So Sánh Đối Chứng Toàn Hệ Thống</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>So với YOLOPv2 (chỉ nhận diện ô tô và không có độ sâu mét) hay chuỗi ViT nặng (suy giảm dưới 9 FPS), Master Pipeline đạt đầy đủ 10 lớp đối tượng, có chiều sâu mét thực tế, tính toán TTC chính xác và duy trì thông lượng 33.0 FPS.</p>
+        </div>
+      `,
+      16: `
+        <h4>Slide 16: Báo Cáo Toàn Diện Ca Thất Bại Trên 3 Phân Hệ</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT MINH:</div>
+          <p>Tuân thủ tuyệt đối tính trung thực khoa học, nhóm đã rà soát toàn diện các ca thất bại thực tế trên cả 834 khung hình KITTI Tracking.</p>
+          <p>Ở Phân hệ 2 (Làn đường), đường không vạch sơn ở KITTI 0000/0001 khiến điểm neo bắt nhầm vào vỉa hè lát đá và quầy báo. Ở Phân hệ 1 (Phát hiện & Bám vết), đèn pha ban đêm chiếu chói làm nhảy 73 lần ID. Ở Phân hệ 3 (Độ sâu & TTC), xe phía trước chạy xa dần làm nổ công thức tính đạo hàm TTC; nhóm xử lý bằng cơ chế khóa an toàn ISO 15623 gán TTC = null.</p>
+        </div>
+      `,
+      17: `
+        <h4>Slide 17: Giải Pháp Kỹ Thuật V2 Cho Phân Hệ Làn Đường</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Giải pháp V2 tích hợp Chế độ Chờ Standby Mode (ISO 17361) tự tắt dự đoán khi độ tin cậy thấp, đồng thời kích hoạt Hành lang Xe Chủ Đô thị 2.20m khóa thẳng theo trục quang camera, triệt tiêu 100% hiện tượng đâm vào vỉa hè.</p>
+        </div>
+      `,
+      18: `
+        <h4>Slide 18: Giải Pháp Kỹ Thuật V2 Cho Độ Sâu & TTC</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Phân hệ 3 ở V2 áp dụng Co ngót thích nghi ROI 20% vỏ kim loại xe loại bỏ nhiễu bóng đường, hiệu chuẩn tuyến tính với LiDAR 64 tia và lọc Kalman CV 1D ràng buộc gia tốc ô tô, hạ sai số TTC từ 2.12s xuống dưới 0.05s.</p>
+        </div>
+      `,
+      19: `
+        <h4>Slide 19: Ablation Study 1: Ngưỡng Ghép Nối ByteTrack</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Nghiên cứu bóc tách TR-10 trên 834 khung hình KITTI khẳng định ngưỡng track_low_thresh = 0.30 là điểm ngọt Pareto tối ưu, giúp giảm số lần nhảy ID xuống mức thấp nhất (73 lần) và nâng chỉ số bám vết IDF1 lên 61.22%.</p>
+        </div>
+      `,
+      20: `
+        <h4>Slide 20: Ablation Study 3: Ma Trận 12 Tổ Hợp Đạo Hàm TTC</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Khảo sát 12 tổ hợp giữa 3 mô hình độ sâu và 4 phương pháp vận tốc chứng minh Theil-Sen Robust đạt sai số vận tốc thấp nhất (0.21 m/s, giảm 19 lần so với sai phân) với thời gian tính toán siêu tốc chỉ 0.049 ms.</p>
+        </div>
+      `,
+      21: `
+        <h4>Slide 21: Kiến Trúc Replay 2 Pha & HUD Buồng Lái (834f)</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT MINH:</div>
+          <p>Để đo độ trễ suy luận AI thuần GPU mà không bị méo mó bởi giao diện, pipeline Replay tách rời 2 pha độc lập: Pha 1 chạy suy luận AI thuần GPU ở trạng thái P0 đạt 30.27 ms (33.0 FPS), Pha 2 vẽ HUD buồng lái và ghi video bất đồng bộ tốn 15.2 ms CPU.</p>
+          <p>Nhóm đã chạy kiểm thử tái hiện thành công toàn bộ 834 khung hình KITTI 0000, 0001, 0002 mà không làm sai lệch số đo GPU.</p>
+        </div>
+      `,
+      22: `
+        <h4>Slide 22: Lan Truyền Sai Số Toàn Hệ Thống (Error Propagation)</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Nhóm mô hình hóa chuỗi lan truyền sai số: Nhiễu rung lắc BBox ±2.1 px truyền qua độ sâu ±0.35m được giảm chấn bằng Theil-Sen xuống ±0.21 m/s, khống chế sai số phán quyết an toàn TTC trong giới hạn an toàn ≤ 0.05 giây.</p>
+        </div>
+      `,
+      23: `
+        <h4>Slide 23: Đánh Giá Khả Thi: Latency Thuần GPU & VRAM</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Tổng thời gian suy luận toàn hệ thống trên GPU Tesla T4 là 30.27 ms (tương đương 33.0 FPS), vượt chuẩn thời gian thực ≥ 30 FPS. Bộ nhớ VRAM chiếm dụng chỉ 1.95 GB (12.2%), hoàn toàn sẵn sàng chuyển giao lên Jetson Orin Nano 8GB.</p>
+        </div>
+      `,
+      24: `
+        <h4>Slide 24: Bài Báo Springer Nature & Lộ Trình Task 3</h4>
+        <div class="notes-section">
+          <div class="notes-heading" style="color: var(--cyan-neon);">🗣️ KỊCH BẢN THUYẾT TRÌNH:</div>
+          <p>Nhóm đã hoàn thành bản thảo bài báo chuẩn Springer Nature (sn-article.tex) với trọn bộ 6 hình xuất bản. Lộ trình Task 3 sẽ tập trung lượng tử hóa TensorRT FP16, gắn lên xe ô tô thật và hoàn tất bảo vệ KLTN xuất sắc.</p>
+        </div>
+      `,
+      25: `
+        
+      `,
+    };
+
+    // Engine State
+    let currentSlide = 1;
+    const totalSlides = document.querySelectorAll('.slide').length || 25;
+
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('topProgressBar');
+    const currSlideNumEl = document.getElementById('currSlideNum');
+    const totalSlideNumEl = document.getElementById('totalSlideNum');
+    const notesDrawer = document.getElementById('notesDrawer');
+    const notesContent = document.getElementById('notesContent');
+    const overviewModal = document.getElementById('overviewModal');
+    const overviewGrid = document.getElementById('overviewGrid');
+
+    totalSlideNumEl.textContent = totalSlides.toString().padStart(2, '0');
+
+    // Build Overview Grid Cards for all 25 slides with safe fallback
+    for (let i = 1; i <= totalSlides; i++) {
+      const card = document.createElement('div');
+      card.className = `overview-card ${i === 1 ? 'current' : ''}`;
+      card.dataset.slide = i;
+
+      const slideEl = document.getElementById(`slide-${i}`);
+      const title = slideEl ? (slideEl.querySelector('.slide-title')?.textContent || `Slide ${i}`) : `Slide ${i}`;
+
+      card.innerHTML = `
+        <div class="num">SLIDE ${i.toString().padStart(2, '0')}</div>
+        <div class="title">${title}</div>
+      `;
+      card.addEventListener('click', () => {
+        goToSlide(i);
+        closeOverview();
+      });
+      overviewGrid.appendChild(card);
+    }
+
+    function renderMathIfAvailable(targetEl) {
+      if (window.renderMathInElement && targetEl) {
+        renderMathInElement(targetEl, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ],
+          throwOnError: false
+        });
+        return true;
+      }
+      return false;
+    }
+
+    function updatePresentation() {
+      slides.forEach((slide, idx) => {
+        const slideNum = idx + 1;
+        if (slideNum === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      // Update progress bar
+      const progressPercent = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+
+      // Update counter
+      currSlideNumEl.textContent = currentSlide.toString().padStart(2, '0');
+
+      // Update speaker notes content
+      notesContent.innerHTML = speakerNotes[currentSlide] || '<p>Không có ghi chú cho slide này.</p>';
+
+      // Render math only once per slide (lazy on activation) and inside current notes
+      const activeSlideEl = slides[currentSlide - 1];
+      if (activeSlideEl && !activeSlideEl.dataset.mathRendered) {
+        if (renderMathIfAvailable(activeSlideEl)) {
+          activeSlideEl.dataset.mathRendered = "true";
+        }
+      }
+      renderMathIfAvailable(notesContent);
+
+      // Update overview active card
+      document.querySelectorAll('.overview-card').forEach(card => {
+        if (parseInt(card.dataset.slide) === currentSlide) {
+          card.classList.add('current');
+        } else {
+          card.classList.remove('current');
+        }
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updatePresentation();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updatePresentation();
+      }
+    }
+
+    function goToSlide(num) {
+      if (num >= 1 && num <= totalSlides) {
+        currentSlide = num;
+        updatePresentation();
+      }
+    }
+
+    function toggleNotes() {
+      notesDrawer.classList.toggle('open');
+      document.getElementById('btnNotes').classList.toggle('active');
+    }
+
+    function toggleOverview() {
+      overviewModal.classList.toggle('open');
+      document.getElementById('btnOverview').classList.toggle('active');
+    }
+
+    function closeOverview() {
+      overviewModal.classList.remove('open');
+      document.getElementById('btnOverview').classList.remove('active');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => alert(err.message));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Event Listeners for Buttons
+    document.getElementById('btnNext').addEventListener('click', nextSlide);
+    document.getElementById('btnPrev').addEventListener('click', prevSlide);
+    document.getElementById('btnNotes').addEventListener('click', toggleNotes);
+    document.getElementById('btnCloseNotes').addEventListener('click', toggleNotes);
+    document.getElementById('btnOverview').addEventListener('click', toggleOverview);
+    document.getElementById('btnCloseOverview').addEventListener('click', closeOverview);
+    document.getElementById('btnFullscreen').addEventListener('click', toggleFullscreen);
+
+    // Keyboard Navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        goToSlide(1);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        goToSlide(totalSlides);
+      } else if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        toggleNotes();
+      } else if (e.key === 'o' || e.key === 'O') {
+        e.preventDefault();
+        toggleOverview();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.key === 'Escape') {
+        closeOverview();
+        notesDrawer.classList.remove('open');
+        document.getElementById('btnNotes').classList.remove('active');
+      }
+    });
+
+    // Touch Swipe Navigation
+    let touchStartX = 0;
+    let touchEndX = 0;
+    window.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
+    window.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchEndX < touchStartX - 60) nextSlide();
+      if (touchEndX > touchStartX + 60) prevSlide();
+    }, false);
+
+    // Initial Presentation render on load
+    window.addEventListener('DOMContentLoaded', () => {
+      updatePresentation();
+      setTimeout(() => {
+        const activeSlideEl = slides[currentSlide - 1];
+        if (activeSlideEl && !activeSlideEl.dataset.mathRendered) {
+          if (renderMathIfAvailable(activeSlideEl)) {
+            activeSlideEl.dataset.mathRendered = "true";
+          }
+        }
+        renderMathIfAvailable(notesContent);
+      }, 300);
+    });
+  </script>
+</body>
+
+</html>
